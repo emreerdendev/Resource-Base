@@ -25,7 +25,7 @@ A free, searchable **directory of companies** — with the emails, career pages 
 
 ## How it works
 
-- **The company directory** is the homepage. It renders per request so the order is reshuffled on every visit, while the company data itself stays tag-cached; search and filters run client-side. Resources live at `/resources`, and old filtered links to `/` are permanently redirected there.
+- **The homepage** introduces both directories. **Companies** live at `/companies`, rendered per request so the order is reshuffled on every visit, while the company data itself stays tag-cached; search and filters run client-side. **Resources** live at `/resources`, and old filtered links to `/` are permanently redirected there.
 - **Browsing & search** are fully public and instant. Filters and the ⌘K palette run client-side over a tag-cached dataset, so navigating between categories, tags and resources feels immediate.
 - **Signing in** (Google, GitHub, or email) unlocks the personal layer — the application tracker, favorites, submissions, suggestions and notifications — all scoped to your own account.
 - **Submitting & suggesting** (resources, fixes and companies) never touch the live directory directly. Your contribution is stored as a moderated submission; an editor reviews it, and on approval the change is applied to the resource automatically and you're notified.
