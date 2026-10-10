@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Fuse from "fuse.js";
-import { ArrowUpRight, Hash, Search } from "lucide-react";
+import { ArrowUpRight, Boxes, Building2, Hash, Search } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -14,12 +14,18 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import type { Resource } from "@/lib/types";
+import type { Company, Resource } from "@/lib/types";
 
 /** Fired by the header search button to open the palette from anywhere. */
 export const OPEN_COMMAND_EVENT = "open-command-palette";
 
-export function CommandPalette({ resources }: { resources: Resource[] }) {
+export function CommandPalette({
+  resources,
+  companies = [],
+}: {
+  resources: Resource[];
+  companies?: Company[];
+}) {
   const { t } = useTranslation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -41,6 +47,17 @@ export function CommandPalette({ resources }: { resources: Resource[] }) {
         minMatchCharLength: 2,
       }),
     [resources],
+  );
+
+  const companyFuse = useMemo(
+    () =>
+      new Fuse(companies, {
+        keys: ["name"],
+        threshold: 0.34,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+      }),
+    [companies],
   );
 
   useEffect(() => {
@@ -68,6 +85,17 @@ export function CommandPalette({ resources }: { resources: Resource[] }) {
       .map((r) => r.item);
   }, [query, fuse, resources]);
 
+  const companyResults = useMemo(
+    () =>
+      query.trim()
+        ? companyFuse
+            .search(query)
+            .slice(0, 6)
+            .map((r) => r.item)
+        : [],
+    [query, companyFuse],
+  );
+
   const go = (href: string, external = false) => {
     setOpen(false);
     setQuery("");
@@ -90,6 +118,21 @@ export function CommandPalette({ resources }: { resources: Resource[] }) {
         />
         <CommandList>
         <CommandEmpty>{t("command.empty")}</CommandEmpty>
+        {companyResults.length > 0 && (
+          <CommandGroup heading={t("command.companies")}>
+            {companyResults.map((c) => (
+              <CommandItem
+                key={c._id}
+                value={c._id}
+                onSelect={() => go(`/company/${c.slug}`)}
+                className="flex items-center gap-2"
+              >
+                <Building2 className="size-4 shrink-0 opacity-60" />
+                <span className="flex-1 truncate">{c.name}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
         <CommandGroup heading={query ? t("command.results") : t("command.featured")}>
           {results.map((r) => (
             <CommandItem
@@ -110,9 +153,17 @@ export function CommandPalette({ resources }: { resources: Resource[] }) {
           ))}
         </CommandGroup>
         <CommandGroup heading={t("command.goTo")}>
-          <CommandItem value="browse-all" onSelect={() => go("/")}>
-            <Hash className="size-4 opacity-60" />
+          <CommandItem value="browse-companies" onSelect={() => go("/")}>
+            <Building2 className="size-4 opacity-60" />
+            {t("command.browseCompanies")}
+          </CommandItem>
+          <CommandItem value="browse-all" onSelect={() => go("/resources")}>
+            <Boxes className="size-4 opacity-60" />
             {t("command.browseAll")}
+          </CommandItem>
+          <CommandItem value="categories" onSelect={() => go("/categories")}>
+            <Hash className="size-4 opacity-60" />
+            {t("nav.categories")}
           </CommandItem>
         </CommandGroup>
         </CommandList>

@@ -39,7 +39,7 @@ export function FavoritesClient({ resources }: { resources: Resource[] }) {
         <div className="rounded-xl border border-dashed border-border py-20 text-center">
           <p className="text-muted-foreground">{t("favorites.empty")}</p>
           <Button asChild className="mt-4">
-            <Link href="/">{t("favorites.browse")}</Link>
+            <Link href="/resources">{t("favorites.browse")}</Link>
           </Button>
         </div>
       ) : (

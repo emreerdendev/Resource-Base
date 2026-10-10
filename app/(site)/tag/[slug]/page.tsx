@@ -47,8 +47,8 @@ export default async function TagPage({
   return (
     <div className="mx-auto max-w-4xl">
       <nav className="mb-6 flex items-center gap-1 text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-foreground">
-          Home
+        <Link href="/resources" className="hover:text-foreground">
+          Resources
         </Link>
         <ChevronRight className="size-3.5" />
         <span className="text-foreground">#{tag.title}</span>

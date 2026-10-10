@@ -130,7 +130,7 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
     <div className="mx-auto max-w-4xl">
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-1 text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-foreground">
+        <Link href="/resources" className="hover:text-foreground">
           {t("category.home")}
         </Link>
         {resource.categories?.[0] && (
