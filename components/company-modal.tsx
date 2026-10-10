@@ -7,7 +7,6 @@ import { CompanyDetails } from "@/components/company-details";
 import { CompanyLogo } from "@/components/company-logo";
 import { CompanyStatusMenu } from "@/components/company-status-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { primaryUrl } from "@/lib/company-utils";
 import type { Company } from "@/lib/types";
 
 /** Detail view for a company, opened from its card. */
@@ -21,7 +20,8 @@ export function CompanyModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
-  const url = primaryUrl(company);
+  // Only the company's own site — career platforms live under "How to apply".
+  const url = company.website;
   const close = () => onOpenChange(false);
 
   return (
@@ -32,7 +32,12 @@ export function CompanyModal({
           <div className="min-w-0 flex-1">
             <DialogTitle className="text-lg leading-tight">
               {url ? (
-                <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground"
+                >
                   {company.name}
                   <ArrowUpRight className="ml-1 inline size-3.5 align-baseline opacity-60" />
                 </a>

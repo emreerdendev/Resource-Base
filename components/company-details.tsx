@@ -6,7 +6,6 @@ import {
   Briefcase,
   Check,
   Copy,
-  Globe,
   Handshake,
   Info,
   Loader2,
@@ -182,9 +181,6 @@ export function CompanyDetails({
                 label={t("company.linkedin")}
               />
             )}
-            {company.website && (
-              <LinkRow href={company.website} icon={<Globe className="size-4" />} label={hostLabel(company.website)} />
-            )}
           </div>
         ) : (
           <div className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
@@ -227,7 +223,7 @@ export function CompanyDetails({
           <SectionLabel>{t("company.sectors")}</SectionLabel>
           <div className="flex flex-wrap gap-2">
             {company.sectors.map((s) => (
-              <Link key={s} href={`/?sector=${s}`} onClick={onNavigate} className={PILL}>
+              <Link key={s} href={`/companies?sector=${s}`} onClick={onNavigate} className={PILL}>
                 {t(`companies.sector.${s}`)}
               </Link>
             ))}

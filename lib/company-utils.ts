@@ -1,10 +1,5 @@
 import type { Company } from "@/lib/types";
 
-/** The URL that best represents a company (for favicons and the title link). */
-export function primaryUrl(c: Pick<Company, "website" | "careerLinks" | "linkedin">) {
-  return c.website ?? c.careerLinks[0] ?? c.linkedin;
-}
-
 /** "jobs.lever.co/acme" → "jobs.lever.co" — compact label for a link. */
 export function hostLabel(url: string) {
   try {
@@ -26,9 +21,12 @@ export function searchLinks(name: string) {
   };
 }
 
-/** True when there's at least one way to apply listed. */
+/**
+ * True when at least one application channel is listed. The website alone
+ * doesn't count — it's reachable from the company name, not a way to apply.
+ */
 export function hasContact(c: Company) {
-  return Boolean(c.emails.length || c.careerLinks.length || c.linkedin || c.website);
+  return Boolean(c.emails.length || c.careerLinks.length || c.linkedin);
 }
 
 /** Fisher–Yates — fresh order on every request (no ranking, by design). */

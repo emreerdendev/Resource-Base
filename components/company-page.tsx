@@ -9,14 +9,15 @@ import { CompanyDetails } from "@/components/company-details";
 import { CompanyLogo } from "@/components/company-logo";
 import { CompanyStatusMenu } from "@/components/company-status-menu";
 import { Button } from "@/components/ui/button";
-import { hostLabel, primaryUrl } from "@/lib/company-utils";
+import { hostLabel } from "@/lib/company-utils";
 import type { CompanyWithRelated } from "@/lib/types";
 
 /** Deep-linkable company page — same body as the modal, plus related companies. */
 export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
-  const url = primaryUrl(company);
+  // Only the company's own site — career platforms live under "How to apply".
+  const url = company.website;
 
   async function share() {
     const href = window.location.href;
@@ -40,7 +41,7 @@ export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
   return (
     <div className="mx-auto max-w-4xl">
       <nav className="mb-6 flex items-center gap-1 text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-foreground">
+        <Link href="/companies" className="hover:text-foreground">
           {t("nav.companies")}
         </Link>
         <ChevronRight className="size-3.5" />
@@ -50,17 +51,22 @@ export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
       <div className="flex flex-wrap items-center gap-4">
         <CompanyLogo company={company} size="xl" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">{company.name}</h1>
-          {url && (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-0.5 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            >
-              {hostLabel(url)} <ArrowUpRight className="size-3.5" />
-            </a>
-          )}
+          <h1 className="text-2xl font-bold tracking-tight">
+            {url ? (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={hostLabel(url)}
+                className="underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground"
+              >
+                {company.name}
+                <ArrowUpRight className="ml-1 inline size-4 align-baseline opacity-60" />
+              </a>
+            ) : (
+              company.name
+            )}
+          </h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={share}>

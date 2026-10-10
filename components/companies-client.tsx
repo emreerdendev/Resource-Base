@@ -13,7 +13,6 @@ import { SubmitCta } from "@/components/submit-cta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  APPLICATION_CHANNELS,
   CITIES,
   SECTORS,
   WORK_MODELS,
@@ -24,8 +23,8 @@ import { cn } from "@/lib/utils";
 
 type Mine = "" | "tracked" | "untracked";
 
-/** Channels a visitor can act on from the listing itself. */
-const FILTER_CHANNELS = APPLICATION_CHANNELS.filter((c) => c !== "message");
+/** Channels that map to concrete links/addresses on the listing. */
+const FILTER_CHANNELS = ["email", "career", "linkedin"] as const;
 
 /**
  * The company directory. Arrives already shuffled from the server (a fresh
@@ -66,7 +65,7 @@ export function CompaniesClient({
   }, []);
 
   // Shareable, filterable URLs (the order itself is never persisted). Uses the
-  // History API rather than router.replace: "/" renders per request, so a
+  // History API rather than router.replace: the page renders per request, so a
   // router navigation would cost a server render on every keystroke.
   useEffect(() => {
     const sp = new URLSearchParams();
@@ -77,7 +76,7 @@ export function CompaniesClient({
     if (sector) sp.set("sector", sector);
     if (mine) sp.set("mine", mine);
     const qs = sp.toString();
-    window.history.replaceState(null, "", qs ? `/?${qs}` : "/");
+    window.history.replaceState(null, "", qs ? `/companies?${qs}` : "/companies");
   }, [q, city, workModel, channel, sector, mine]);
 
   const fuse = useMemo(

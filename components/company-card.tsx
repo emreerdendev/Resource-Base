@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Briefcase, Globe, Mail, MapPin, Users } from "lucide-react";
+import { Briefcase, Mail, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LinkedinIcon } from "@/components/brand-icons";
 import { CompanyLogo } from "@/components/company-logo";
 import { CompanyModal } from "@/components/company-modal";
 import { CompanyStatusMenu } from "@/components/company-status-menu";
-import { hostLabel, primaryUrl } from "@/lib/company-utils";
+import { hostLabel } from "@/lib/company-utils";
 import type { Company } from "@/lib/types";
 
 /**
- * Compact company card: logo + name + where they work, the ways to apply as
- * icons, and the bookmark/status control. The card body opens the detail
+ * Compact company card: logo + name + where they work, the application
+ * channels it lists (email / career platform / LinkedIn) as icons, and the
+ * bookmark/status control. The card body opens the detail
  * modal with the actual emails and links.
  */
 export function CompanyCard({ company }: { company: Company }) {
@@ -39,19 +40,6 @@ export function CompanyCard({ company }: { company: Company }) {
       icon: <LinkedinIcon className="size-3.5" />,
       label: t("companies.channel.linkedin"),
     },
-    // A bare website is still a way in when nothing more specific is listed.
-    company.website &&
-      !company.emails.length &&
-      !company.careerLinks.length && {
-        key: "website",
-        icon: <Globe className="size-3.5" />,
-        label: t("companies.channel.website"),
-      },
-    company.channels.includes("hr") && {
-      key: "hr",
-      icon: <Users className="size-3.5" />,
-      label: t("companies.channel.hr"),
-    },
   ].filter(Boolean) as { key: string; icon: React.ReactNode; label: string }[];
 
   return (
@@ -76,8 +64,8 @@ export function CompanyCard({ company }: { company: Company }) {
                 </>
               ) : company.sectors[0] ? (
                 t(`companies.sector.${company.sectors[0]}`)
-              ) : primaryUrl(company) ? (
-                hostLabel(primaryUrl(company)!).split("/")[0]
+              ) : company.website ? (
+                hostLabel(company.website).split("/")[0]
               ) : (
                 t("companies.unknownLocation")
               )}
