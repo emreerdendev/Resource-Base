@@ -160,5 +160,13 @@ export async function sendEmail(opts: {
     html: opts.html,
     text: opts.text,
   });
+  // Locally the binding is simulated by Miniflare: nothing is delivered (it
+  // only writes the message to a temp folder). Print it so verification /
+  // reset links can be followed during development.
+  if ((env.BETTER_AUTH_URL ?? "").includes("localhost")) {
+    console.info(
+      `\n[email:dev] Not delivered locally — to: ${opts.to}\nSubject: ${opts.subject}\n${opts.text}\n`,
+    );
+  }
   return { ok: true };
 }
