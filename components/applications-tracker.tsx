@@ -109,7 +109,7 @@ export function ApplicationsTracker({
           <p className="mt-1 text-sm text-muted-foreground">{t("tracker.import.emptyHint")}</p>
         )}
         <Button asChild className="mt-4">
-          <Link href="/">{t("tracker.browse")}</Link>
+          <Link href="/companies">{t("tracker.browse")}</Link>
         </Button>
       </div>
     );

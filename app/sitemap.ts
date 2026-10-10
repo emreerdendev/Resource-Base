@@ -16,13 +16,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     sanityFetch<string[]>({ query: companySlugsQuery, tags: ["company"] }),
   ]);
 
-  const staticPaths = ["", "/resources", "/categories", "/submit", "/privacy", "/terms"];
+  const staticPaths = ["", "/companies", "/resources", "/categories", "/submit", "/privacy", "/terms"];
 
   return [
     ...staticPaths.map((p) => ({
       url: `${siteUrl}${p}`,
       changeFrequency: "weekly" as const,
-      priority: p === "" ? 1 : p === "/resources" ? 0.9 : 0.5,
+      priority: p === "" ? 1 : p === "/companies" || p === "/resources" ? 0.9 : 0.5,
     })),
     ...companies.map((slug) => ({
       url: `${siteUrl}/company/${slug}`,

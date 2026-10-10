@@ -153,7 +153,7 @@ export function CommandPalette({
           ))}
         </CommandGroup>
         <CommandGroup heading={t("command.goTo")}>
-          <CommandItem value="browse-companies" onSelect={() => go("/")}>
+          <CommandItem value="browse-companies" onSelect={() => go("/companies")}>
             <Building2 className="size-4 opacity-60" />
             {t("command.browseCompanies")}
           </CommandItem>

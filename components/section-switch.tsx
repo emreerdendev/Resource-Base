@@ -14,7 +14,12 @@ export function SectionSwitch({ className }: { className?: string }) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const items = [
-    { href: "/", label: t("nav.companies"), icon: Building2, active: pathname === "/" },
+    {
+      href: "/companies",
+      label: t("nav.companies"),
+      icon: Building2,
+      active: pathname.startsWith("/compan"),
+    },
     {
       href: "/resources",
       label: t("nav.resources"),

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { CompaniesClient } from "@/components/companies-client";
@@ -7,12 +8,18 @@ import type { Company } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { allCompaniesQuery } from "@/sanity/lib/queries";
 
-export default async function HomePage({
+export const metadata: Metadata = {
+  title: "Companies",
+  description:
+    "A free, community-curated list of companies with their application emails, career pages and LinkedIn.",
+  alternates: { canonical: "/companies" },
+};
+
+export default async function CompaniesPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // Old resource-browser links (/?category=…) are redirected in next.config.
   const params = await searchParams;
 
   // Render per request so every visit gets a fresh random order. The Sanity
@@ -25,7 +32,7 @@ export default async function HomePage({
 
   return (
     <Suspense>
-      {/* Keyed by sector so in-app sector links (/?sector=…) start fresh. */}
+      {/* Keyed by sector so in-app sector links (?sector=…) start fresh. */}
       <CompaniesClient
         key={typeof params.sector === "string" ? params.sector : ""}
         companies={shuffle(companies)}
