@@ -2,7 +2,6 @@
 
 import { Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { SectionSwitch } from "@/components/section-switch";
 
 /** CSS-only entrance (tw-animate-css) so the hero is visible before hydration. */
 const ENTER = "animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500";
@@ -11,7 +10,6 @@ export function CompaniesIntro({ count }: { count: number }) {
   const { t } = useTranslation();
   return (
     <div className="mb-8 flex flex-col items-center text-center">
-      <SectionSwitch className={`mb-6 ${ENTER}`} />
       <div
         className={`mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground ${ENTER} delay-75`}
       >
