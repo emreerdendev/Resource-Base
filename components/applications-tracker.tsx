@@ -105,6 +105,9 @@ export function ApplicationsTracker({
       <div className="rounded-xl border border-dashed border-border py-16 text-center">
         <BriefcaseBusiness className="mx-auto size-6 text-muted-foreground" />
         <p className="mt-3 text-muted-foreground">{t("tracker.empty")}</p>
+        {!compact && (
+          <p className="mt-1 text-sm text-muted-foreground">{t("tracker.import.emptyHint")}</p>
+        )}
         <Button asChild className="mt-4">
           <Link href="/">{t("tracker.browse")}</Link>
         </Button>

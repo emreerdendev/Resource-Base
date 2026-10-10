@@ -26,6 +26,8 @@ type TrackerValue = {
   /** `null` removes the company from the tracker. */
   setStatus: (companyId: string, status: ApplicationStatus | null) => Promise<void>;
   setNote: (companyId: string, note: string) => Promise<boolean>;
+  /** Re-fetch from the server (e.g. after a bulk import). */
+  reload: () => Promise<void>;
 };
 
 const TrackerContext = createContext<TrackerValue | null>(null);
@@ -56,6 +58,12 @@ export function CompanyTrackerProvider({ children }: { children: React.ReactNode
       })),
     [],
   );
+
+  const reload = useCallback(async () => {
+    if (!userId) return;
+    const rows = await listTrackedCompanies();
+    setState({ userId, items: rows });
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -135,8 +143,8 @@ export function CompanyTrackerProvider({ children }: { children: React.ReactNode
 
   const value = useMemo<TrackerValue>(() => {
     const byId = new Map(items.map((x) => [x.companyId, x]));
-    return { items, loading, get: (id) => byId.get(id), setStatus, setNote };
-  }, [items, loading, setStatus, setNote]);
+    return { items, loading, get: (id) => byId.get(id), setStatus, setNote, reload };
+  }, [items, loading, setStatus, setNote, reload]);
 
   return <TrackerContext.Provider value={value}>{children}</TrackerContext.Provider>;
 }
@@ -149,6 +157,7 @@ export function useCompanyTracker() {
       get: () => undefined,
       setStatus: async () => {},
       setNote: async () => false,
+      reload: async () => {},
     }
   );
 }

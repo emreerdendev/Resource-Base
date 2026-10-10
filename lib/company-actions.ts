@@ -96,3 +96,43 @@ export async function setCompanyNote(
     });
   return { ok: true };
 }
+
+const IMPORT_MAX = 500;
+
+/**
+ * Bulk-add companies to the user's tracker (CSV import). Only matched company
+ * ids + statuses reach the server — the file itself is parsed in the browser.
+ * "saved" never downgrades an existing entry; other statuses overwrite.
+ */
+export async function importTrackedCompanies(
+  entries: { companyId: string; status: ApplicationStatus }[],
+): Promise<{ ok: true; imported: number } | { ok: false; error: "rate_limited" | "invalid" }> {
+  const me = await requireUser();
+  if (!Array.isArray(entries) || entries.length === 0 || entries.length > IMPORT_MAX)
+    return { ok: false, error: "invalid" };
+  const clean = new Map<string, ApplicationStatus>();
+  for (const e of entries) {
+    if (!e || !COMPANY_ID_RE.test(e.companyId) || !isApplicationStatus(e.status))
+      return { ok: false, error: "invalid" };
+    clean.set(e.companyId, e.status);
+  }
+  if (await isRateLimited(`track-import:${me.id}`, 5, 3600))
+    return { ok: false, error: "rate_limited" };
+
+  const db = getDb();
+  const now = new Date();
+  const statements = [...clean].map(([companyId, status]) => {
+    const insert = db
+      .insert(companyApplications)
+      .values({ userId: me.id, companyId, status, updatedAt: now });
+    return status === "saved"
+      ? insert.onConflictDoNothing()
+      : insert.onConflictDoUpdate({
+          target: [companyApplications.userId, companyApplications.companyId],
+          set: { status, updatedAt: now },
+        });
+  });
+  // D1 batch = one round-trip, applied atomically.
+  await db.batch(statements as [(typeof statements)[number], ...(typeof statements)[number][]]);
+  return { ok: true, imported: clean.size };
+}
