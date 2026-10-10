@@ -33,7 +33,15 @@ export const structure: StructureResolver = (S) =>
             .filter('_type == "submission" && status == "pending"')
             .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
         ),
+      S.listItem()
+        .title('🏢 Pending companies')
+        .child(
+          S.documentList()
+            .title('Pending companies')
+            .filter('_type == "company" && status == "pending"')
+        ),
       S.divider(),
+      S.documentTypeListItem('company').title('All companies'),
       S.documentTypeListItem('resource').title('All resources'),
       S.documentTypeListItem('category').title('Categories'),
       S.documentTypeListItem('tag').title('Tags'),
