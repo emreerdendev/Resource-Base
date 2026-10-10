@@ -5,7 +5,7 @@ import { UserMenu } from "@/components/auth/user-menu";
 import { OPEN_COMMAND_EVENT } from "@/components/command-palette";
 import { LanguageToggle } from "@/components/language-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Boxes, ChevronRight, Plus, Search } from "lucide-react";
+import { Boxes, ChevronRight, Menu, Plus, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -89,7 +89,7 @@ export function SiteHeader() {
   }
   return (
     /* Opaque strip masking content that scrolls beneath the floating header. */
-    <header className="sticky px-4 inset-x-0 top-0 z-50 py-4 bg-background">
+    <header className="sticky inset-x-0 top-0 z-50 bg-background px-3 py-4 sm:px-4">
       <div
         ref={rowRef}
         className="relative mx-auto flex h-14 max-w-4xl items-center rounded-xl border border-border/70 bg-background/95 px-3 shadow-lg shadow-black/5 ring-1 ring-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-background/85 sm:px-4"
@@ -114,12 +114,12 @@ export function SiteHeader() {
 
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-2 font-semibold transition-opacity hover:opacity-80"
+          className="flex shrink-0 items-center gap-1.5 font-semibold transition-opacity hover:opacity-80 sm:gap-2"
         >
           <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-sm">
             <Boxes className="size-5" />
           </span>
-          <span className="hidden whitespace-nowrap sm:inline">Resource Base</span>
+          <span className="text-[15px] whitespace-nowrap sm:text-base">Resource Base</span>
         </Link>
 
         <span aria-hidden className="hidden shrink-0 text-border md:inline pl-3 pr-1">
@@ -133,20 +133,25 @@ export function SiteHeader() {
           <span aria-hidden className="text-border">
             •
           </span>
-          <Link
-            href="/resources"
-            className={navLink(pathname.startsWith("/resources") || pathname.startsWith("/resource/"))}
-          >
-            {t("nav.resources")}
-          </Link>
-          {/* Categories belong to the resource side. */}
-          <ChevronRight aria-hidden className="size-3.5 text-muted-foreground/50" />
-          <Link
-            href="/categories"
-            className={navLink(pathname.startsWith("/categor"))}
-          >
-            {t("nav.categories")}
-          </Link>
+          {/* Categories are a sub-section of resources, so the pair sits tight. */}
+          <div className="flex items-center">
+            <Link
+              href="/resources"
+              className={cn(
+                navLink(pathname.startsWith("/resources") || pathname.startsWith("/resource/")),
+                "pr-1",
+              )}
+            >
+              {t("nav.resources")}
+            </Link>
+            <ChevronRight aria-hidden className="size-3 shrink-0 text-muted-foreground/50" />
+            <Link
+              href="/categories"
+              className={cn(navLink(pathname.startsWith("/categor")), "pl-1")}
+            >
+              {t("nav.categories")}
+            </Link>
+          </div>
           {showSubmit && (
             <button
               type="button"
@@ -161,13 +166,13 @@ export function SiteHeader() {
           )}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 pl-1 sm:gap-2 sm:pl-2">
           {showSearch && (
             <button
               onClick={openSearch}
               aria-label={t("header.searchPlaceholder")}
               title={t("header.searchPlaceholder")}
-              className="group flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted hover:text-foreground"
+              className="group flex h-9 w-9 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 text-sm sm:w-auto sm:px-3 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted hover:text-foreground"
             >
               <Search className="size-4 transition-transform group-hover:scale-110" />
               {!compact && (
@@ -183,15 +188,110 @@ export function SiteHeader() {
             </button>
           )}
 
-          {/* Language + theme share one control group. */}
-          <div className="flex h-9 items-center rounded-lg border border-border bg-muted/40">
-            <LanguageToggle />
-            <span aria-hidden className="h-5 w-px bg-border" />
-            <ThemeToggle />
+          {/* Language + theme share one control group (in the menu on mobile). */}
+          <div className="hidden md:block">
+            <PreferencesGroup />
           </div>
           <UserMenu />
+          <MobileMenu
+            pathname={pathname}
+            submit={showSubmit ? { label: submitLabel, onClick: goSubmit } : null}
+          />
         </div>
       </div>
     </header>
+  );
+}
+
+function PreferencesGroup() {
+  return (
+    <div className="flex h-9 items-center rounded-lg border border-border bg-muted/40">
+      <LanguageToggle />
+      <span aria-hidden className="h-5 w-px bg-border" />
+      <ThemeToggle />
+    </div>
+  );
+}
+
+/**
+ * Below md the nav links don't fit next to the actions, so they move into a
+ * menu panel under the header, together with the language + theme controls.
+ */
+function MobileMenu({
+  pathname,
+  submit,
+}: {
+  pathname: string;
+  submit: { label: string; onClick: () => void } | null;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
+  const item = (active: boolean) =>
+    cn(
+      "flex items-center rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted",
+      active ? "bg-muted font-medium text-foreground" : "text-muted-foreground",
+    );
+
+  return (
+    <div className="md:hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="mobile-menu"
+        aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
+        className="grid size-9 cursor-pointer place-items-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      >
+        {open ? <X className="size-4" /> : <Menu className="size-4" />}
+      </button>
+
+      {open && (
+        <>
+          {/* Click-away layer. */}
+          <div className="fixed inset-0 z-40" aria-hidden onClick={close} />
+          <div
+            id="mobile-menu"
+            className="animate-in fade-in slide-in-from-top-1 absolute inset-x-0 top-[calc(100%+0.5rem)] z-50 flex flex-col gap-1 rounded-xl border border-border/70 bg-background p-2 shadow-lg duration-150"
+          >
+            <Link href="/companies" onClick={close} className={item(pathname.startsWith("/compan"))}>
+              {t("nav.companies")}
+            </Link>
+            <Link
+              href="/resources"
+              onClick={close}
+              className={item(pathname.startsWith("/resources") || pathname.startsWith("/resource/"))}
+            >
+              {t("nav.resources")}
+            </Link>
+            <Link
+              href="/categories"
+              onClick={close}
+              className={cn(item(pathname.startsWith("/categor")), "pl-7")}
+            >
+              <ChevronRight className="-ml-4 mr-1 size-3 text-muted-foreground/60" />
+              {t("nav.categories")}
+            </Link>
+            {submit && (
+              <button
+                type="button"
+                onClick={() => {
+                  close();
+                  submit.onClick();
+                }}
+                className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-primary transition-colors hover:bg-muted"
+              >
+                <Plus className="size-4" />
+                {submit.label}
+              </button>
+            )}
+            <div className="mt-1 flex items-center justify-between border-t border-border px-1 pt-2">
+              <span className="px-2 text-xs text-muted-foreground">{t("nav.preferences")}</span>
+              <PreferencesGroup />
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
