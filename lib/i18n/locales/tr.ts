@@ -47,6 +47,30 @@ export const tr = {
   },
 
   home: {
+    onboardBadge: "Ücretsiz ve topluluk tarafından derlenir",
+    onboardTitleLead: "Nereye başvuracağını bul —",
+    onboardTitleHighlight: "ne öğreneceğini de.",
+    onboardSubtitle: "Resource Base, her birine nasıl başvurulacağıyla birlikte bir şirket dizinini ve yazılım, tasarım ve daha fazlası için özenle seçilmiş kaynakları bir araya getirir.",
+    continueTracking: "Başvurularıma devam et",
+    companiesStat: "{{count}} şirket",
+    companiesBody: "Her şirket için başvuru e-postaları, kariyer sayfaları ve LinkedIn. Şirketleri kaydet, her başvuruyu “kaydedildi”den “teklif”e kadar takip et.",
+    resourcesStat: "{{count}}+ kaynak · {{categories}} kategori",
+    resourcesBody: "Bilmeye değer araçlar, kütüphaneler, kurslar ve referanslar — aranabilir, filtrelenebilir, favorilerine kaydedilebilir.",
+    howItWorks: "Nasıl çalışır",
+    steps: {
+      find: {
+        title: "Bul",
+        body: "Şirketleri isme, şehre, çalışma modeline veya sektöre göre ara — her ziyarette farklı bir sırayla.",
+      },
+      track: {
+        title: "Kaydet ve takip et",
+        body: "Şirketleri kaydet, her başvurunun durumunu işaretle ve özel notlar tut.",
+      },
+      apply: {
+        title: "Başvur",
+        body: "Listelenen e-posta, kariyer sayfası veya LinkedIn ile doğrudan ulaş.",
+      },
+    },
     badge: "{{count}}+ özenle seçilmiş kaynak",
     titleLead: "Bir sonraki",
     titleHighlight: "kaynağını bul.",
@@ -364,12 +388,9 @@ export const tr = {
       onsite: "Ofisten",
     },
     channel: {
-      website: "Web sitesi",
       email: "E-posta",
       career: "Kariyer sayfası",
       linkedin: "LinkedIn",
-      message: "Doğrudan mesaj",
-      hr: "İK / çalışanlara ulaşma",
     },
     sector: {
       gaming: "Oyun",

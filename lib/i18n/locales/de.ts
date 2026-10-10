@@ -47,6 +47,30 @@ export const de = {
   },
 
   home: {
+    onboardBadge: "Kostenlos & von der Community gepflegt",
+    onboardTitleLead: "Finde, wo du dich bewirbst —",
+    onboardTitleHighlight: "und was du lernst.",
+    onboardSubtitle: "Resource Base vereint ein Unternehmensverzeichnis mit genau dem richtigen Bewerbungsweg für jedes Unternehmen und handverlesene Ressourcen für Entwicklung, Design und mehr.",
+    continueTracking: "Weiter zu meinen Bewerbungen",
+    companiesStat: "{{count}} Unternehmen",
+    companiesBody: "Bewerbungs-E-Mails, Karriereseiten und LinkedIn für jedes Unternehmen. Speichere sie und verfolge jede Bewerbung von „gespeichert“ bis „Angebot“.",
+    resourcesStat: "{{count}}+ Ressourcen · {{categories}} Kategorien",
+    resourcesBody: "Tools, Bibliotheken, Kurse und Referenzen, die man kennen sollte — durchsuchbar, filterbar und als Favoriten speicherbar.",
+    howItWorks: "So funktioniert’s",
+    steps: {
+      find: {
+        title: "Finden",
+        body: "Suche Unternehmen nach Name, Stadt, Arbeitsmodell oder Branche — bei jedem Besuch neu gemischt.",
+      },
+      track: {
+        title: "Speichern & verfolgen",
+        body: "Merke dir Unternehmen, halte den Stand jeder Bewerbung fest und notiere Privates.",
+      },
+      apply: {
+        title: "Bewerben",
+        body: "Nutze die angegebene E-Mail, Karriereseite oder LinkedIn, um sie direkt zu erreichen.",
+      },
+    },
     badge: "{{count}}+ handverlesene Ressourcen",
     titleLead: "Finde deine nächste",
     titleHighlight: "Ressource.",
@@ -366,12 +390,9 @@ export const de = {
       onsite: "Vor Ort",
     },
     channel: {
-      website: "Website",
       email: "E-Mail",
       career: "Karriereseite",
       linkedin: "LinkedIn",
-      message: "Direktnachricht",
-      hr: "HR / Mitarbeitende kontaktieren",
     },
     sector: {
       gaming: "Gaming",

@@ -47,6 +47,30 @@ export const en = {
   },
 
   home: {
+    onboardBadge: "Free & community-curated",
+    onboardTitleLead: "Find where to apply —",
+    onboardTitleHighlight: "and what to learn.",
+    onboardSubtitle: "Resource Base brings together a directory of companies with exactly how to apply to each, and hand-picked resources for development, design and more.",
+    continueTracking: "Continue to my applications",
+    companiesStat: "{{count}} companies",
+    companiesBody: "Application emails, career pages and LinkedIn for every company. Save them and track each application from “saved” to “offer”.",
+    resourcesStat: "{{count}}+ resources · {{categories}} categories",
+    resourcesBody: "Tools, libraries, courses and references worth knowing — searchable, filterable and saved to your favorites.",
+    howItWorks: "How it works",
+    steps: {
+      find: {
+        title: "Find",
+        body: "Search companies by name, city, work model or sector — in a fresh order on every visit.",
+      },
+      track: {
+        title: "Save & track",
+        body: "Bookmark companies, set where each application stands and keep private notes.",
+      },
+      apply: {
+        title: "Apply",
+        body: "Use the listed email, career page or LinkedIn to reach them directly.",
+      },
+    },
     badge: "{{count}}+ hand-picked resources",
     titleLead: "Find your next",
     titleHighlight: "resource.",
@@ -366,12 +390,9 @@ export const en = {
       onsite: "On-site",
     },
     channel: {
-      website: "Website",
       email: "Email",
       career: "Career page",
       linkedin: "LinkedIn",
-      message: "Direct message",
-      hr: "Reach HR / employees",
     },
     sector: {
       gaming: "Gaming",
