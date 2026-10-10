@@ -8,7 +8,7 @@ import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 
 const BUTTON =
-  "inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4";
+  "inline-flex h-full w-9 shrink-0 cursor-pointer items-center justify-center rounded-r-lg text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
@@ -43,6 +43,7 @@ export function ThemeToggle() {
       <Button
         variant="ghost"
         size="icon"
+        className="h-full w-9 rounded-l-none rounded-r-lg"
         aria-label={label}
         title={label}
         onClick={() => setTheme(isDark ? "light" : "dark")}
