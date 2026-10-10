@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BrowseClient } from "@/components/browse-client";
 import { HomeIntro } from "@/components/home-intro";
@@ -9,7 +10,14 @@ import {
 } from "@/sanity/lib/queries";
 import type { Category, Resource, Tag } from "@/lib/types";
 
-export default async function HomePage() {
+export const metadata: Metadata = {
+  title: "Resources",
+  description:
+    "A curated, searchable directory of the best resources for development, design and more.",
+  alternates: { canonical: "/resources" },
+};
+
+export default async function ResourcesPage() {
   const [resources, categories, tags] = await Promise.all([
     sanityFetch<Resource[]>({ query: allResourcesQuery, tags: ["resource"] }),
     sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["category"] }),
@@ -22,7 +30,7 @@ export default async function HomePage() {
         resources={resources}
         categories={categories}
         tags={tags}
-        basePath="/"
+        basePath="/resources"
         intro={<HomeIntro count={resources.length} />}
       />
     </Suspense>

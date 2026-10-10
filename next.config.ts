@@ -45,6 +45,9 @@ const LEGACY_REDIRECTS: Record<string, string> = {
   "/useful-sections/github-generators": "/category/github-generators",
 };
 
+/** Filters that only exist on the resource browser (see redirects below). */
+const RESOURCE_BROWSE_PARAMS = ["category", "tags", "pricing", "lang", "sort"];
+
 /**
  * Content Security Policy. Whitelists exactly the origins the app talks to:
  *  - scripts: self + Google Analytics (@next/third-parties).
@@ -116,11 +119,22 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    return Object.entries(LEGACY_REDIRECTS).map(([source, destination]) => ({
-      source,
-      destination,
-      permanent: true,
-    }));
+    return [
+      ...Object.entries(LEGACY_REDIRECTS).map(([source, destination]) => ({
+        source,
+        destination,
+        permanent: true,
+      })),
+      // "/" used to be the resource browser; it's now the company directory.
+      // Forward old filtered links (/?category=…&tags=…) — the query string is
+      // carried over automatically.
+      ...RESOURCE_BROWSE_PARAMS.map((key) => ({
+        source: "/",
+        has: [{ type: "query" as const, key }],
+        destination: "/resources",
+        permanent: true,
+      })),
+    ];
   },
 };
 

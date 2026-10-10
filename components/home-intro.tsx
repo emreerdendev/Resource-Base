@@ -2,11 +2,15 @@
 
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { SectionSwitch } from "@/components/section-switch";
 
 export function HomeIntro({ count }: { count: number }) {
   const { t } = useTranslation();
   return (
     <div className="mb-8 text-center">
+      <div className="mb-6">
+        <SectionSwitch />
+      </div>
       <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
         <Sparkles className="size-3.5 text-primary" />
         {t("home.badge", { count })}
