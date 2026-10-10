@@ -15,7 +15,6 @@ import {
   MessageCircle,
   NotebookPen,
   Search,
-  Users,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -201,22 +200,12 @@ export function CompanyDetails({
           </div>
         )}
 
-        {/* Tips gathered from how people actually got responses. */}
-        {(company.channels.includes("hr") || company.channels.includes("message")) && (
-          <div className="flex flex-col gap-1.5 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-            {company.channels.includes("hr") && (
-              <p className="flex items-start gap-2">
-                <Users className="mt-px size-3.5 shrink-0 text-primary" />
-                {t("company.tipHr")}
-              </p>
-            )}
-            {company.channels.includes("message") && (
-              <p className="flex items-start gap-2">
-                <MessageCircle className="mt-px size-3.5 shrink-0 text-primary" />
-                {t("company.tipMessage")}
-              </p>
-            )}
-          </div>
+        {/* Tip gathered from how people actually got responses. */}
+        {company.channels.includes("message") && (
+          <p className="flex items-start gap-2 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+            <MessageCircle className="mt-px size-3.5 shrink-0 text-primary" />
+            {t("company.tipMessage")}
+          </p>
         )}
       </div>
 

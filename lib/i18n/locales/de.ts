@@ -33,6 +33,7 @@ export const de = {
   },
 
   nav: {
+    suggestCompany: "Unternehmen vorschlagen",
     companies: "Unternehmen",
     resources: "Ressourcen",
     applications: "Meine Bewerbungen",
@@ -393,7 +394,6 @@ export const de = {
     noContact: "Für dieses Unternehmen haben wir noch keine Kontaktdaten. Diese Suchen finden meist die Karriereseite:",
     searchLinkedin: "Auf LinkedIn suchen",
     searchWeb: "Im Web suchen",
-    tipHr: "Tipp: HR oder Mitarbeitende über LinkedIn anzuschreiben hat hier gut funktioniert.",
     tipMessage: "Tipp: Eine kurze, direkte Nachricht wurde hier beantwortet.",
     location: "Standort",
     sectors: "Branche",

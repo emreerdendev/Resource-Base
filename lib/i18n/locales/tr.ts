@@ -33,6 +33,7 @@ export const tr = {
   },
 
   nav: {
+    suggestCompany: "Şirket öner",
     companies: "Şirketler",
     resources: "Kaynaklar",
     applications: "Başvurularım",
@@ -391,7 +392,6 @@ export const tr = {
     noContact: "Bu şirket için henüz iletişim bilgimiz yok. Şu aramalar genelde kariyer sayfalarını bulur:",
     searchLinkedin: "LinkedIn'de ara",
     searchWeb: "Web'de ara",
-    tipHr: "İpucu: Bu şirkette İK ekibine veya çalışanlara LinkedIn üzerinden ulaşmak işe yarıyor.",
     tipMessage: "İpucu: Kısa ve doğrudan bir mesaj burada yanıt aldı.",
     location: "Konum",
     sectors: "Sektör",

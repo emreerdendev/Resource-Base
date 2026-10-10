@@ -33,6 +33,7 @@ export const es = {
   },
 
   nav: {
+    suggestCompany: "Sugerir una empresa",
     companies: "Empresas",
     resources: "Recursos",
     applications: "Mis postulaciones",
@@ -393,7 +394,6 @@ export const es = {
     noContact: "Aún no tenemos datos de contacto de esta empresa. Estas búsquedas suelen encontrar su página de empleo:",
     searchLinkedin: "Buscar en LinkedIn",
     searchWeb: "Buscar en la web",
-    tipHr: "Consejo: contactar a RR. HH. o a empleados por LinkedIn ha funcionado bien aquí.",
     tipMessage: "Consejo: un mensaje breve y directo obtuvo respuesta aquí.",
     location: "Ubicación",
     sectors: "Sector",
