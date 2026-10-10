@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { user, favorites, submissions, notifications } from "@/lib/db/schema";
+import {
+  user,
+  favorites,
+  submissions,
+  notifications,
+  companyApplications,
+} from "@/lib/db/schema";
 import { getSessionUser } from "@/lib/authz";
 
 export const runtime = "nodejs";
@@ -16,11 +22,15 @@ export async function GET() {
   if (!me) return new NextResponse("Unauthorized", { status: 401 });
 
   const db = getDb();
-  const [profileRows, favRows, subRows, notifRows] = await Promise.all([
+  const [profileRows, favRows, subRows, notifRows, appRows] = await Promise.all([
     db.select().from(user).where(eq(user.id, me.id)).limit(1),
     db.select().from(favorites).where(eq(favorites.userId, me.id)),
     db.select().from(submissions).where(eq(submissions.userId, me.id)),
     db.select().from(notifications).where(eq(notifications.userId, me.id)),
+    db
+      .select()
+      .from(companyApplications)
+      .where(eq(companyApplications.userId, me.id)),
   ]);
 
   const payload = {
@@ -30,6 +40,7 @@ export async function GET() {
     favorites: favRows,
     submissions: subRows,
     notifications: notifRows,
+    companyApplications: appRows,
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

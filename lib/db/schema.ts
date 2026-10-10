@@ -203,3 +203,28 @@ export const submissions = sqliteTable(
     index("submissions_sanity_idx").on(t.sanitySubmissionId),
   ],
 );
+
+// Company application tracker — one row per (user, company) the user saved.
+// companyId is the Sanity company _id. Private: never exposed to other users.
+export const companyApplications = sqliteTable(
+  "company_applications",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    companyId: text("company_id").notNull(),
+    // saved | applied | interview | offer | rejected (lib/company-taxonomy.ts)
+    status: text("status").notNull().default("saved"),
+    note: text("note"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.companyId] }),
+    index("company_applications_user_updated_idx").on(t.userId, t.updatedAt),
+  ],
+);

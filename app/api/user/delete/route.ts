@@ -15,7 +15,8 @@ export const runtime = "nodejs";
  * body), so a user can only delete their own account.
  *
  * Order: anonymize the user's Sanity submission docs, then delete the user row
- * — which cascades sessions/favorites/notifications (on-delete-cascade FKs) and
+ * — which cascades sessions/favorites/notifications/company applications
+ * (on-delete-cascade FKs) and
  * sets submissions.user_id to null. Published resources stay; submitter
  * attribution is cleared.
  */

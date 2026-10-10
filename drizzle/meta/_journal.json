@@ -15,6 +15,13 @@
       "when": 1781326372852,
       "tag": "0001_true_power_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791644399419,
+      "tag": "0002_faithful_toro",
+      "breakpoints": true
     }
   ]
 }
