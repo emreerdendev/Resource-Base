@@ -11,7 +11,7 @@ export type LegalDoc = { title: string; updated: string; intro: string; sections
 
 const CONTACT = "emreerden@pm.me";
 // Update when the policy text changes.
-export const LEGAL_UPDATED = "2026-06-13";
+export const LEGAL_UPDATED = "2026-10-10";
 
 const privacyEn: LegalDoc = {
   title: "Privacy Policy",
@@ -22,21 +22,21 @@ const privacyEn: LegalDoc = {
     {
       heading: "Who we are",
       body: [
-        `Resource Base is a curated directory of resources. For privacy questions, contact us at ${CONTACT}.`,
+        `Resource Base is a curated directory of companies (with how to apply to them) and resources. For privacy questions, contact us at ${CONTACT}.`,
       ],
     },
     {
       heading: "What we collect",
       body: [
         "Account data (only if you sign in): your email address, and a profile (username, display name, optional bio, avatar and social links) stored in our database hosted on Cloudflare.",
-        "Activity data: resources you favorite, and resources/edits you submit for review. Aggregate, anonymous click counts per resource (not tied to your identity).",
+        "Activity data: resources you favorite, companies you save to your application tracker (with the status and private notes you set — visible only to you), and resources/edits you submit for review. Aggregate, anonymous click counts per resource (not tied to your identity).",
         "Technical data: standard server logs and, if you consent, anonymous usage analytics (page views, performance). We do not sell your data.",
       ],
     },
     {
       heading: "Why we use it",
       body: [
-        "To provide the service: authentication, your favorites, your submissions and their review status, and contributor attribution on public profiles.",
+        "To provide the service: authentication, your favorites, your application tracker, your submissions and their review status, and contributor attribution on public profiles.",
         "To improve the site via aggregate analytics (only with your consent).",
         "Legal basis: performance of the service you request (account features) and your consent (analytics cookies).",
       ],
@@ -91,21 +91,21 @@ const privacyTr: LegalDoc = {
     {
       heading: "Biz kimiz",
       body: [
-        `Resource Base, özenle seçilmiş bir kaynak dizinidir. Gizlilik soruları için ${CONTACT} adresinden bize ulaşın.`,
+        `Resource Base, özenle seçilmiş bir şirket (başvuru bilgileriyle birlikte) ve kaynak dizinidir. Gizlilik soruları için ${CONTACT} adresinden bize ulaşın.`,
       ],
     },
     {
       heading: "Topladığımız veriler",
       body: [
         "Hesap verileri (yalnızca giriş yaparsanız): e-posta adresiniz ve bir profil (kullanıcı adı, görünen ad, isteğe bağlı biyografi, avatar ve sosyal bağlantılar) — Cloudflare üzerinde barındırılan veritabanımızda saklanır.",
-        "Etkinlik verileri: favorilediğiniz kaynaklar ve incelenmek üzere gönderdiğiniz kaynak/düzenleme önerileri. Kaynak başına toplu, anonim tıklanma sayıları (kimliğinizle ilişkilendirilmez).",
+        "Etkinlik verileri: favorilediğiniz kaynaklar, başvuru takibinize eklediğiniz şirketler (belirlediğiniz durum ve yalnızca sizin görebildiğiniz özel notlarla) ve incelenmek üzere gönderdiğiniz kaynak/düzenleme önerileri. Kaynak başına toplu, anonim tıklanma sayıları (kimliğinizle ilişkilendirilmez).",
         "Teknik veriler: standart sunucu kayıtları ve onay verirseniz anonim kullanım analitiği (sayfa görüntüleme, performans). Verilerinizi satmıyoruz.",
       ],
     },
     {
       heading: "Neden kullanıyoruz",
       body: [
-        "Hizmeti sunmak için: kimlik doğrulama, favorileriniz, gönderileriniz ve inceleme durumları, ve herkese açık profillerde katkı atfı.",
+        "Hizmeti sunmak için: kimlik doğrulama, favorileriniz, başvuru takibiniz, gönderileriniz ve inceleme durumları, ve herkese açık profillerde katkı atfı.",
         "Toplu analitik ile siteyi iyileştirmek için (yalnızca onayınızla).",
         "Hukuki dayanak: talep ettiğiniz hizmetin ifası (hesap özellikleri) ve açık rızanız (analitik çerezler).",
       ],
@@ -160,7 +160,8 @@ const termsEn: LegalDoc = {
     {
       heading: "The service",
       body: [
-        "Resource Base is a free, curated directory of links to third-party resources. We do not own or control those external sites and are not responsible for their content or availability.",
+        "Resource Base is a free, curated directory of links to third-party resources and of companies with their publicly available application channels. We do not own or control those external sites and are not responsible for their content or availability.",
+        "Company information (emails, career pages, locations) is community-curated from public sources and may be outdated. We are not affiliated with the listed companies, and listing a company does not mean it is currently hiring. Companies can ask for corrections or removal at any time.",
       ],
     },
     {
@@ -205,7 +206,8 @@ const termsTr: LegalDoc = {
     {
       heading: "Hizmet",
       body: [
-        "Resource Base, üçüncü taraf kaynaklara bağlantılar içeren ücretsiz, özenle seçilmiş bir dizindir. Bu harici sitelerin sahibi veya kontrolcüsü değiliz; içeriklerinden veya erişilebilirliklerinden sorumlu değiliz.",
+        "Resource Base, üçüncü taraf kaynaklara bağlantılar ve şirketlerin herkese açık başvuru kanallarını içeren ücretsiz, özenle seçilmiş bir dizindir. Bu harici sitelerin sahibi veya kontrolcüsü değiliz; içeriklerinden veya erişilebilirliklerinden sorumlu değiliz.",
+        "Şirket bilgileri (e-postalar, kariyer sayfaları, konumlar) herkese açık kaynaklardan derlenir ve güncelliğini yitirmiş olabilir. Listelenen şirketlerle bir bağlantımız yoktur; bir şirketin listede olması aktif olarak işe alım yaptığı anlamına gelmez. Şirketler her zaman düzeltme veya kaldırma talep edebilir.",
       ],
     },
     {
