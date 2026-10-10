@@ -133,6 +133,12 @@ export const de = {
   },
 
   cta: {
+    company: {
+      title: "Kennst du ein Unternehmen, das fehlt?",
+      subtitle: "Schlag es mit Bewerbungsweg vor — jeder Vorschlag wird vor der Veröffentlichung geprüft.",
+      submit: "Unternehmen vorschlagen",
+      emptyPrompt: "Nicht gefunden? Schlag es vor und hilf anderen.",
+    },
     title: "Kennst du eine fehlende Ressource?",
     subtitle:
       "Füge sie zum Verzeichnis hinzu — jeder Vorschlag wird vor der Veröffentlichung geprüft.",
@@ -191,6 +197,7 @@ export const de = {
   },
 
   submissions: {
+    company: "Unternehmensvorschlag",
     title: "Meine Einreichungen",
     empty: "Du hast noch keine Ressourcen eingereicht.",
     status: { pending: "Ausstehend", approved: "Genehmigt", rejected: "Abgelehnt" },
@@ -402,6 +409,24 @@ export const de = {
   },
 
   tracker: {
+    import: {
+      button: "Importieren",
+      title: "Bewerbungen importieren",
+      description: "Übernimm eine bestehende Liste (z. B. Notion- oder Tabellen-Export) in deinen Tracker.",
+      privacy: "Deine Datei wird auf diesem Gerät gelesen. Nur die erkannten Unternehmen und ihr Status werden in deinem Konto gespeichert — sonst verlässt nichts deinen Browser.",
+      choose: "CSV-Datei auswählen",
+      format: "Benötigt eine Spalte mit dem Firmennamen (z. B. „Company“ oder „Şirket Adı“); eine Statusspalte („Status“ / „Durum“) ist optional.",
+      tooLarge: "Die Datei ist zu groß (max. 2 MB).",
+      noNameColumn: "In dieser Datei wurde keine Spalte mit Firmennamen gefunden.",
+      empty: "Diese Datei enthält keine Zeilen.",
+      matched: "{{count}} Unternehmen erkannt",
+      unmatched: "{{count}} noch nicht im Verzeichnis",
+      unmatchedHint: "Klicke eins an, um es vorzuschlagen.",
+      another: "Andere Datei wählen",
+      confirm: "{{count}} importieren",
+      done: "{{count}} Unternehmen in deinen Tracker importiert.",
+      emptyHint: "Schon woanders erfasst? Nutze oben „Importieren“.",
+    },
     title: "Meine Bewerbungen",
     subtitle: "Alle gespeicherten Unternehmen und der Stand jeder Bewerbung. Nur du kannst das sehen.",
     save: "Speichern",
@@ -432,5 +457,25 @@ export const de = {
     updated: "Aktualisiert am {{date}}",
     private: "Privat",
     privateHint: "Deine Status und Notizen werden niemals anderen angezeigt.",
+  },
+
+  suggest: {
+    title: "Unternehmen vorschlagen",
+    subtitle: "Kennst du ein Unternehmen, das hierher gehört? Teile, wie man sich bewirbt — wir prüfen jeden Vorschlag.",
+    name: "Name des Unternehmens",
+    waysHint: "Mindestens eins: Bewerbungs-E-Mail, Karriereseite, LinkedIn oder Website.",
+    emails: "Bewerbungs-E-Mails",
+    emailsPlaceholder: "Bewerbungs-E-Mails, kommagetrennt (z. B. careers@acme.com)",
+    career: "Karriereseite",
+    careerPlaceholder: "Karriereseite oder Jobbörse (Lever, Greenhouse…)",
+    website: "Website",
+    websitePlaceholder: "Website des Unternehmens",
+    privacyHint: "Nur allgemeine Firmenadressen (hr@, careers@, info@…) — bitte keine persönlichen E-Mails von Mitarbeitenden.",
+    notePlaceholder: "Alles Hilfreiche — was sie entwickeln, wie du dich beworben hast, welcher Weg funktioniert hat…",
+    submit: "Vorschlag senden",
+    success: "Danke! Dein Vorschlag wird geprüft.",
+    exists: "Dieses Unternehmen ist bereits im Verzeichnis.",
+    view: "Ansehen",
+    alreadyPending: "Du hast dieses Unternehmen bereits vorgeschlagen — es wird geprüft.",
   },
 } as const;

@@ -133,6 +133,12 @@ export const fr = {
   },
 
   cta: {
+    company: {
+      title: "Vous connaissez une entreprise manquante ?",
+      subtitle: "Suggérez-la avec la façon de postuler — chaque suggestion est vérifiée avant publication.",
+      submit: "Suggérer une entreprise",
+      emptyPrompt: "Introuvable ? Suggérez-la et aidez les autres.",
+    },
     title: "Vous connaissez une ressource manquante ?",
     subtitle:
       "Ajoutez-la au répertoire — chaque proposition est examinée avant publication.",
@@ -191,6 +197,7 @@ export const fr = {
   },
 
   submissions: {
+    company: "Suggestion d’entreprise",
     title: "Mes propositions",
     empty: "Vous n'avez encore proposé aucune ressource.",
     status: { pending: "En attente", approved: "Approuvée", rejected: "Refusée" },
@@ -402,6 +409,24 @@ export const fr = {
   },
 
   tracker: {
+    import: {
+      button: "Importer",
+      title: "Importer vos candidatures",
+      description: "Ajoutez une liste existante (ex. export Notion ou tableur) à votre suivi.",
+      privacy: "Votre fichier est lu sur cet appareil. Seules les entreprises reconnues et leur statut sont enregistrés — rien d’autre ne quitte votre navigateur.",
+      choose: "Choisir un fichier CSV",
+      format: "Une colonne de nom d’entreprise est requise (ex. « Company » ou « Şirket Adı ») ; une colonne de statut (« Status » / « Durum ») est facultative.",
+      tooLarge: "Fichier trop volumineux (2 Mo max).",
+      noNameColumn: "Aucune colonne de nom d’entreprise trouvée dans ce fichier.",
+      empty: "Ce fichier ne contient aucune ligne.",
+      matched: "{{count}} entreprises reconnues",
+      unmatched: "{{count}} pas encore dans l’annuaire",
+      unmatchedHint: "Cliquez pour la suggérer.",
+      another: "Choisir un autre fichier",
+      confirm: "Importer {{count}}",
+      done: "{{count}} entreprises importées dans votre suivi.",
+      emptyHint: "Vous suivez déjà ailleurs ? Utilisez « Importer » ci-dessus.",
+    },
     title: "Mes candidatures",
     subtitle: "Toutes les entreprises enregistrées et l'état de chaque candidature. Vous seul pouvez voir ceci.",
     save: "Enregistrer",
@@ -432,5 +457,25 @@ export const fr = {
     updated: "Mis à jour le {{date}}",
     private: "Privé",
     privateHint: "Vos statuts et notes ne sont jamais montrés aux autres.",
+  },
+
+  suggest: {
+    title: "Suggérer une entreprise",
+    subtitle: "Vous connaissez une entreprise qui a sa place ici ? Indiquez comment postuler — chaque suggestion est vérifiée.",
+    name: "Nom de l’entreprise",
+    waysHint: "Ajoutez-en au moins un : e-mail de candidature, page carrières, LinkedIn ou site web.",
+    emails: "E-mails de candidature",
+    emailsPlaceholder: "E-mails de candidature, séparés par des virgules (ex. careers@acme.com)",
+    career: "Page carrières",
+    careerPlaceholder: "Page carrières ou job board (Lever, Greenhouse…)",
+    website: "Site web",
+    websitePlaceholder: "Site web de l’entreprise",
+    privacyHint: "Uniquement des adresses génériques (rh@, careers@, info@…) — pas d’e-mails personnels d’employés.",
+    notePlaceholder: "Tout ce qui peut aider — ce qu’ils développent, comment vous avez postulé, quel canal a marché…",
+    submit: "Envoyer la suggestion",
+    success: "Merci ! Votre suggestion est en cours de vérification.",
+    exists: "Cette entreprise est déjà dans l’annuaire.",
+    view: "Voir",
+    alreadyPending: "Vous avez déjà suggéré cette entreprise — elle est en attente de vérification.",
   },
 } as const;

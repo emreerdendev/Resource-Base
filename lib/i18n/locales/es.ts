@@ -133,6 +133,12 @@ export const es = {
   },
 
   cta: {
+    company: {
+      title: "¿Conoces una empresa que falta?",
+      subtitle: "Sugiérela con cómo postular — cada sugerencia se revisa antes de publicarse.",
+      submit: "Sugerir una empresa",
+      emptyPrompt: "¿No la encuentras? Sugiérela y ayuda a otros.",
+    },
     title: "¿Conoces un recurso que falta?",
     subtitle:
       "Añádelo al directorio — cada sugerencia se revisa antes de publicarse.",
@@ -191,6 +197,7 @@ export const es = {
   },
 
   submissions: {
+    company: "Sugerencia de empresa",
     title: "Mis propuestas",
     empty: "Aún no has propuesto ningún recurso.",
     status: { pending: "Pendiente", approved: "Aprobada", rejected: "Rechazada" },
@@ -402,6 +409,24 @@ export const es = {
   },
 
   tracker: {
+    import: {
+      button: "Importar",
+      title: "Importa tus postulaciones",
+      description: "Trae una lista existente (ej. exportación de Notion u hoja de cálculo) a tu seguimiento.",
+      privacy: "Tu archivo se lee en este dispositivo. Solo se guardan en tu cuenta las empresas reconocidas y su estado — nada más sale de tu navegador.",
+      choose: "Elegir un archivo CSV",
+      format: "Necesita una columna con el nombre de la empresa (ej. “Company” o “Şirket Adı”); la columna de estado (“Status” / “Durum”) es opcional.",
+      tooLarge: "El archivo es demasiado grande (máx. 2 MB).",
+      noNameColumn: "No se encontró una columna de nombre de empresa en este archivo.",
+      empty: "Este archivo no tiene filas.",
+      matched: "{{count}} empresas reconocidas",
+      unmatched: "{{count}} aún no están en el directorio",
+      unmatchedHint: "Haz clic en una para sugerirla.",
+      another: "Elegir otro archivo",
+      confirm: "Importar {{count}}",
+      done: "{{count}} empresas importadas a tu seguimiento.",
+      emptyHint: "¿Ya las sigues en otro lugar? Usa “Importar” arriba.",
+    },
     title: "Mis postulaciones",
     subtitle: "Todas las empresas que guardaste y el estado de cada postulación. Solo tú puedes verlo.",
     save: "Guardar",
@@ -432,5 +457,25 @@ export const es = {
     updated: "Actualizado {{date}}",
     private: "Privado",
     privateHint: "Tus estados y notas nunca se muestran a otras personas.",
+  },
+
+  suggest: {
+    title: "Sugerir una empresa",
+    subtitle: "¿Conoces una empresa que debería estar aquí? Comparte cómo postular — revisamos cada sugerencia.",
+    name: "Nombre de la empresa",
+    waysHint: "Añade al menos uno: correo de postulación, página de empleo, LinkedIn o sitio web.",
+    emails: "Correos de postulación",
+    emailsPlaceholder: "Correos de postulación, separados por comas (ej. careers@acme.com)",
+    career: "Página de empleo",
+    careerPlaceholder: "Página de empleo o portal (Lever, Greenhouse…)",
+    website: "Sitio web",
+    websitePlaceholder: "Sitio web de la empresa",
+    privacyHint: "Solo correos genéricos de la empresa (rrhh@, careers@, info@…) — sin correos personales de empleados.",
+    notePlaceholder: "Todo lo que ayude — qué desarrollan, cómo postulaste, qué canal funcionó…",
+    submit: "Enviar sugerencia",
+    success: "¡Gracias! Tu sugerencia está en revisión.",
+    exists: "Esta empresa ya está en el directorio.",
+    view: "Ver",
+    alreadyPending: "Ya sugeriste esta empresa — está pendiente de revisión.",
   },
 } as const;

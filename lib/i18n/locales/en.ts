@@ -133,6 +133,12 @@ export const en = {
   },
 
   cta: {
+    company: {
+      title: "Know a company we're missing?",
+      subtitle: "Suggest it with how to apply — every suggestion is reviewed before going live.",
+      submit: "Suggest a company",
+      emptyPrompt: "Can't find it? Suggest it and help others.",
+    },
     title: "Know a resource we're missing?",
     subtitle:
       "Add it to the directory — every submission is reviewed before going live.",
@@ -191,6 +197,7 @@ export const en = {
   },
 
   submissions: {
+    company: "Company suggestion",
     title: "My submissions",
     empty: "You haven't submitted any resources yet.",
     status: { pending: "Pending", approved: "Approved", rejected: "Rejected" },
@@ -402,6 +409,24 @@ export const en = {
   },
 
   tracker: {
+    import: {
+      button: "Import",
+      title: "Import your applications",
+      description: "Bring an existing list (e.g. a Notion or spreadsheet export) into your tracker.",
+      privacy: "Your file is read on this device. Only the matched companies and their statuses are saved to your account — nothing else in the file leaves your browser.",
+      choose: "Choose a CSV file",
+      format: "Needs a company name column (e.g. “Company” or “Şirket Adı”); a status column (“Status” / “Durum”) is optional.",
+      tooLarge: "That file is too large (max 2 MB).",
+      noNameColumn: "Couldn’t find a company name column in this file.",
+      empty: "This file has no rows to import.",
+      matched: "{{count}} companies matched",
+      unmatched: "{{count}} not in the directory yet",
+      unmatchedHint: "Click one to suggest it.",
+      another: "Choose another file",
+      confirm: "Import {{count}}",
+      done: "Imported {{count}} companies into your tracker.",
+      emptyHint: "Already tracking somewhere else? Use “Import” above.",
+    },
     title: "My applications",
     subtitle: "Every company you've saved, with where each application stands. Only you can see this.",
     save: "Save",
@@ -432,5 +457,25 @@ export const en = {
     updated: "Updated {{date}}",
     private: "Private",
     privateHint: "Your statuses and notes are never shown to other people.",
+  },
+
+  suggest: {
+    title: "Suggest a company",
+    subtitle: "Know a company that belongs here? Share how to apply — we review every suggestion before it goes live.",
+    name: "Company name",
+    waysHint: "Add at least one: an application email, career page, LinkedIn or website.",
+    emails: "Application emails",
+    emailsPlaceholder: "Application emails, comma-separated (e.g. careers@acme.com)",
+    career: "Career page",
+    careerPlaceholder: "Career page or job board (Lever, Greenhouse, Kariyer.net…)",
+    website: "Website",
+    websitePlaceholder: "Company website",
+    privacyHint: "Only generic company inboxes (hr@, careers@, info@…) — please no personal employee emails.",
+    notePlaceholder: "Anything that helps — what they build, how you applied, which channel worked…",
+    submit: "Send suggestion",
+    success: "Thanks! Your suggestion is in the review queue.",
+    exists: "This company is already in the directory.",
+    view: "View",
+    alreadyPending: "You already suggested this company — it is waiting for review.",
   },
 } as const;

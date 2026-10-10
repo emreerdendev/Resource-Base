@@ -133,6 +133,12 @@ export const tr = {
   },
 
   cta: {
+    company: {
+      title: "Listede olmayan bir şirket mi biliyorsun?",
+      subtitle: "Nasıl başvurulacağıyla birlikte öner — her öneri yayına girmeden önce incelenir.",
+      submit: "Şirket öner",
+      emptyPrompt: "Bulamadın mı? Öner ve başkalarına da yardım et.",
+    },
     title: "Eksik bir kaynak mı biliyorsun?",
     subtitle:
       "Depoya ekle — her gönderi yayına girmeden önce incelenir.",
@@ -191,6 +197,7 @@ export const tr = {
   },
 
   submissions: {
+    company: "Şirket önerisi",
     title: "Gönderilerim",
     empty: "Henüz hiç kaynak göndermedin.",
     status: { pending: "Beklemede", approved: "Onaylandı", rejected: "Reddedildi" },
@@ -400,6 +407,24 @@ export const tr = {
   },
 
   tracker: {
+    import: {
+      button: "İçe aktar",
+      title: "Başvurularını içe aktar",
+      description: "Mevcut listeni (ör. Notion veya tablo dışa aktarımı) takip listene taşı.",
+      privacy: "Dosyan bu cihazda okunur. Hesabına yalnızca eşleşen şirketler ve durumları kaydedilir — dosyadaki başka hiçbir şey tarayıcından çıkmaz.",
+      choose: "CSV dosyası seç",
+      format: "Şirket adı sütunu gerekli (ör. “Şirket Adı” veya “Company”); durum sütunu (“Durum” / “Status”) isteğe bağlı.",
+      tooLarge: "Dosya çok büyük (en fazla 2 MB).",
+      noNameColumn: "Bu dosyada şirket adı sütunu bulunamadı.",
+      empty: "Bu dosyada içe aktarılacak satır yok.",
+      matched: "{{count}} şirket eşleşti",
+      unmatched: "{{count}} şirket henüz listede yok",
+      unmatchedHint: "Önermek için birine tıkla.",
+      another: "Başka dosya seç",
+      confirm: "{{count}} şirketi içe aktar",
+      done: "{{count}} şirket takip listene eklendi.",
+      emptyHint: "Başka bir yerde mi takip ediyordun? Yukarıdaki “İçe aktar”ı kullan.",
+    },
     title: "Başvurularım",
     subtitle: "Kaydettiğin tüm şirketler ve her başvurunun durumu. Bunu yalnızca sen görebilirsin.",
     save: "Kaydet",
@@ -430,5 +455,25 @@ export const tr = {
     updated: "{{date}} güncellendi",
     private: "Özel",
     privateHint: "Durumların ve notların asla başkalarına gösterilmez.",
+  },
+
+  suggest: {
+    title: "Şirket öner",
+    subtitle: "Burada olması gereken bir şirket mi biliyorsun? Nasıl başvurulacağını paylaş — her öneri yayına girmeden önce incelenir.",
+    name: "Şirket adı",
+    waysHint: "En az birini ekle: başvuru e-postası, kariyer sayfası, LinkedIn veya web sitesi.",
+    emails: "Başvuru e-postaları",
+    emailsPlaceholder: "Başvuru e-postaları, virgülle ayır (ör. kariyer@acme.com)",
+    career: "Kariyer sayfası",
+    careerPlaceholder: "Kariyer sayfası veya ilan platformu (Lever, Greenhouse, Kariyer.net…)",
+    website: "Web sitesi",
+    websitePlaceholder: "Şirketin web sitesi",
+    privacyHint: "Sadece şirketin genel adresleri (ik@, kariyer@, info@…) — lütfen çalışanların kişisel e-postalarını ekleme.",
+    notePlaceholder: "Faydalı olabilecek her şey — ne geliştiriyorlar, nasıl başvurdun, hangi kanal işe yaradı…",
+    submit: "Öneriyi gönder",
+    success: "Teşekkürler! Önerin inceleme sırasında.",
+    exists: "Bu şirket zaten listede.",
+    view: "Gör",
+    alreadyPending: "Bu şirketi zaten önerdin — incelenmeyi bekliyor.",
   },
 } as const;
