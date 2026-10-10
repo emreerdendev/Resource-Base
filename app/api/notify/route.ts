@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { notifications, submissions } from "@/lib/db/schema";
 import { writeClient } from "@/sanity/lib/writeClient";
+import { slugify } from "@/lib/slug";
 
 export const runtime = "nodejs";
 
@@ -49,6 +50,60 @@ async function resolveRefs(
   return { refs, unresolved };
 }
 
+type CompanySubmissionDoc = {
+  name?: string;
+  companyWebsite?: string;
+  companyCareerUrl?: string;
+  companyLinkedin?: string;
+  companyEmails?: string[];
+  companyCities?: string[];
+  companyWorkModels?: string[];
+};
+
+/**
+ * Create the live company from an approved suggestion. Reads the submission
+ * itself (so the webhook projection doesn't need the company fields) and uses
+ * the deterministic `company-<slug>` id, so retries never duplicate it.
+ * Returns the company slug.
+ */
+async function createCompanyFromSubmission(submissionId: string): Promise<string | null> {
+  const doc = await writeClient.fetch<CompanySubmissionDoc | null>(
+    `*[_id == $id][0]{ name, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, companyCities, companyWorkModels }`,
+    { id: submissionId },
+  );
+  const name = doc?.name?.trim();
+  const slug = name ? slugify(name) : "";
+  if (!doc || !name || !slug) return null;
+
+  const emails = doc.companyEmails ?? [];
+  const careerLinks = doc.companyCareerUrl ? [doc.companyCareerUrl] : [];
+  const channels = [
+    emails.length && "email",
+    careerLinks.length && "career",
+    doc.companyLinkedin && "linkedin",
+  ].filter(Boolean);
+
+  await writeClient.createIfNotExists({
+    _id: `company-${slug}`,
+    _type: "company",
+    name,
+    slug: { _type: "slug", current: slug },
+    ...(doc.companyWebsite && { website: doc.companyWebsite }),
+    ...(doc.companyLinkedin && { linkedin: doc.companyLinkedin }),
+    emails,
+    careerLinks,
+    channels,
+    cities: doc.companyCities ?? [],
+    workModels: doc.companyWorkModels ?? [],
+    sectors: [],
+    clients: [],
+    status: "published",
+    addedAt: new Date().toISOString(),
+    internalNotes: `Suggested by the community (submission ${submissionId}).`,
+  });
+  return slug;
+}
+
 /**
  * Sanity webhook → D1 notification + mirror sync (+ fix apply).
  * Configure a webhook in sanity.io/manage filtered to
@@ -90,7 +145,18 @@ export async function POST(req: NextRequest) {
   const isUrlFix = body.kind === "fix";
   const isTaxonomyFix = body.kind === "taxonomy";
   const isFix = isUrlFix || isTaxonomyFix;
+  const isCompany = body.kind === "company";
   const label = body.name ? `“${body.name}”` : "Your submitted resource";
+
+  // On approval of a company suggestion, publish the company.
+  let companySlug: string | null = null;
+  if (approved && isCompany) {
+    try {
+      companySlug = await createCompanyFromSubmission(body._id);
+    } catch (err) {
+      console.error("company create failed", err);
+    }
+  }
 
   // On approval of a URL fix, apply the corrected url to the live resource and
   // reset its link health so the daily checker re-verifies it.
@@ -146,23 +212,29 @@ export async function POST(req: NextRequest) {
       title: approved
         ? isFix
           ? "Your fix was applied ✅"
-          : "Your resource was approved 🎉"
+          : isCompany
+            ? "Your company suggestion was approved 🎉"
+            : "Your resource was approved 🎉"
         : "Your submission needs changes",
       body: approved
         ? isUrlFix
           ? `Thanks! ${label} now points to the corrected link.`
           : isTaxonomyFix
             ? `Thanks! The categories/tags for ${label} were updated.`
-            : `${label} is now live in the directory.`
+            : isCompany
+              ? `${label} is now in the company directory.`
+              : `${label} is now live in the directory.`
         : body.rejectionReason
           ? `${label} wasn’t approved: ${body.rejectionReason}`
           : `${label} wasn’t approved. You can edit and resubmit it.`,
       url:
         approved && isUrlFix
           ? (body.url ?? null)
-          : approved
-            ? null
-            : "/profile/edit",
+          : approved && companySlug
+            ? `/company/${companySlug}`
+            : approved
+              ? null
+              : "/profile/edit",
       sourceKey: `submission_${body.status}:${body._id}`,
     });
   } catch (error) {
