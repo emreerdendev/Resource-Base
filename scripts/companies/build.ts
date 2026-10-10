@@ -17,6 +17,8 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import type { ApplicationChannel, City, Sector, WorkModel } from '../../lib/company-taxonomy'
+import { parseCsv } from '../../lib/csv'
+import { slugify } from '../../lib/slug'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = join(__dirname, 'data', 'companies.json')
@@ -37,55 +39,7 @@ export interface CompanySeed {
 
 /* --------------------------------- parsing -------------------------------- */
 
-/** Minimal RFC 4180 CSV parser (quoted fields, escaped quotes, CRLF). */
-function parseCsv(text: string): string[][] {
-  const rows: string[][] = []
-  let row: string[] = []
-  let field = ''
-  let quoted = false
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i]
-    if (quoted) {
-      if (ch === '"' && text[i + 1] === '"') {
-        field += '"'
-        i++
-      } else if (ch === '"') quoted = false
-      else field += ch
-    } else if (ch === '"') quoted = true
-    else if (ch === ',') {
-      row.push(field)
-      field = ''
-    } else if (ch === '\n' || ch === '\r') {
-      if (ch === '\r' && text[i + 1] === '\n') i++
-      row.push(field)
-      rows.push(row)
-      row = []
-      field = ''
-    } else field += ch
-  }
-  if (field || row.length) {
-    row.push(field)
-    rows.push(row)
-  }
-  return rows
-}
-
 /* -------------------------------- cleaning -------------------------------- */
-
-const TR_MAP: Record<string, string> = {
-  ç: 'c', ğ: 'g', ı: 'i', i̇: 'i', ö: 'o', ş: 's', ü: 'u', â: 'a', î: 'i', û: 'u',
-}
-
-export function slugify(input: string): string {
-  return input
-    .toLocaleLowerCase('tr')
-    .replace(/[çğıöşüâîû]/g, (c) => TR_MAP[c] ?? c)
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 96)
-}
 
 function normalizeUrl(raw: string): string | undefined {
   let v = raw.trim()
