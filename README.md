@@ -1,6 +1,6 @@
 # Resource Base
 
-A curated, searchable directory of the best resources for **development**, **design**, and — over time — anything else worth collecting. Browse ~500 hand-picked tools, libraries and references across a multi-level category and tag taxonomy, search them instantly, save your favorites, and suggest improvements. Built as a real, production application in **5 languages** with full control over design and data.
+A free, searchable **directory of companies** — with the emails, career pages and LinkedIn links you need to apply to each — plus a curated directory of the best resources for **development**, **design**, and anything else worth collecting. Save companies, track every application from "saved" to "offer" with private notes, browse ~500 hand-picked tools across a multi-level category and tag taxonomy, save favorites and suggest improvements. Built as a real, production application in **5 languages** with full control over design and data.
 
 ![Resource Base](./thumbnail/Resource-Base.png)
 
@@ -8,6 +8,8 @@ A curated, searchable directory of the best resources for **development**, **des
 
 | Feature | Signed out | Signed in | How it works |
 | --- | :---: | :---: | --- |
+| **Company directory** | ✅ | ✅ | ~240 companies in a fresh random order on every visit (no ranking, by design); search and filter by city, work model, application channel and sector. Each company has a detail view and a shareable page with its application emails (one-click copy), career pages and LinkedIn. |
+| **Application tracker** | — | ✅ | Bookmark companies and move each one through *saved → applied → interview → offer / rejected*, with private notes. Lives on its own page and on your profile — visible only to you. |
 | **Browse & filter** | ✅ | ✅ | Explore by category, tag, pricing and language; sort by featured, popularity, favorites, name or recency. |
 | **Instant search** | ✅ | ✅ | A self-built ⌘K command palette with fuzzy matching across every resource, category and tag — no third-party search service. |
 | **Resource details** | ✅ | ✅ | Each resource has a deep-linkable, shareable page with full description, taxonomy, related resources and rich SEO/OG metadata. |
@@ -21,8 +23,9 @@ A curated, searchable directory of the best resources for **development**, **des
 
 ## How it works
 
+- **The company directory** is the homepage. It renders per request so the order is reshuffled on every visit, while the company data itself stays tag-cached; search and filters run client-side. Resources live at `/resources`, and old filtered links to `/` are permanently redirected there.
 - **Browsing & search** are fully public and instant. Filters and the ⌘K palette run client-side over a tag-cached dataset, so navigating between categories, tags and resources feels immediate.
-- **Signing in** (Google, GitHub, or email) unlocks the personal layer — favorites, submissions, suggestions and notifications — all scoped to your own account.
+- **Signing in** (Google, GitHub, or email) unlocks the personal layer — the application tracker, favorites, submissions, suggestions and notifications — all scoped to your own account.
 - **Submitting & suggesting** never touch the live directory directly. Your contribution is stored as a moderated submission; an editor reviews it, and on approval the change is applied to the resource automatically and you're notified.
 - **Content updates go live without a redeploy** — a CMS webhook revalidates just the affected pages on demand.
 
@@ -33,11 +36,11 @@ The entire interface is available in **English, Turkish, Spanish, French and Ger
 ## Tech stack
 
 - **Next.js (App Router) + React + TypeScript** — the application
-- **Tailwind CSS + shadcn/ui + Radix** — design system and accessible primitives
-- **Sanity** — headless CMS for resources, categories, tags and submissions (Studio embedded at `/studio`)
+- **Tailwind CSS + shadcn/ui + Radix** — design system and accessible primitives; **Magic UI** for the animated theme switch
+- **Sanity** — headless CMS for companies, resources, categories, tags and submissions (Studio embedded at `/studio`)
 - **Better Auth** — authentication (Google/GitHub/GitLab OAuth + email/password with required email verification and password reset)
 - **Cloudflare Turnstile** — bot protection on the account-creation and email-sending endpoints
-- **Cloudflare D1 + Drizzle ORM** — user data (profiles, favorites, submissions, notifications)
+- **Cloudflare D1 + Drizzle ORM** — user data (profiles, favorites, application tracker, submissions, notifications)
 - **cmdk + Fuse.js** — the self-built command palette and fuzzy search
 - **Cloudflare Workers (via OpenNext)** — hosting; **KV** for the ISR page cache, a **Durable Object** queue for revalidation, **Email Sending** for password-reset mail, a separate **Cron Trigger** Worker for the broken-link checker, and **Web Analytics**
 
@@ -82,6 +85,16 @@ pnpm db:migrate:local      # apply to the local D1
 pnpm db:migrate:remote     # apply to the production D1
 ```
 
+### Importing companies
+
+Companies are managed in Sanity (Studio → *All companies*). The initial list was built from a Notion export; the raw export is **not** committed because it contains personal HR contacts and private application statuses. `companies:build` keeps only public, company-level data (generic inboxes, career pages, LinkedIn, location, sector) and writes `scripts/companies/data/companies.json`:
+
+```bash
+pnpm companies:build "/path/to/notion-export.csv"   # CSV → clean seed JSON
+pnpm companies:import:dry                           # summarise, write nothing
+pnpm companies:import                               # add missing companies (never overwrites Studio edits)
+```
+
 ### Importing the legacy content
 
 The original markdown lives in `_migration-source/`. To (re)import into Sanity:
@@ -97,7 +110,8 @@ Hosted on **Cloudflare Workers** via OpenNext. Pushing to `main` triggers an aut
 
 Notes:
 - Runtime secrets are set with `wrangler secret put`; the public `NEXT_PUBLIC_*` and Sanity tokens must also be present as **Build variables** in Workers Builds (Next.js inlines them / fetches Sanity at build time).
-- Add a Sanity webhook (**sanity.io/manage → API → Webhooks**) pointing at `/api/revalidate` (content revalidation) and `/api/notify` (submission-approval notifications), each sharing its respective secret.
+- Apply new D1 migrations to production with `pnpm db:migrate:remote` before (or right after) deploying a schema change.
+- Add a Sanity webhook (**sanity.io/manage → API → Webhooks**) pointing at `/api/revalidate` (content revalidation — make sure its filter includes the `company` type) and `/api/notify` (submission-approval notifications), each sharing its respective secret.
 - The broken-link checker runs daily as a separate Cron Trigger Worker (`workers/link-check-cron`).
 
 ### Production hardening
@@ -115,7 +129,7 @@ Two extra steps lock down the auth endpoints against bot abuse and spam. Both ar
 
 ## Disclaimer
 
-Resource Base is an independent directory. Listed resources are the property of their respective owners and are linked for discovery; inclusion does not imply any affiliation or endorsement.
+Resource Base is an independent directory. Listed resources are the property of their respective owners and are linked for discovery; inclusion does not imply any affiliation or endorsement. Company information is compiled from public sources, may be out of date, and does not mean a company is currently hiring — companies can request corrections or removal at any time.
 
 ## Feedback & contact
 
