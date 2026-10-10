@@ -107,3 +107,47 @@ export const resourceBySlugQuery = groq`
     } | order(_score desc, featured desc, addedAt desc)[0...6]
   }
 `
+
+/* ------------------------------ company directory ----------------------------- */
+
+const COMPANY_FIELDS = groq`
+  _id,
+  name,
+  "slug": slug.current,
+  website,
+  linkedin,
+  description,
+  "emails": coalesce(emails, []),
+  "careerLinks": coalesce(careerLinks, []),
+  "channels": coalesce(channels, []),
+  "cities": coalesce(cities, []),
+  "workModels": coalesce(workModels, []),
+  "sectors": coalesce(sectors, []),
+  "clients": coalesce(clients, []),
+  addedAt
+`
+
+const PUBLISHED_COMPANY = groq`_type == "company" && status == "published" && defined(slug.current)`
+
+/** Every published company — the (small) set the directory searches client-side. */
+export const allCompaniesQuery = groq`
+  *[${PUBLISHED_COMPANY}] | order(name asc) {
+    ${COMPANY_FIELDS}
+  }
+`
+
+export const companySlugsQuery = groq`*[${PUBLISHED_COMPANY}].slug.current`
+
+/** A company by slug plus a few others sharing a sector or city. */
+export const companyBySlugQuery = groq`
+  *[${PUBLISHED_COMPANY} && slug.current == $slug][0] {
+    ${COMPANY_FIELDS},
+    "related": *[
+      ${PUBLISHED_COMPANY} && slug.current != ^.slug.current &&
+      (count(sectors[@ in ^.^.sectors]) > 0)
+    ] {
+      ${COMPANY_FIELDS},
+      "_score": count(sectors[@ in ^.^.sectors]) * 2 + count(cities[@ in ^.^.cities])
+    } | order(_score desc, name asc)[0...6]
+  }
+`

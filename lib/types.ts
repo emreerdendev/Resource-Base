@@ -1,4 +1,5 @@
 /** Shapes returned by the GROQ projections in sanity/lib/queries.ts. */
+import type { ApplicationChannel, City, Sector, WorkModel } from './company-taxonomy'
 
 export type LinkStatus = 'ok' | 'broken' | 'redirect' | 'suspect' | 'unchecked'
 export type Pricing = 'free' | 'freemium' | 'paid'
@@ -126,4 +127,27 @@ export interface CategoryWithResources extends Omit<Category, 'count' | 'parentS
 
 export interface TagWithResources extends Omit<Tag, 'count'> {
   resources: Resource[]
+}
+
+/* ------------------------------ company directory ----------------------------- */
+
+export interface Company {
+  _id: string
+  name: string
+  slug: string
+  website?: string
+  linkedin?: string
+  description?: string
+  emails: string[]
+  careerLinks: string[]
+  channels: ApplicationChannel[]
+  cities: City[]
+  workModels: WorkModel[]
+  sectors: Sector[]
+  clients: string[]
+  addedAt?: string
+}
+
+export interface CompanyWithRelated extends Company {
+  related: Company[]
 }
