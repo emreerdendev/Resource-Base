@@ -43,7 +43,10 @@ export async function getAuth() {
     plugins.push(
       captcha({
         provider: "cloudflare-turnstile",
-        secretKey: turnstileSecret,
+        // Locally the widget runs with Cloudflare's always-pass test site key
+        // (see components/auth/turnstile.tsx), whose tokens only verify
+        // against the matching test secret.
+        secretKey: isLocal ? "1x0000000000000000000000000000000AA" : turnstileSecret,
         // Guard every endpoint that creates an account or sends an email.
         endpoints: [
           "/sign-up/email",
@@ -59,7 +62,10 @@ export async function getAuth() {
   return betterAuth({
     database: drizzleAdapter(db, { provider: "sqlite", schema }),
     secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
+    // Locally, derive the base URL from the incoming request so both `next dev`
+    // (:3000) and `cf:preview` (:8788) build the right OAuth redirect_uri;
+    // a fixed :8788 made every provider reject sign-ins from :3000.
+    baseURL: isLocal ? undefined : env.BETTER_AUTH_URL,
     // Better Auth rejects requests whose Origin isn't trusted ("Invalid origin").
     // In local dev (BETTER_AUTH_URL on localhost) accept any origin so both
     // `next dev` (:3000) and `cf:preview` (:8788) work; in production only the

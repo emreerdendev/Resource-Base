@@ -10,6 +10,17 @@ import { useTranslation } from "react-i18next";
 // when TURNSTILE_SECRET_KEY is set, so the two stay in sync.
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
+/**
+ * Cloudflare's official always-pass test site key. The real widget only allows
+ * the production hostnames, so on localhost it fails with "Unable to connect
+ * to website"; there we swap in the test key (paired with the test secret in
+ * lib/auth.ts). Production is unaffected.
+ */
+const LOCAL_TEST_SITE_KEY = "1x00000000000000000000AA";
+const isLocalHost = () =>
+  typeof window !== "undefined" &&
+  /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname);
+
 /** True when Turnstile is configured (a site key exists). */
 export const turnstileEnabled = Boolean(SITE_KEY);
 
@@ -98,7 +109,7 @@ export function Turnstile({
       .then(() => {
         if (cancelled || !containerRef.current || !window.turnstile) return;
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: SITE_KEY,
+          sitekey: isLocalHost() ? LOCAL_TEST_SITE_KEY : SITE_KEY,
           action,
           theme: resolvedTheme === "dark" ? "dark" : "light",
           language: i18n.resolvedLanguage ?? i18n.language ?? "auto",
