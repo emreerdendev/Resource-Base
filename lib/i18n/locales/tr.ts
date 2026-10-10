@@ -33,6 +33,9 @@ export const tr = {
   },
 
   nav: {
+    openMenu: "Menüyü aç",
+    closeMenu: "Menüyü kapat",
+    preferences: "Tercihler",
     suggestCompany: "Şirket öner",
     companies: "Şirketler",
     resources: "Kaynaklar",
@@ -347,9 +350,6 @@ export const tr = {
     deleteConfirm: "Kalıcı olarak sil",
   },
 
-  sections: {
-    label: "Dizinler",
-  },
 
   theme: {
     toLight: "Açık temaya geç",

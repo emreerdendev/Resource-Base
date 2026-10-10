@@ -33,6 +33,9 @@ export const en = {
   },
 
   nav: {
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    preferences: "Preferences",
     suggestCompany: "Suggest a company",
     companies: "Companies",
     resources: "Resources",
@@ -349,9 +352,6 @@ export const en = {
     deleteConfirm: "Permanently delete",
   },
 
-  sections: {
-    label: "Directories",
-  },
 
   theme: {
     toLight: "Switch to light theme",

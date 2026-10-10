@@ -33,6 +33,9 @@ export const fr = {
   },
 
   nav: {
+    openMenu: "Ouvrir le menu",
+    closeMenu: "Fermer le menu",
+    preferences: "Préférences",
     suggestCompany: "Suggérer une entreprise",
     companies: "Entreprises",
     resources: "Ressources",
@@ -349,9 +352,6 @@ export const fr = {
     deleteConfirm: "Supprimer définitivement",
   },
 
-  sections: {
-    label: "Annuaires",
-  },
 
   theme: {
     toLight: "Passer au thème clair",

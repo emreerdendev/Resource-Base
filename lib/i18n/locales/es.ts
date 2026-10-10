@@ -33,6 +33,9 @@ export const es = {
   },
 
   nav: {
+    openMenu: "Abrir menú",
+    closeMenu: "Cerrar menú",
+    preferences: "Preferencias",
     suggestCompany: "Sugerir una empresa",
     companies: "Empresas",
     resources: "Recursos",
@@ -349,9 +352,6 @@ export const es = {
     deleteConfirm: "Eliminar permanentemente",
   },
 
-  sections: {
-    label: "Directorios",
-  },
 
   theme: {
     toLight: "Cambiar a tema claro",
