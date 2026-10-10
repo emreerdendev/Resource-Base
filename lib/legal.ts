@@ -29,7 +29,7 @@ const privacyEn: LegalDoc = {
       heading: "What we collect",
       body: [
         "Account data (only if you sign in): your email address, and a profile (username, display name, optional bio, avatar and social links) stored in our database hosted on Cloudflare.",
-        "Activity data: resources you favorite, companies you save to your application tracker (with the status and private notes you set — visible only to you), and resources/edits you submit for review. Aggregate, anonymous click counts per resource (not tied to your identity).",
+        "Activity data: resources you favorite, companies you save to your application tracker (with the status and private notes you set — visible only to you), and resources/edits/companies you submit for review. If you import a tracker file, it is read in your browser; only the matched companies and their statuses are stored. Aggregate, anonymous click counts per resource (not tied to your identity).",
         "Technical data: standard server logs and, if you consent, anonymous usage analytics (page views, performance). We do not sell your data.",
       ],
     },
@@ -98,7 +98,7 @@ const privacyTr: LegalDoc = {
       heading: "Topladığımız veriler",
       body: [
         "Hesap verileri (yalnızca giriş yaparsanız): e-posta adresiniz ve bir profil (kullanıcı adı, görünen ad, isteğe bağlı biyografi, avatar ve sosyal bağlantılar) — Cloudflare üzerinde barındırılan veritabanımızda saklanır.",
-        "Etkinlik verileri: favorilediğiniz kaynaklar, başvuru takibinize eklediğiniz şirketler (belirlediğiniz durum ve yalnızca sizin görebildiğiniz özel notlarla) ve incelenmek üzere gönderdiğiniz kaynak/düzenleme önerileri. Kaynak başına toplu, anonim tıklanma sayıları (kimliğinizle ilişkilendirilmez).",
+        "Etkinlik verileri: favorilediğiniz kaynaklar, başvuru takibinize eklediğiniz şirketler (belirlediğiniz durum ve yalnızca sizin görebildiğiniz özel notlarla) ve incelenmek üzere gönderdiğiniz kaynak/düzenleme/şirket önerileri. Bir takip dosyasını içe aktarırsanız dosya tarayıcınızda okunur; yalnızca eşleşen şirketler ve durumları saklanır. Kaynak başına toplu, anonim tıklanma sayıları (kimliğinizle ilişkilendirilmez).",
         "Teknik veriler: standart sunucu kayıtları ve onay verirseniz anonim kullanım analitiği (sayfa görüntüleme, performans). Verilerinizi satmıyoruz.",
       ],
     },
@@ -173,7 +173,7 @@ const termsEn: LegalDoc = {
     {
       heading: "Submissions",
       body: [
-        "When you submit a resource or an edit, you confirm you have the right to share it and grant us a non-exclusive license to display it in the directory. Submissions are reviewed and may be edited or rejected. Do not submit illegal, infringing, malicious or spam content.",
+        "When you submit a resource, a company or an edit, you confirm you have the right to share it and grant us a non-exclusive license to display it in the directory. Submissions are reviewed and may be edited or rejected. Do not submit illegal, infringing, malicious or spam content.",
       ],
     },
     {
@@ -219,7 +219,7 @@ const termsTr: LegalDoc = {
     {
       heading: "Gönderiler",
       body: [
-        "Bir kaynak veya düzenleme gönderdiğinizde, bunu paylaşma hakkına sahip olduğunuzu onaylar ve dizinde göstermemiz için bize münhasır olmayan bir lisans verirsiniz. Gönderiler incelenir; düzenlenebilir veya reddedilebilir. Yasa dışı, hak ihlali yapan, kötü amaçlı veya spam içerik göndermeyin.",
+        "Bir kaynak, şirket veya düzenleme gönderdiğinizde, bunu paylaşma hakkına sahip olduğunuzu onaylar ve dizinde göstermemiz için bize münhasır olmayan bir lisans verirsiniz. Gönderiler incelenir; düzenlenebilir veya reddedilebilir. Yasa dışı, hak ihlali yapan, kötü amaçlı veya spam içerik göndermeyin.",
       ],
     },
     {
