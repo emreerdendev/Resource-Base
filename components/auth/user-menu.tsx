@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, LogOut, Plus, Star, User as UserIcon } from "lucide-react";
+import { Bell, BriefcaseBusiness, LogOut, Plus, Star, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -81,6 +81,11 @@ export function UserMenu() {
         <DropdownMenuItem asChild>
           <Link href={profileHref}>
             <UserIcon className="size-4" /> {t("nav.profile")}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/applications">
+            <BriefcaseBusiness className="size-4" /> {t("nav.applications")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

@@ -8,6 +8,7 @@ import {
   InstagramIcon,
   XIcon,
 } from "@/components/brand-icons";
+import { ApplicationsTracker } from "@/components/applications-tracker";
 import { MySubmissions } from "@/components/my-submissions";
 import { ResourceGrid } from "@/components/resource-grid";
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +16,19 @@ import { Button } from "@/components/ui/button";
 import { contributorTier } from "@/lib/contributor-tier";
 import { initial } from "@/lib/initial";
 import { fetchPublicEmail } from "@/lib/profile";
-import type { Category, PublicProfile, Resource } from "@/lib/types";
+import type { Category, Company, PublicProfile, Resource } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Award, Eye, EyeOff, Globe, Mail, Pencil, Send } from "lucide-react";
+import {
+  Award,
+  BriefcaseBusiness,
+  Eye,
+  EyeOff,
+  Globe,
+  Lock,
+  Mail,
+  Pencil,
+  Send,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -49,10 +60,12 @@ export function PublicProfileView({
   profile,
   resources,
   categories,
+  companies,
 }: {
   profile: PublicProfile;
   resources: Resource[];
   categories: Category[];
+  companies: Company[];
 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -174,6 +187,25 @@ export function PublicProfileView({
           )}
         </div>
       </div>
+
+      {/* Application tracker — owner only (statuses and notes are private). */}
+      {isOwner && (
+        <div className="mt-12">
+          <div className="mb-4 flex items-center gap-2">
+            <BriefcaseBusiness className="size-5 text-primary" />
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("tracker.title")}
+            </h2>
+            <span
+              className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground"
+              title={t("tracker.privateHint")}
+            >
+              <Lock className="size-3" /> {t("tracker.private")}
+            </span>
+          </div>
+          <ApplicationsTracker companies={companies} compact />
+        </div>
+      )}
 
       {/* Contributions */}
       <div className="mt-12">
