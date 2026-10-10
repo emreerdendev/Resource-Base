@@ -3,42 +3,52 @@
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Plus, Sparkles } from "lucide-react";
+import { Building2, Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
 /**
- * Invites visitors to contribute a resource (and sign in if needed). Two
- * variants: a full "band" for the home page, and a compact prompt for empty
- * search results. Signed-out users get the auth modal before /submit.
+ * Invites visitors to contribute a resource or a company (and sign in if
+ * needed). Two variants: a full "band" under the listings, and a compact
+ * prompt for empty search results. Signed-out users get the auth modal first.
  */
 export function SubmitCta({
   variant = "band",
+  kind = "resource",
+  name,
 }: {
   variant?: "band" | "compact";
+  kind?: "resource" | "company";
+  /** Prefills the company name (e.g. the search that found nothing). */
+  name?: string;
 }) {
   const { t } = useTranslation();
   const { user, openAuth } = useAuth();
+  const company = kind === "company";
+  const k = company ? "cta.company" : "cta";
+  const href = company
+    ? `/submit?type=company${name?.trim() ? `&name=${encodeURIComponent(name.trim())}` : ""}`
+    : "/submit";
 
   const cta = user ? (
     <Button asChild>
-      <Link href="/submit">
+      <Link href={href}>
         <Plus className="size-4" />
-        {t("cta.submit")}
+        {t(`${k}.submit`)}
       </Link>
     </Button>
   ) : (
     // Guests: open sign-in in place, then forward to /submit after auth.
-    <Button onClick={() => openAuth("/submit")}>
+    <Button onClick={() => openAuth(href)}>
       <Plus className="size-4" />
-      {t("cta.submit")}
+      {t(`${k}.submit`)}
     </Button>
   );
 
   if (variant === "compact") {
     return (
       <div className="mt-4 flex flex-col items-center gap-3">
-        <p className="text-sm text-muted-foreground">{t("cta.emptyPrompt")}</p>
+        <p className="text-sm text-muted-foreground">{t(`${k}.emptyPrompt`)}</p>
         {cta}
       </div>
     );
@@ -52,12 +62,12 @@ export function SubmitCta({
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-          <Sparkles className="size-5" />
+          {company ? <Building2 className="size-5" /> : <Sparkles className="size-5" />}
         </span>
         <div>
-          <p className="font-semibold tracking-tight">{t("cta.title")}</p>
+          <p className="font-semibold tracking-tight">{t(`${k}.title`)}</p>
           <p className="mt-0.5 max-w-md text-sm text-muted-foreground">
-            {t("cta.subtitle")}
+            {t(`${k}.subtitle`)}
           </p>
         </div>
       </div>

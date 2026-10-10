@@ -9,6 +9,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { CompanyCard } from "@/components/company-card";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
 import { Pagination } from "@/components/pagination";
+import { SubmitCta } from "@/components/submit-cta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -254,7 +255,10 @@ export function CompaniesClient({
 
       <div ref={resultsRef} className="scroll-mt-28" />
       {filtered.length === 0 ? (
-        <div className="py-20 text-center text-muted-foreground">{t("companies.empty")}</div>
+        <div className="py-20 text-center text-muted-foreground">
+          {t("companies.empty")}
+          <SubmitCta variant="compact" kind="company" name={q} />
+        </div>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -274,6 +278,8 @@ export function CompaniesClient({
               pageLabel={t("browse.page", { page: currentPage, total: totalPages })}
             />
           )}
+
+          <SubmitCta variant="band" kind="company" />
         </>
       )}
     </div>

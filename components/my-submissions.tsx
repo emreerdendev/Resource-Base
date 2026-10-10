@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowUpRight,
+  Building2,
   CheckCircle2,
   Clock,
   Globe,
@@ -118,7 +119,12 @@ export function MySubmissions({ categories }: { categories: Category[] }) {
                 <span className="block truncate font-medium leading-tight group-hover:underline">
                   {s.name}
                 </span>
-                {s.kind !== "new" && (
+                {s.kind === "company" ? (
+                  <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Building2 className="size-3" />
+                    {t("submissions.company")}
+                  </span>
+                ) : s.kind !== "new" && (
                   <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Wrench className="size-3" />
                     {t(
