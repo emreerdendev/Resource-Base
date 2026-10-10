@@ -30,7 +30,12 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <Button size="sm" variant="outline" onClick={() => openAuth()}>
+      // Same height/radius as the language + theme group next to it.
+      <Button
+        variant="outline"
+        className="h-9 rounded-lg px-3"
+        onClick={() => openAuth()}
+      >
         {t("header.signIn")}
       </Button>
     );

@@ -5,7 +5,7 @@ import { UserMenu } from "@/components/auth/user-menu";
 import { OPEN_COMMAND_EVENT } from "@/components/command-palette";
 import { LanguageToggle } from "@/components/language-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Boxes, Plus, Search } from "lucide-react";
+import { Boxes, ChevronRight, Plus, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -60,8 +60,9 @@ export function SiteHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, openAuth } = useAuth();
-  // The directory pages already have a big inline search, so hide this one there.
-  const showSearch = pathname !== "/" && pathname !== "/resources";
+  // ⌘K searches companies AND resources, so it stays available everywhere
+  // (the directory pages' inline search only filters their own list).
+  const showSearch = true;
   const navLink = (active: boolean) =>
     cn(
       "whitespace-nowrap rounded-md px-2 py-2 text-sm transition-colors hover:text-foreground",
@@ -69,8 +70,10 @@ export function SiteHeader() {
     );
 
   // On the company side, "+" suggests a company; everywhere else a resource.
+  // Hidden on the homepage, which is just the entry point to both sides.
   const companySide =
-    pathname === "/" || pathname.startsWith("/company/") || pathname.startsWith("/applications");
+    pathname.startsWith("/compan") || pathname.startsWith("/applications");
+  const showSubmit = pathname !== "/";
   const submitHref = companySide ? "/submit?type=company" : "/submit";
   const submitLabel = companySide ? t("nav.suggestCompany") : t("nav.submit");
 
@@ -98,7 +101,7 @@ export function SiteHeader() {
           aria-hidden
           className="pointer-events-none invisible absolute top-0 left-0 flex text-sm whitespace-nowrap"
         >
-          <span className="pl-1 font-medium">{submitLabel}</span>
+          {showSubmit && <span className="pl-1 font-medium">{submitLabel}</span>}
           {showSearch && (
             <>
               <span className="pl-2">{t("header.searchPlaceholder")}</span>
@@ -124,34 +127,38 @@ export function SiteHeader() {
         </span>
 
         <nav className="hidden shrink-0 items-center gap-1 md:flex">
-          <Link
-            href="/"
-            className={navLink(pathname === "/" || pathname.startsWith("/company/"))}
-          >
+          <Link href="/companies" className={navLink(pathname.startsWith("/compan"))}>
             {t("nav.companies")}
           </Link>
+          <span aria-hidden className="text-border">
+            •
+          </span>
           <Link
             href="/resources"
             className={navLink(pathname.startsWith("/resources") || pathname.startsWith("/resource/"))}
           >
             {t("nav.resources")}
           </Link>
+          {/* Categories belong to the resource side. */}
+          <ChevronRight aria-hidden className="size-3.5 text-muted-foreground/50" />
           <Link
             href="/categories"
             className={navLink(pathname.startsWith("/categor"))}
           >
             {t("nav.categories")}
           </Link>
-          <button
-            type="button"
-            onClick={goSubmit}
-            aria-label={submitLabel}
-            title={submitLabel}
-            className="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
-          >
-            <Plus className="size-3.5" />
-            {!compact && <span>{submitLabel}</span>}
-          </button>
+          {showSubmit && (
+            <button
+              type="button"
+              onClick={goSubmit}
+              aria-label={submitLabel}
+              title={submitLabel}
+              className="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+            >
+              <Plus className="size-3.5" />
+              {!compact && <span>{submitLabel}</span>}
+            </button>
+          )}
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
