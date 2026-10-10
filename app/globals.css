@@ -159,3 +159,17 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Theme switch (Magic UI animated theme toggler): the new theme is revealed by
+   a clip-path animation on the root view-transition snapshot. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+:root[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  clip-path: var(--magicui-theme-vt-clip-from);
+}
+:root[data-magicui-theme-vt="active"]::view-transition-group(root) {
+  animation-duration: var(--magicui-theme-toggle-vt-duration, 400ms);
+}
