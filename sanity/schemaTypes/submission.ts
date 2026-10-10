@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
 
+import { CITIES, WORK_MODELS, studioOptions } from '../../lib/company-taxonomy'
+
 /**
- * Community-suggested resource. Kept separate from `resource` so the public
- * submit endpoint only needs create access on this one type and can never
- * touch the live taxonomy. An editor reviews, then promotes to a `resource`.
+ * Community-suggested resource or company. Kept separate from `resource` /
+ * `company` so the public submit endpoint only needs create access on this one
+ * type and can never touch live content. An editor reviews, then approves.
  */
 export const submission = defineType({
   name: 'submission',
@@ -19,6 +21,7 @@ export const submission = defineType({
           { title: 'New resource', value: 'new' },
           { title: 'URL fix', value: 'fix' },
           { title: 'Category / tag fix', value: 'taxonomy' },
+          { title: 'New company', value: 'company' },
         ],
         layout: 'radio',
       },
@@ -32,7 +35,7 @@ export const submission = defineType({
       description:
         'The resource this fix corrects. On approval the relevant fields are updated automatically.',
       readOnly: true,
-      hidden: ({ parent }) => parent?.kind === 'new',
+      hidden: ({ parent }) => parent?.kind === 'new' || parent?.kind === 'company',
     }),
     defineField({
       name: 'proposedCategories',
@@ -87,6 +90,51 @@ export const submission = defineType({
       readOnly: true,
       hidden: ({ parent }) => parent?.kind !== 'taxonomy',
     }),
+    // --- Company suggestions (kind "company"). Review/edit these, then set
+    // the status to Approved: the company is created automatically. ---
+    defineField({
+      name: 'companyWebsite',
+      title: 'Company website',
+      type: 'url',
+      hidden: ({ parent }) => parent?.kind !== 'company',
+    }),
+    defineField({
+      name: 'companyCareerUrl',
+      title: 'Career page / job board',
+      type: 'url',
+      hidden: ({ parent }) => parent?.kind !== 'company',
+    }),
+    defineField({
+      name: 'companyLinkedin',
+      title: 'LinkedIn',
+      type: 'url',
+      hidden: ({ parent }) => parent?.kind !== 'company',
+    }),
+    defineField({
+      name: 'companyEmails',
+      title: 'Application emails',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+      description: 'Generic inboxes only — remove personal employee addresses before approving.',
+      hidden: ({ parent }) => parent?.kind !== 'company',
+    }),
+    defineField({
+      name: 'companyCities',
+      title: 'Cities',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { list: studioOptions(CITIES), layout: 'grid' },
+      hidden: ({ parent }) => parent?.kind !== 'company',
+    }),
+    defineField({
+      name: 'companyWorkModels',
+      title: 'Work models',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { list: studioOptions(WORK_MODELS), layout: 'grid' },
+      hidden: ({ parent }) => parent?.kind !== 'company',
+    }),
     defineField({
       name: 'name',
       type: 'string',
@@ -95,7 +143,12 @@ export const submission = defineType({
     defineField({
       name: 'url',
       type: 'url',
-      validation: (rule) => rule.required().uri({ scheme: ['http', 'https'] }),
+      validation: (rule) =>
+        rule.uri({ scheme: ['http', 'https'] }).custom((value, ctx) =>
+          value || (ctx.parent as { kind?: string })?.kind === 'company'
+            ? true
+            : 'Required',
+        ),
     }),
     defineField({ name: 'suggestedCategory', type: 'string' }),
     defineField({

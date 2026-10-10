@@ -89,7 +89,7 @@ export interface Tag {
 
 export type SubmissionStatus = 'pending' | 'approved' | 'rejected'
 
-export type SubmissionKind = 'new' | 'fix' | 'taxonomy'
+export type SubmissionKind = 'new' | 'fix' | 'taxonomy' | 'company'
 
 /** A user's own submission row (public.submissions mirror, RLS read-own). */
 export interface Submission {

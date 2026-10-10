@@ -38,7 +38,9 @@ export const structure: StructureResolver = (S) =>
         .child(
           S.documentList()
             .title('Pending companies')
-            .filter('_type == "company" && status == "pending"')
+            .filter(
+              '(_type == "company" && status == "pending") || (_type == "submission" && kind == "company" && status == "pending")'
+            )
         ),
       S.divider(),
       S.documentTypeListItem('company').title('All companies'),

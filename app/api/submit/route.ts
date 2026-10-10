@@ -4,6 +4,8 @@ import { writeClient } from "@/sanity/lib/writeClient";
 import { getDb } from "@/lib/db";
 import { submissions } from "@/lib/db/schema";
 import { getSessionUser } from "@/lib/authz";
+import { parseCompanySuggestion } from "@/lib/company-submission";
+import { slugify } from "@/lib/slug";
 
 export const runtime = "nodejs";
 
@@ -63,6 +65,11 @@ export async function POST(req: NextRequest) {
 
   // Honeypot: real users never fill this.
   if (data.company) return NextResponse.json({ ok: true });
+
+  // Company suggestions have their own shape and approval path.
+  if (data.kind === "company") {
+    return submitCompany(data as Record<string, unknown>, user.id, user.email ?? "");
+  }
 
   // Submission kinds: "new" (brand-new resource), "fix" (correct a broken URL),
   // "taxonomy" (correct a resource's categories/tags). Fixes target an
@@ -297,6 +304,79 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("submission failed", err);
+    return new NextResponse("Server error", { status: 500 });
+  }
+}
+
+/**
+ * A suggested company → a pending `submission` (kind "company") for an editor
+ * to review. On approval /api/notify creates the live company document. Exact
+ * duplicates of an existing company (same slug) are rejected up front.
+ */
+async function submitCompany(data: Record<string, unknown>, userId: string, email: string) {
+  const parsed = parseCompanySuggestion(data);
+  if (!parsed.ok) return new NextResponse(parsed.error, { status: 400 });
+  const c = parsed.value;
+  const slug = slugify(c.name);
+  if (!slug) return new NextResponse("Invalid name", { status: 400 });
+
+  try {
+    const [existing, pendingDup] = await Promise.all([
+      writeClient.fetch<string | null>(
+        `*[_type == "company" && slug.current == $slug][0].slug.current`,
+        { slug },
+      ),
+      writeClient.fetch<string | null>(
+        `*[_type == "submission" && kind == "company" && submittedBy == $u && status == "pending" && name == $name][0]._id`,
+        { u: userId, name: c.name },
+      ),
+    ]);
+    if (existing) {
+      return NextResponse.json({ error: "exists", slug: existing }, { status: 409 });
+    }
+    if (pendingDup) {
+      return NextResponse.json({ error: "pending" }, { status: 409 });
+    }
+
+    const url = c.website ?? c.careerUrl ?? c.linkedin ?? "";
+    const created = await writeClient.create({
+      _type: "submission",
+      kind: "company",
+      name: c.name,
+      ...(url && { url }),
+      ...(c.website && { companyWebsite: c.website }),
+      ...(c.careerUrl && { companyCareerUrl: c.careerUrl }),
+      ...(c.linkedin && { companyLinkedin: c.linkedin }),
+      companyEmails: c.emails,
+      companyCities: c.cities,
+      companyWorkModels: c.workModels,
+      note: c.note,
+      email: email.slice(0, 200),
+      submittedBy: userId,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    });
+
+    try {
+      await getDb().insert(submissions).values({
+        userId,
+        sanitySubmissionId: created._id,
+        kind: "company",
+        name: c.name,
+        url: url || null,
+        note: c.note,
+        status: "pending",
+      });
+    } catch (err) {
+      // Keep the stores consistent (same policy as resource submissions).
+      console.error("company submission mirror failed", err);
+      await writeClient.delete(created._id).catch(() => {});
+      return new NextResponse("Could not save submission", { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("company submission failed", err);
     return new NextResponse("Server error", { status: 500 });
   }
 }
