@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { UserMenu } from "@/components/auth/user-menu";
 import { OPEN_COMMAND_EVENT } from "@/components/command-palette";
 import { LanguageToggle } from "@/components/language-toggle";
+import { NavLink } from "@/components/nav-link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Boxes, ChevronRight, Menu, Plus, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -128,7 +129,7 @@ export function SiteHeader() {
           )}
         </span>
 
-        <Link
+        <NavLink
           href="/"
           className="flex shrink-0 items-center gap-1.5 font-semibold transition-opacity hover:opacity-80 sm:gap-2"
         >
@@ -136,22 +137,22 @@ export function SiteHeader() {
             <Boxes className="size-5" />
           </span>
           <span className="text-[15px] whitespace-nowrap sm:text-base">Resource Base</span>
-        </Link>
+        </NavLink>
 
         <span aria-hidden className="hidden shrink-0 text-border md:inline pl-3 pr-1">
           •
         </span>
 
         <nav className="hidden shrink-0 items-center gap-1 md:flex">
-          <Link href="/companies" className={navLink(pathname.startsWith("/compan"))}>
+          <NavLink href="/companies" className={navLink(pathname.startsWith("/compan"))}>
             {t("nav.companies")}
-          </Link>
+          </NavLink>
           <span aria-hidden className="text-border">
             •
           </span>
           {/* Categories are a sub-section of resources, so the pair sits tight. */}
           <div className="flex items-center">
-            <Link
+            <NavLink
               href="/resources"
               className={cn(
                 navLink(pathname.startsWith("/resources") || pathname.startsWith("/resource/")),
@@ -159,14 +160,14 @@ export function SiteHeader() {
               )}
             >
               {t("nav.resources")}
-            </Link>
+            </NavLink>
             <ChevronRight aria-hidden className="size-3 shrink-0 text-muted-foreground/50" />
-            <Link
+            <NavLink
               href="/categories"
               className={cn(navLink(pathname.startsWith("/categor")), "pl-1")}
             >
               {t("nav.categories")}
-            </Link>
+            </NavLink>
           </div>
           {showSubmit && (
             <span aria-hidden className="text-border">

@@ -15,6 +15,17 @@ const PROTECTED_APIS = ["/api/submit", "/api/user"];
  * @opennextjs/cloudflare doesn't yet support the proxy convention (issue #962).
  */
 export function middleware(request: NextRequest) {
+  // www → apex, so crawlers don't index (and we don't serve) every page twice.
+  // A Cloudflare Redirect Rule does this before the Worker runs; this is the
+  // fallback if that rule is missing.
+  const host = request.headers.get("host") ?? "";
+  if (host.startsWith("www.")) {
+    const url = request.nextUrl.clone();
+    url.host = host.slice(4);
+    url.port = "";
+    return NextResponse.redirect(url, 301);
+  }
+
   const hasSession = !!getSessionCookie(request);
   const { pathname } = request.nextUrl;
 

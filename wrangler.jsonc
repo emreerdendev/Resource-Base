@@ -9,7 +9,12 @@
   // of the site (200 OK), which Google could index as duplicate content and
   // split ranking away from resource-base.com.
   "workers_dev": false,
-  "observability": { "enabled": true },
+  // Logs are sampled: every request was logged before, and log events past the
+  // plan's monthly allowance are billed. 10% is plenty to spot errors/trends.
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 },
+  // Hard ceiling per request so a pathological render can't burn CPU time
+  // (billed past the plan's allowance). Real pages use a small fraction.
+  "limits": { "cpu_ms": 5000 },
   // Custom domains — Cloudflare auto-creates the DNS records + SSL.
   "routes": [
     { "pattern": "resource-base.com", "custom_domain": true },

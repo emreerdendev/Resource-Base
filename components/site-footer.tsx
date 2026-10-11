@@ -3,7 +3,7 @@
 import { GithubIcon } from "@/components/brand-icons";
 import { Separator } from "@/components/ui/separator";
 import { Boxes, CircleDot, Globe, Heart, Mail } from "lucide-react";
-import Link from "next/link";
+import { NavLink } from "@/components/nav-link";
 import { useTranslation } from "react-i18next";
 
 const REPO_URL = "https://github.com/emreerdendev/Resource-Base";
@@ -93,13 +93,13 @@ export function SiteFooter() {
 
         {/* Row 3 — legal */}
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs">
-          <Link href="/privacy" className={linkClass}>
+          <NavLink href="/privacy" className={linkClass}>
             {t("footer.privacy")}
-          </Link>
+          </NavLink>
           <Dot />
-          <Link href="/terms" className={linkClass}>
+          <NavLink href="/terms" className={linkClass}>
             {t("footer.terms")}
-          </Link>
+          </NavLink>
         </div>
       </div>
     </footer>
