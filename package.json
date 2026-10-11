@@ -15,6 +15,8 @@
     "companies:build": "tsx scripts/companies/build.ts",
     "companies:import": "tsx scripts/companies/import.ts",
     "companies:import:dry": "tsx scripts/companies/import.ts --dry-run",
+    "companies:sync": "tsx scripts/companies/sync.ts",
+    "companies:sync:dry": "tsx scripts/companies/sync.ts --dry-run",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf:typegen": "wrangler types --env-interface CloudflareEnv",
