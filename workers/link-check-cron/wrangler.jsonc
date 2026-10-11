@@ -8,6 +8,15 @@
   "triggers": {
     "crons": ["0 6 * * *"]
   },
+  // The app database, for the daily cleanup of expired auth rows and old
+  // notifications (same database as the main worker's DB binding).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "resource-base",
+      "database_id": "30e17abb-8039-46ae-b507-cba92062f4b8"
+    }
+  ],
   // Non-secret Sanity config (the write token is set via `wrangler secret put`).
   "vars": {
     "SANITY_PROJECT_ID": "77o1dw6w",

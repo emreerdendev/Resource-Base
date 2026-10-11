@@ -1,11 +1,13 @@
 import { createClient } from "@sanity/client";
 
-// Standalone Cloudflare Worker: daily link-health check over Sanity resources.
+// Standalone Cloudflare Worker: daily link-health check over Sanity resources,
+// plus a cleanup of rows nothing reads anymore in the app database.
 // Runs on a Cron Trigger (scheduled handler) — kept separate from the main
 // OpenNext app so that app stays a clean fetch-only worker. Writes results
 // (linkStatus / lastCheckedAt / httpStatus) back to Sanity. No user auth.
 
 interface Env {
+  DB: D1Database;
   SANITY_PROJECT_ID: string;
   SANITY_DATASET: string;
   SANITY_API_VERSION: string;
@@ -99,10 +101,37 @@ async function runLinkCheck(env: Env): Promise<void> {
   console.log(`link-check: processed ${resources.length} resources`);
 }
 
+const DAY_SEC = 24 * 60 * 60;
+/** Read notifications are kept this long, then deleted. */
+const NOTIFICATION_RETENTION_DAYS = 180;
+
+/**
+ * Keeps D1 storage flat: expired sessions and verification tokens are never
+ * deleted by Better Auth on its own, rate-limit counters older than their
+ * longest window (1h) are dead, and read notifications age out.
+ * Timestamps: Better Auth / Drizzle "timestamp" columns are unix seconds,
+ * rateLimit.last_request is milliseconds.
+ */
+async function cleanupDatabase(env: Env): Promise<void> {
+  const now = Math.floor(Date.now() / 1000);
+  const results = await env.DB.batch([
+    env.DB.prepare("DELETE FROM session WHERE expires_at < ?").bind(now),
+    env.DB.prepare("DELETE FROM verification WHERE expires_at < ?").bind(now),
+    env.DB.prepare("DELETE FROM rateLimit WHERE last_request < ?").bind((now - 2 * 3600) * 1000),
+    env.DB.prepare(
+      "DELETE FROM notifications WHERE read_at IS NOT NULL AND created_at < ?",
+    ).bind(now - NOTIFICATION_RETENTION_DAYS * DAY_SEC),
+  ]);
+  console.log(`cleanup: deleted ${results.map((r) => r.meta.changes).join("/")} rows`);
+}
+
 export default {
   async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(
       runLinkCheck(env).catch((err) => console.error("link-check failed", err)),
+    );
+    ctx.waitUntil(
+      cleanupDatabase(env).catch((err) => console.error("cleanup failed", err)),
     );
   },
 } satisfies ExportedHandler<Env>;
