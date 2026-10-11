@@ -17,42 +17,52 @@ function openSearch() {
 }
 
 /**
- * True when the header row can't fit the "+ Add" and search labels, so they
- * collapse to icons. Measured (not breakpoint-based): the available width is
- * capped by the max-w container and the needed width changes with the language
- * and sign-in state. A ResizeObserver re-checks whenever the row or any of its
- * items (e.g. translated labels) change size.
+ * How much of the header's collapsible text fits, measured (not breakpoint-
+ * based) because the available width is capped by the max-w container and the
+ * needed width changes with the language and sign-in state:
+ *   0 → everything fits, 1 → the search label collapses to its icon,
+ *   2 → the "+ Add" label collapses too.
+ * A ResizeObserver re-checks whenever the row or any of its items change size.
  */
-function useCompactRow(
+function useCollapseLevel(
   rowRef: React.RefObject<HTMLDivElement | null>,
   labelsRef: React.RefObject<HTMLSpanElement | null>,
 ) {
-  const [compact, setCompact] = useState(false);
+  const [level, setLevel] = useState<0 | 1 | 2>(0);
   useEffect(() => {
     const row = rowRef.current;
     const labels = labelsRef.current;
     if (!row || !labels) return;
+    const width = (key: string) =>
+      [...labels.querySelectorAll<HTMLElement>(`[data-label="${key}"]`)].reduce(
+        (sum, el) => sum + el.getBoundingClientRect().width,
+        0,
+      );
     const check = () => {
       const cs = getComputedStyle(row);
       const available =
-        row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) + 1;
       const items = [...row.children].filter(
         (el) => el !== labels && getComputedStyle(el).display !== "none",
       );
       const used = items.reduce((sum, el) => sum + el.getBoundingClientRect().width, 0);
-      // Width the labels add back when expanded (each measured with its gap).
-      const extra = [...labels.children].reduce(
-        (sum, el) => sum + el.getBoundingClientRect().width,
-        0,
-      );
-      setCompact((was) => (was ? used + extra : used) > available + 1);
+      const submit = width("submit");
+      const search = width("search");
+      setLevel((current) => {
+        // Width of the row with no collapsible text, then add labels back.
+        const shown = current === 0 ? submit + search : current === 1 ? submit : 0;
+        const base = used - shown;
+        if (base + submit + search <= available) return 0;
+        if (base + submit <= available) return 1;
+        return 2;
+      });
     };
     const ro = new ResizeObserver(check);
     ro.observe(row);
     for (const el of row.children) ro.observe(el);
     return () => ro.disconnect();
   }, [rowRef, labelsRef]);
-  return compact;
+  return level;
 }
 
 export function SiteHeader() {
@@ -79,7 +89,7 @@ export function SiteHeader() {
 
   const rowRef = useRef<HTMLDivElement>(null);
   const labelsRef = useRef<HTMLSpanElement>(null);
-  const compact = useCompactRow(rowRef, labelsRef);
+  const level = useCollapseLevel(rowRef, labelsRef);
 
   // Guests: open the sign-in modal in place (don't yank them to the home page),
   // then forward to /submit after they authenticate. Signed-in: go straight.
@@ -101,11 +111,17 @@ export function SiteHeader() {
           aria-hidden
           className="pointer-events-none invisible absolute top-0 left-0 flex text-sm whitespace-nowrap"
         >
-          {showSubmit && <span className="pl-1 font-medium">{submitLabel}</span>}
+          {showSubmit && (
+            <span data-label="submit" className="pl-1 font-medium">
+              {submitLabel}
+            </span>
+          )}
           {showSearch && (
             <>
-              <span className="pl-2">{t("header.searchPlaceholder")}</span>
-              <span className="pl-2">
+              <span data-label="search" className="pl-2">
+                {t("header.searchPlaceholder")}
+              </span>
+              <span data-label="search" className="pl-2">
                 <span className="border px-1.5 font-mono text-[10px]">⌘K</span>
               </span>
             </>
@@ -153,6 +169,11 @@ export function SiteHeader() {
             </Link>
           </div>
           {showSubmit && (
+            <span aria-hidden className="text-border">
+              •
+            </span>
+          )}
+          {showSubmit && (
             <button
               type="button"
               onClick={goSubmit}
@@ -161,7 +182,7 @@ export function SiteHeader() {
               className="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
             >
               <Plus className="size-3.5" />
-              {!compact && <span>{submitLabel}</span>}
+              {level < 2 && <span>{submitLabel}</span>}
             </button>
           )}
         </nav>
@@ -175,7 +196,7 @@ export function SiteHeader() {
               className="group flex h-9 w-9 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 text-sm sm:w-auto sm:px-3 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted hover:text-foreground"
             >
               <Search className="size-4 transition-transform group-hover:scale-110" />
-              {!compact && (
+              {level === 0 && (
                 <>
                   <span className="hidden whitespace-nowrap sm:inline">
                     {t("header.searchPlaceholder")}
