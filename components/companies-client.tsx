@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Fuse from "fuse.js";
 import { Search, Shuffle, SlidersHorizontal, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -20,6 +19,7 @@ import {
   type Sector,
   type WorkModel,
 } from "@/lib/company-taxonomy";
+import { createCompanySearch } from "@/lib/company-search";
 import { shuffle } from "@/lib/company-utils";
 import type { Company } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -132,28 +132,13 @@ export function CompaniesClient({
     window.history.replaceState(null, "", qs ? `/companies?${qs}` : "/companies");
   }, [q, selected, mineParam]);
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(companies, {
-        keys: [
-          { name: "name", weight: 0.65 },
-          { name: "website", weight: 0.1 },
-          { name: "emails", weight: 0.1 },
-          { name: "clients", weight: 0.1 },
-          { name: "otherLocations", weight: 0.05 },
-        ],
-        threshold: 0.34,
-        ignoreLocation: true,
-        minMatchCharLength: 2,
-      }),
-    [companies],
-  );
+  const search = useMemo(() => createCompanySearch(companies), [companies]);
 
   // Search + "my tracker" first; facets are applied on top of this base.
   const searched = useMemo(() => {
-    const list = q.trim() ? fuse.search(q).map((r) => r.item) : companies;
+    const list = q.trim() ? search(q) : companies;
     return mine ? list.filter((c) => Boolean(getTracked(c._id)) === (mine === "tracked")) : list;
-  }, [q, fuse, companies, mine, getTracked]);
+  }, [q, search, companies, mine, getTracked]);
 
   const filtered = useMemo(
     () => searched.filter((c) => FACETS.every((k) => matchesFacet(c, k, selected[k]))),

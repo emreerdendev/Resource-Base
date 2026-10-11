@@ -14,6 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { createCompanySearch } from "@/lib/company-search";
 import type { Company, Resource } from "@/lib/types";
 
 /** Fired by the header search button to open the palette from anywhere. */
@@ -49,16 +50,7 @@ export function CommandPalette({
     [resources],
   );
 
-  const companyFuse = useMemo(
-    () =>
-      new Fuse(companies, {
-        keys: ["name"],
-        threshold: 0.34,
-        ignoreLocation: true,
-        minMatchCharLength: 2,
-      }),
-    [companies],
-  );
+  const searchCompanies = useMemo(() => createCompanySearch(companies), [companies]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -87,13 +79,8 @@ export function CommandPalette({
 
   const companyResults = useMemo(
     () =>
-      query.trim()
-        ? companyFuse
-            .search(query)
-            .slice(0, 6)
-            .map((r) => r.item)
-        : [],
-    [query, companyFuse],
+      query.trim() ? searchCompanies(query).slice(0, 6) : [],
+    [query, searchCompanies],
   );
 
   const go = (href: string, external = false) => {
