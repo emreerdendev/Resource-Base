@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { notifications, submissions } from "@/lib/db/schema";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { slugify } from "@/lib/slug";
+import { isPlainId } from "@/sanity/lib/slugs";
 
 export const runtime = "nodejs";
 
@@ -33,13 +34,15 @@ async function resolveRefs(
 ): Promise<{ refs: { _type: "reference"; _ref: string; _key: string }[]; unresolved: string[] }> {
   const refs: { _type: "reference"; _ref: string; _key: string }[] = [];
   const unresolved: string[] = [];
-  for (const raw of values) {
-    const v = raw.trim();
-    if (!v) continue;
-    const id = await writeClient.fetch<string | null>(
-      `*[_type == $t && (slug.current == $v || lower(title) == lower($v))][0]._id`,
-      { t: docType, v },
-    );
+  const wanted = values.map((v) => v.trim()).filter(Boolean);
+  if (!wanted.length) return { refs, unresolved };
+  // One query for all values instead of one per value.
+  const docs = await writeClient.fetch<{ _id: string; slug?: string; title?: string }[]>(
+    `*[_type == $t && !(_id in path("drafts.**")) && (slug.current in $vs || lower(title) in $lower)]{ _id, "slug": slug.current, title }`,
+    { t: docType, vs: wanted, lower: wanted.map((v) => v.toLowerCase()) },
+  );
+  for (const v of wanted) {
+    const id = docs.find((d) => d.slug === v || d.title?.toLowerCase() === v.toLowerCase())?._id;
     if (id) {
       // Stable key derived from the ref id keeps the array idempotent.
       refs.push({ _type: "reference", _ref: id, _key: id.slice(0, 12) });
@@ -69,7 +72,7 @@ type CompanySubmissionDoc = {
  */
 async function createCompanyFromSubmission(submissionId: string): Promise<string | null> {
   const doc = await writeClient.fetch<CompanySubmissionDoc | null>(
-    `*[_id == $id][0]{ name, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, companyCities, companyOtherLocations, companyWorkModels }`,
+    `*[_type == "submission" && _id == $id][0]{ name, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, companyCities, companyOtherLocations, companyWorkModels }`,
     { id: submissionId },
   );
   const name = doc?.name?.trim();
@@ -143,6 +146,27 @@ export async function POST(req: NextRequest) {
   }
 
   const db = getDb();
+  const sourceKey = `submission_${body.status}:${body._id}`;
+
+  // A decision is applied once. Retries and replays of an already-handled
+  // webhook stop here, so they can't re-apply a fix over later edits.
+  const [handled] = await db
+    .select({ id: notifications.id })
+    .from(notifications)
+    .where(eq(notifications.sourceKey, sourceKey))
+    .limit(1);
+  if (handled) return NextResponse.json({ ok: true, duplicate: true });
+
+  // Fixes may only ever patch a published resource document.
+  const targetResourceId =
+    body.targetResourceId && isPlainId(body.targetResourceId) &&
+    (await writeClient.fetch<string | null>(
+      `*[_type == "resource" && _id == $id][0]._id`,
+      { id: body.targetResourceId },
+    ))
+      ? body.targetResourceId
+      : null;
+
   const approved = body.status === "approved";
   const isUrlFix = body.kind === "fix";
   const isTaxonomyFix = body.kind === "taxonomy";
@@ -158,14 +182,17 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       console.error("company create failed", err);
     }
+    // Not created → fail so Sanity retries, instead of telling the user their
+    // company is live when it isn't.
+    if (!companySlug) return new NextResponse("Company not created", { status: 500 });
   }
 
   // On approval of a URL fix, apply the corrected url to the live resource and
   // reset its link health so the daily checker re-verifies it.
-  if (approved && isUrlFix && body.targetResourceId && body.url) {
+  if (approved && isUrlFix && targetResourceId && body.url) {
     try {
       await writeClient
-        .patch(body.targetResourceId)
+        .patch(targetResourceId)
         .set({ url: body.url, linkStatus: "unchecked" })
         .commit();
     } catch (err) {
@@ -176,7 +203,7 @@ export async function POST(req: NextRequest) {
   // On approval of a taxonomy fix, resolve the proposed categories/tags to
   // references and set them on the resource. Free-text values that don't match
   // an existing doc are recorded back on the submission for the editor.
-  if (approved && isTaxonomyFix && body.targetResourceId) {
+  if (approved && isTaxonomyFix && targetResourceId) {
     try {
       const [cats, tags] = await Promise.all([
         resolveRefs("category", body.proposedCategories ?? []),
@@ -189,7 +216,7 @@ export async function POST(req: NextRequest) {
       const proposedDescription = body.proposedDescription?.trim();
       if (proposedDescription) patch.description = proposedDescription;
       if (Object.keys(patch).length) {
-        await writeClient.patch(body.targetResourceId).set(patch).commit();
+        await writeClient.patch(targetResourceId).set(patch).commit();
       }
       const unresolved = [...cats.unresolved, ...tags.unresolved];
       if (unresolved.length) {
@@ -237,7 +264,7 @@ export async function POST(req: NextRequest) {
             : approved
               ? null
               : "/profile/edit",
-      sourceKey: `submission_${body.status}:${body._id}`,
+      sourceKey,
     });
   } catch (error) {
     // Unique-violation on source_key means we already notified — treat as ok.
