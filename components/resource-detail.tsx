@@ -30,6 +30,7 @@ import {
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { trackClick } from "@/lib/track-click";
 
 const PILL =
   "inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-xs text-accent-foreground transition-colors hover:bg-accent/70";
@@ -95,13 +96,7 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
   function registerClick() {
     if (counted.current) return;
     counted.current = true;
-    bump(resource._id);
-    fetch("/api/click", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resourceId: resource._id }),
-      keepalive: true,
-    }).catch(() => { });
+    if (trackClick(resource._id)) bump(resource._id);
   }
 
   async function share() {

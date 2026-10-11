@@ -41,6 +41,17 @@
       "id": "7972c906f2c84a05adf9975ba9a95643"
     }
   ],
+  // Workers Rate Limiting — per-location counters kept in memory by Cloudflare,
+  // free and with no KV/D1 writes. Used for every short-window abuse limit
+  // (lib/rate-limit.ts `overLimit`); KV is kept only for hourly/daily caps.
+  "ratelimits": [
+    // Anonymous endpoints, keyed by IP (click counting).
+    { "name": "RL_PUBLIC", "namespace_id": "1001", "simple": { "limit": 30, "period": 60 } },
+    // Signed-in writes, keyed by user (favorites, tracker, notifications, profile).
+    { "name": "RL_USER", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
+    // Expensive writes that create Sanity documents (submissions), keyed by user.
+    { "name": "RL_SUBMIT", "namespace_id": "1003", "simple": { "limit": 5, "period": 60 } }
+  ],
   // Cloudflare Email Sending — used only by Better Auth password reset.
   "send_email": [{ "name": "EMAIL" }],
   // Self-reference service binding. OpenNext's ISR revalidation calls back into

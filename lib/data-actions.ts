@@ -9,7 +9,8 @@ import {
   submissions,
 } from "@/lib/db/schema";
 import { getSessionUser, requireUser } from "@/lib/authz";
-import { isRateLimited } from "@/lib/rate-limit";
+import { overLimit } from "@/lib/rate-limit";
+import { isResourceId } from "@/sanity/lib/slugs";
 
 /* ----------------------------- favorites (own) ---------------------------- */
 
@@ -25,33 +26,29 @@ export async function listFavorites(): Promise<string[]> {
 
 export async function toggleFavorite(
   resourceId: string,
-): Promise<{ favorited: boolean; error?: "rate_limited" }> {
+): Promise<{ favorited: boolean; error?: "rate_limited" | "invalid" }> {
   const me = await requireUser();
-  // Per-user ceiling well above real use (nobody toggles 30×/min) — only trips
-  // a script spamming D1 writes. Returns the current state unchanged on trip.
-  if (await isRateLimited(`fav:${me.id}`, 30, 60)) {
-    const [row] = await getDb()
-      .select({ resourceId: favorites.resourceId })
-      .from(favorites)
-      .where(
-        and(eq(favorites.userId, me.id), eq(favorites.resourceId, resourceId)),
-      )
-      .limit(1);
-    return { favorited: Boolean(row), error: "rate_limited" };
-  }
+  if (typeof resourceId !== "string" || !/^[A-Za-z0-9._-]{1,100}$/.test(resourceId))
+    return { favorited: false, error: "invalid" };
   const db = getDb();
-  const existing = await db
+  const where = and(eq(favorites.userId, me.id), eq(favorites.resourceId, resourceId));
+  const [existing] = await db
     .select({ resourceId: favorites.resourceId })
     .from(favorites)
-    .where(and(eq(favorites.userId, me.id), eq(favorites.resourceId, resourceId)))
+    .where(where)
     .limit(1);
+  // Per-user ceiling well above real use — only trips a script spamming D1
+  // writes. Returns the current state unchanged on trip.
+  if (await overLimit("RL_USER", `fav:${me.id}`))
+    return { favorited: Boolean(existing), error: "rate_limited" };
 
-  if (existing.length > 0) {
-    await db
-      .delete(favorites)
-      .where(and(eq(favorites.userId, me.id), eq(favorites.resourceId, resourceId)));
+  if (existing) {
+    await db.delete(favorites).where(where);
     return { favorited: false };
   }
+  // Only published resources can be added, so the table (and the public
+  // counts every visitor loads) can't fill with made-up ids.
+  if (!(await isResourceId(resourceId))) return { favorited: false, error: "invalid" };
   await db.insert(favorites).values({ userId: me.id, resourceId });
   return { favorited: true };
 }

@@ -11,6 +11,7 @@ import { useFavoriteCounts } from "@/components/favorite-counts-provider";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ResourceModal } from "@/components/resource-modal";
 import type { Resource } from "@/lib/types";
+import { trackClick } from "@/lib/track-click";
 
 /**
  * Compact card: site icon + name + favorite toggle (with public favorite
@@ -32,20 +33,14 @@ export function ResourceCard({ resource }: { resource: Resource }) {
   const clicks = get(resource._id);
   const favorites = getFavorites(resource._id);
 
-  // Fire-and-forget click increment via our API (server-side IP debounce
-  // guards against repeat/refresh spam). The link opens in a new tab, so
+  // Fire-and-forget click increment, deduped per day in the browser and per
+  // IP on the server. The link opens in a new tab, so
   // there's no navigation race — we don't preventDefault. Opening the modal
   // does NOT call this, so browsing details never counts as a click.
   function registerClick() {
     if (counted.current) return;
     counted.current = true;
-    bump(resource._id);
-    fetch("/api/click", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resourceId: resource._id }),
-      keepalive: true,
-    }).catch(() => {});
+    if (trackClick(resource._id)) bump(resource._id);
   }
 
   return (

@@ -75,3 +75,41 @@ export async function alreadySeen(
   await kv.put(k, "1", { expirationTtl: windowSec });
   return false;
 }
+
+type Limiter = "RL_PUBLIC" | "RL_USER" | "RL_SUBMIT";
+
+/**
+ * Short-window limit on a Workers Rate Limiting binding (see wrangler.jsonc for
+ * each binding's limit/period). Unlike `isRateLimited` it costs nothing — no KV
+ * read or write per call — so it's the one to use on hot paths. Counters are
+ * per Cloudflare location and approximate, which is fine for abuse limiting.
+ * Returns true when the caller should reject. Allows when the binding is
+ * missing (local dev) or errors.
+ */
+export async function overLimit(limiter: Limiter, key: string): Promise<boolean> {
+  try {
+    const rl = getCloudflareContext().env[limiter] as RateLimit | undefined;
+    if (!rl) return false;
+    return !(await rl.limit({ key })).success;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The client IP for per-IP limits. IPv6 is cut to its /64 — one subscriber
+ * typically owns a whole /64, so per-address limits would be trivial to rotate.
+ */
+export function clientIp(headers: Headers): string {
+  const ip =
+    headers.get("cf-connecting-ip") ??
+    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    "unknown";
+  if (!ip.includes(":")) return ip;
+  // Expand "::" so equal /64 prefixes compare equal however they're written.
+  const [head, tail = ""] = ip.split("::");
+  const h = head ? head.split(":") : [];
+  const t = ip.includes("::") && tail ? tail.split(":") : [];
+  const groups = [...h, ...Array(Math.max(0, 8 - h.length - t.length)).fill("0"), ...t];
+  return groups.slice(0, 4).map((g) => g.toLowerCase().replace(/^0+(?=.)/, "")).join(":");
+}

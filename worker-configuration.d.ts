@@ -6,6 +6,9 @@ interface __BaseEnv_CloudflareEnv {
 	DB: D1Database;
 	NEXT_TAG_CACHE_D1: D1Database;
 	EMAIL: SendEmail;
+	RL_PUBLIC: RateLimit;
+	RL_USER: RateLimit;
+	RL_SUBMIT: RateLimit;
 	ASSETS: Fetcher;
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;

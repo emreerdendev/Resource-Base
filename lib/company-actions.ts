@@ -4,7 +4,8 @@ import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { companyApplications } from "@/lib/db/schema";
 import { getSessionUser, requireUser } from "@/lib/authz";
-import { isRateLimited } from "@/lib/rate-limit";
+import { isRateLimited, overLimit } from "@/lib/rate-limit";
+import { listCompanyIds } from "@/sanity/lib/slugs";
 import {
   isApplicationStatus,
   type ApplicationStatus,
@@ -19,6 +20,11 @@ export type TrackedCompany = {
 
 const NOTE_MAX = 1000;
 const COMPANY_ID_RE = /^company-[a-z0-9-]{1,96}$|^[A-Za-z0-9-]{8,64}$/;
+
+/** Writes only target published companies, so rows per user stay bounded. */
+async function isCompanyId(id: unknown): Promise<boolean> {
+  return typeof id === "string" && COMPANY_ID_RE.test(id) && (await listCompanyIds()).has(id);
+}
 
 /** Every company the signed-in user tracks (own rows only). */
 export async function listTrackedCompanies(): Promise<TrackedCompany[]> {
@@ -48,11 +54,15 @@ export async function setCompanyStatus(
   status: ApplicationStatus | null,
 ): Promise<Result> {
   const me = await requireUser();
-  if (!COMPANY_ID_RE.test(companyId)) return { ok: false, error: "invalid" };
-  if (status !== null && !isApplicationStatus(status))
-    return { ok: false, error: "invalid" };
+  // Removing skips the published check so entries of since-hidden companies
+  // can still be cleared.
+  const valid =
+    status === null
+      ? typeof companyId === "string" && COMPANY_ID_RE.test(companyId)
+      : isApplicationStatus(status) && (await isCompanyId(companyId));
+  if (!valid) return { ok: false, error: "invalid" };
   // Far above real use — only trips a script hammering D1 writes.
-  if (await isRateLimited(`track:${me.id}`, 60, 60))
+  if (await overLimit("RL_USER", `track:${me.id}`))
     return { ok: false, error: "rate_limited" };
 
   const db = getDb();
@@ -81,8 +91,9 @@ export async function setCompanyNote(
   note: string,
 ): Promise<Result> {
   const me = await requireUser();
-  if (!COMPANY_ID_RE.test(companyId)) return { ok: false, error: "invalid" };
-  if (await isRateLimited(`track:${me.id}`, 60, 60))
+  if (typeof note !== "string" || !(await isCompanyId(companyId)))
+    return { ok: false, error: "invalid" };
+  if (await overLimit("RL_USER", `track:${me.id}`))
     return { ok: false, error: "rate_limited" };
 
   const clean = note.trim().slice(0, NOTE_MAX) || null;
@@ -110,9 +121,10 @@ export async function importTrackedCompanies(
   const me = await requireUser();
   if (!Array.isArray(entries) || entries.length === 0 || entries.length > IMPORT_MAX)
     return { ok: false, error: "invalid" };
+  const published = await listCompanyIds();
   const clean = new Map<string, ApplicationStatus>();
   for (const e of entries) {
-    if (!e || !COMPANY_ID_RE.test(e.companyId) || !isApplicationStatus(e.status))
+    if (!e || !published.has(e.companyId) || !isApplicationStatus(e.status))
       return { ok: false, error: "invalid" };
     clean.set(e.companyId, e.status);
   }
