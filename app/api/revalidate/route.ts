@@ -6,11 +6,14 @@ import { parseBody } from "next-sanity/webhook";
  * Sanity webhook → on-demand revalidation. A content edit in the Studio
  * (including a broken-link fix) refreshes the live site within seconds,
  * no redeploy. Configure the webhook in sanity.io/manage to POST here with
- * the secret below and projection: { "_type": _type }.
+ * the secret below and projection:
+ *   { _type, "skip": delta::changedOnly((lastCheckedAt, httpStatus)) }
+ * `skip` marks the daily link checker's bookkeeping patches, which change
+ * nothing on the site — revalidating for those would re-render every page.
  */
 export async function POST(req: NextRequest) {
   try {
-    const { isValidSignature, body } = await parseBody<{ _type: string }>(
+    const { isValidSignature, body } = await parseBody<{ _type: string; skip?: boolean }>(
       req,
       process.env.SANITY_REVALIDATE_SECRET,
     );
@@ -22,11 +25,14 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Bad request", { status: 400 });
     }
 
-    // Revalidate the document's own tag plus broad tags so list pages refresh.
-    // Next 16 requires a cache profile; "max" expires the cached fetch entries
-    // tagged with these tags on the next request.
+    if (body.skip === true) {
+      return NextResponse.json({ revalidated: false, type: body._type });
+    }
+
+    // Every fetch is tagged with its document type(s), so the type's tag
+    // refreshes both detail and list pages. Next 16 requires a cache profile;
+    // "max" expires the tagged fetch entries on the next request.
     revalidateTag(body._type, "max");
-    revalidateTag("sanity", "max");
 
     return NextResponse.json({ revalidated: true, type: body._type });
   } catch (err) {
