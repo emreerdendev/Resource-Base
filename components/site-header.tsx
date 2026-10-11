@@ -248,7 +248,21 @@ function MobileMenu({
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const close = () => setOpen(false);
+
+  // Escape closes the menu and returns focus to its toggle.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      toggleRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
   const item = (active: boolean) =>
     cn(
       "flex items-center rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted",
@@ -258,6 +272,7 @@ function MobileMenu({
   return (
     <div className="md:hidden">
       <button
+        ref={toggleRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
