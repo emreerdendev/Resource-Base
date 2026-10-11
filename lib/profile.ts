@@ -27,6 +27,7 @@ export type EditableProfile = Pick<
   | "twitter_url"
   | "instagram_url"
   | "dribbble_url"
+  | "linkedin_url"
   | "show_email"
 >;
 
@@ -46,6 +47,7 @@ function toProfile(row: DbProfile, email: string | null): Profile {
     twitter_url: row.twitterUrl,
     instagram_url: row.instagramUrl,
     dribbble_url: row.dribbbleUrl,
+    linkedin_url: row.linkedinUrl,
     show_email: row.showEmail,
   } as Profile;
 }
@@ -59,6 +61,7 @@ const KEY_MAP: Record<keyof EditableProfile, string> = {
   twitter_url: "twitterUrl",
   instagram_url: "instagramUrl",
   dribbble_url: "dribbbleUrl",
+  linkedin_url: "linkedinUrl",
   show_email: "showEmail",
 };
 

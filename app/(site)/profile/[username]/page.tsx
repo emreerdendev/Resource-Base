@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { and, count, eq } from "drizzle-orm";
+import { getDb } from "@/lib/db";
+import { submissions } from "@/lib/db/schema";
 import { fetchPublicProfile } from "@/lib/profile-actions";
 import { sanityFetch } from "@/sanity/lib/fetch";
-import {
-  allCategoriesQuery,
-  allCompaniesQuery,
-  resourcesBySubmitterQuery,
-} from "@/sanity/lib/queries";
+import { resourcesBySubmitterQuery } from "@/sanity/lib/queries";
 import { PublicProfileView } from "@/components/public-profile";
-import type { Category, Company, PublicProfile, Resource } from "@/lib/types";
+import type { PublicProfile, Resource } from "@/lib/types";
 
-// Profiles are reachable only via resource-card links — keep them out of search.
+// Profiles are reachable only via contributor links — keep them out of search.
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
@@ -25,25 +24,27 @@ export default async function PublicProfilePage({
   const profile = (await fetchPublicProfile(username)) as PublicProfile | null;
   if (!profile) notFound();
 
-  // All queries are tag-cached + CDN-served, so this stays cheap. Categories
-  // feed the owner-only "My submissions" resubmit modal; companies resolve the
-  // owner-only application tracker.
-  const [resources, categories, companies] = await Promise.all([
+  // Contributions: published resources (Sanity, tag-cached) plus approved
+  // company suggestions (counted from the D1 submissions mirror).
+  const [resources, [{ companies }]] = await Promise.all([
     sanityFetch<Resource[]>({
       query: resourcesBySubmitterQuery,
       params: { userId: profile.id },
       tags: ["resource"],
     }),
-    sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["category"] }),
-    sanityFetch<Company[]>({ query: allCompaniesQuery, tags: ["company"] }),
+    getDb()
+      .select({ companies: count() })
+      .from(submissions)
+      .where(
+        and(
+          eq(submissions.userId, profile.id),
+          eq(submissions.kind, "company"),
+          eq(submissions.status, "approved"),
+        ),
+      ),
   ]);
 
   return (
-    <PublicProfileView
-      profile={profile}
-      resources={resources}
-      categories={categories}
-      companies={companies}
-    />
+    <PublicProfileView profile={profile} resources={resources} companiesAdded={companies} />
   );
 }

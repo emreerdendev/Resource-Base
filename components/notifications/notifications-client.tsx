@@ -2,12 +2,72 @@
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
-import { useNotifications } from "@/lib/notifications";
+import { useNotifications, type Notification } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 import { Bell } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+
+const KINDS = ["new", "fix", "taxonomy", "company"];
+
+/**
+ * Title + body in the reader's language. Notifications carry a structured
+ * `data` payload; older rows without it fall back to their stored English.
+ */
+function useMessage(n: Notification): { title: string; body: string | null } {
+  const { t } = useTranslation();
+  const d = n.data;
+  if (!d || !KINDS.includes(d.kind) || !d.name) return { title: n.title ?? "", body: n.body };
+  if (n.type === "submission_approved")
+    return {
+      title: t(`notifications.approvedTitle.${d.kind}`),
+      body: t(`notifications.approvedBody.${d.kind}`, { name: d.name }),
+    };
+  const hint = t(`notifications.resubmitHint.${d.kind === "company" ? "company" : "other"}`);
+  return {
+    title: t("notifications.rejectedTitle"),
+    body: d.reason
+      ? `${t("notifications.rejectedReason", { name: d.name, reason: d.reason })} ${hint}`
+      : `${t("notifications.rejectedBody", { name: d.name })} ${hint}`,
+  };
+}
+
+function NotificationItem({ n, highlight }: { n: Notification; highlight: boolean }) {
+  const { i18n } = useTranslation();
+  const { title, body } = useMessage(n);
+  const date = new Date(n.created_at).toLocaleDateString(i18n.language, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  const inner = (
+    <div
+      className={cn(
+        "rounded-xl border border-border bg-card p-4 transition-colors",
+        n.url && "hover:border-primary/40",
+        highlight && "border-primary/30 bg-primary/5",
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <p className="flex-1 font-medium">{title}</p>
+        <time dateTime={n.created_at} className="shrink-0 text-xs text-muted-foreground">
+          {date}
+        </time>
+      </div>
+      {body && <p className="mt-0.5 text-sm text-muted-foreground">{body}</p>}
+    </div>
+  );
+  if (!n.url) return inner;
+  // Site pages open in place; outside links (a fixed resource URL) in a new tab.
+  return n.url.startsWith("/") ? (
+    <Link href={n.url}>{inner}</Link>
+  ) : (
+    <a href={n.url} target="_blank" rel="noopener noreferrer">
+      {inner}
+    </a>
+  );
+}
 
 export function NotificationsClient() {
   const { t } = useTranslation();
@@ -45,37 +105,16 @@ export function NotificationsClient() {
         <div className="rounded-xl border border-dashed border-border py-20 text-center">
           <p className="text-muted-foreground">{t("notifications.empty")}</p>
           <Button asChild className="mt-4">
-            <Link href="/resources">{t("favorites.browse")}</Link>
+            <Link href="/companies">{t("notifications.browse")}</Link>
           </Button>
         </div>
       ) : (
         <ul className="space-y-2">
-          {items.map((n) => {
-            const inner = (
-              <div
-                className={cn(
-                  "rounded-xl border border-border bg-card p-4 transition-colors",
-                  (!n.read_at || isNew(n.id)) && "border-primary/30 bg-primary/5",
-                )}
-              >
-                <p className="font-medium">{n.title}</p>
-                {n.body && (
-                  <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
-                )}
-              </div>
-            );
-            return (
-              <li key={n.id}>
-                {n.url ? (
-                  <a href={n.url} target="_blank" rel="noopener noreferrer">
-                    {inner}
-                  </a>
-                ) : (
-                  inner
-                )}
-              </li>
-            );
-          })}
+          {items.map((n) => (
+            <li key={n.id}>
+              <NotificationItem n={n} highlight={!n.read_at || isNew(n.id)} />
+            </li>
+          ))}
         </ul>
       )}
     </div>

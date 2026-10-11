@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
   const isTaxonomyFix = body.kind === "taxonomy";
   const isFix = isUrlFix || isTaxonomyFix;
   const isCompany = body.kind === "company";
-  const label = body.name ? `“${body.name}”` : "Your submitted resource";
+  const label = body.name ? `“${body.name}”` : "Your submission";
 
   // On approval of a company suggestion, publish the company.
   let companySlug: string | null = null;
@@ -234,6 +234,12 @@ export async function POST(req: NextRequest) {
 
   // Idempotent: source_key has a unique index, so webhook retries are no-ops.
   // The status is part of the key so an approve-after-reject still notifies.
+  // `data` lets the UI render the message in the reader's language; title and
+  // body keep an English fallback.
+  const kind = isCompany ? "company" : isUrlFix ? "fix" : isTaxonomyFix ? "taxonomy" : "new";
+  const resubmitHint = isCompany
+    ? "You can suggest it again with more details."
+    : "You can edit and resubmit it.";
   try {
     await db.insert(notifications).values({
       userId: body.submittedBy,
@@ -255,7 +261,12 @@ export async function POST(req: NextRequest) {
               : `${label} is now live in the directory.`
         : body.rejectionReason
           ? `${label} wasn’t approved: ${body.rejectionReason}`
-          : `${label} wasn’t approved. You can edit and resubmit it.`,
+          : `${label} wasn’t approved. ${resubmitHint}`,
+      data: {
+        kind,
+        ...(body.name && { name: body.name.slice(0, 200) }),
+        ...(!approved && body.rejectionReason && { reason: body.rejectionReason.slice(0, 500) }),
+      },
       url:
         approved && isUrlFix
           ? (body.url ?? null)
@@ -263,7 +274,7 @@ export async function POST(req: NextRequest) {
             ? `/company/${companySlug}`
             : approved
               ? null
-              : "/profile/edit",
+              : "/submissions",
       sourceKey,
     });
   } catch (error) {

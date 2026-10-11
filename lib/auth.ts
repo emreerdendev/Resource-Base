@@ -224,6 +224,7 @@ export async function getAuth() {
         twitterUrl: { type: "string", required: false, input: false },
         instagramUrl: { type: "string", required: false, input: false },
         dribbbleUrl: { type: "string", required: false, input: false },
+        linkedinUrl: { type: "string", required: false, input: false },
         showEmail: { type: "boolean", required: false, defaultValue: false, input: false },
       },
     },

@@ -7,6 +7,7 @@ import { AtSign, Eye, EyeOff, Globe, Loader2, Mail, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { LinkedinIcon } from "@/components/brand-icons";
 import { IconInput } from "@/components/ui/icon-input";
 import { AccountDangerZone } from "@/components/account-danger-zone";
 import { ProfileChangePassword } from "@/components/profile-change-password";
@@ -24,6 +25,7 @@ type Fields = {
   twitter_url: string;
   instagram_url: string;
   dribbble_url: string;
+  linkedin_url: string;
   show_email: boolean;
 };
 
@@ -36,6 +38,7 @@ function fieldsFromProfile(p: {
   twitter_url?: string | null;
   instagram_url?: string | null;
   dribbble_url?: string | null;
+  linkedin_url?: string | null;
   show_email?: boolean | null;
 }): Fields {
   return {
@@ -47,6 +50,7 @@ function fieldsFromProfile(p: {
     twitter_url: p.twitter_url ?? "",
     instagram_url: p.instagram_url ?? "",
     dribbble_url: p.dribbble_url ?? "",
+    linkedin_url: p.linkedin_url ?? "",
     show_email: !!p.show_email,
   };
 }
@@ -131,6 +135,7 @@ export function ProfileEditForm() {
         twitter_url: fields.twitter_url || null,
         instagram_url: fields.instagram_url || null,
         dribbble_url: fields.dribbble_url || null,
+        linkedin_url: fields.linkedin_url || null,
         show_email: fields.show_email,
       });
       if (error)
@@ -204,6 +209,9 @@ export function ProfileEditForm() {
       </Field>
       <Field label={t("profile.portfolio")}>
         <IconInput icon={Globe} type="url" maxLength={200} value={fields.portfolio_url} onChange={(e) => setField("portfolio_url", e.target.value)} placeholder="https://…" />
+      </Field>
+      <Field label="LinkedIn">
+        <IconInput icon={LinkedinIcon} type="url" maxLength={200} value={fields.linkedin_url} onChange={(e) => setField("linkedin_url", e.target.value)} placeholder="https://linkedin.com/in/…" />
       </Field>
       <Field label="GitHub">
         <IconInput icon={Globe} type="url" maxLength={200} value={fields.github_url} onChange={(e) => setField("github_url", e.target.value)} placeholder="https://github.com/…" />

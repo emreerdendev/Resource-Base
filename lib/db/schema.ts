@@ -37,6 +37,7 @@ export const user = sqliteTable(
     twitterUrl: text("twitter_url"),
     instagramUrl: text("instagram_url"),
     dribbbleUrl: text("dribbble_url"),
+    linkedinUrl: text("linkedin_url"),
     showEmail: integer("show_email", { mode: "boolean" })
       .notNull()
       .default(false),
@@ -158,6 +159,9 @@ export const notifications = sqliteTable(
     body: text("body"),
     resourceId: text("resource_id"),
     url: text("url"),
+    // Structured payload ({ kind, name, reason, … }) the UI renders in the
+    // reader's language; title/body hold the English fallback.
+    data: text("data", { mode: "json" }).$type<Record<string, string>>(),
     // unique-when-not-null → webhook idempotency
     sourceKey: text("source_key"),
     readAt: integer("read_at", { mode: "timestamp" }),

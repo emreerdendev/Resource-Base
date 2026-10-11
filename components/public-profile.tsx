@@ -1,30 +1,31 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
-import { ProviderBadge } from "@/components/auth/provider-badge";
 import {
   DribbbleIcon,
   GithubIcon,
   InstagramIcon,
+  LinkedinIcon,
   XIcon,
 } from "@/components/brand-icons";
-import { ApplicationsTracker } from "@/components/applications-tracker";
-import { MySubmissions } from "@/components/my-submissions";
+import { useCompanyTracker } from "@/components/company-tracker-provider";
 import { ResourceGrid } from "@/components/resource-grid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { contributorTier } from "@/lib/contributor-tier";
 import { initial } from "@/lib/initial";
 import { fetchPublicEmail } from "@/lib/profile";
-import type { Category, Company, PublicProfile, Resource } from "@/lib/types";
+import { useSubmissions } from "@/lib/submissions";
+import type { PublicProfile, Resource } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
+  ArrowRight,
   Award,
+  Building2,
   BriefcaseBusiness,
   Eye,
   EyeOff,
   Globe,
-  Lock,
   Mail,
   Pencil,
   Send,
@@ -59,20 +60,20 @@ function SocialLink({
 export function PublicProfileView({
   profile,
   resources,
-  categories,
-  companies,
+  companiesAdded,
 }: {
   profile: PublicProfile;
   resources: Resource[];
-  categories: Category[];
-  companies: Company[];
+  /** Approved company suggestions — contributions without a resource card. */
+  companiesAdded: number;
 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isOwner = user?.id === profile.id;
   const name = profile.full_name || `@${profile.username}`;
-  // Gamification: tier badge based on accepted contributions.
-  const tier = contributorTier(resources.length);
+  // Gamification: tier badge based on accepted contributions of any kind.
+  const contributions = resources.length + companiesAdded;
+  const tier = contributorTier(contributions);
 
   // Email display: the owner always sees their own (from the session) with an
   // eye/eye-off marking whether it's public; other visitors see it only if the
@@ -95,20 +96,9 @@ export function PublicProfileView({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={profile.avatar_url} alt={profile.username} className="size-full object-cover" />
             ) : (
-              initial(name)
+              initial(profile.full_name || profile.username)
             )}
           </span>
-          {/* Provider badge is private — only the profile owner sees their own
-              sign-in method, never visitors. */}
-          {/* Provider badge: Better Auth keeps the sign-in provider in the
-              account table, not on the session user. Omitted for now. */}
-          {isOwner && (
-            <ProviderBadge
-              provider={undefined}
-              className="size-6 ring-[3px]"
-              iconClassName="size-3.5"
-            />
-          )}
         </span>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{name}</h1>
@@ -142,7 +132,7 @@ export function PublicProfileView({
             <div className="mt-2 flex items-center justify-center">
               <Badge variant="outline" className={cn("gap-1", tier.className)}>
                 <Award className="size-3" />
-                {t(tier.labelKey)} · {t("contributor.count", { count: resources.length })}
+                {t(tier.labelKey)} · {t("contributor.count", { count: contributions })}
               </Badge>
             </div>
           )}
@@ -163,6 +153,11 @@ export function PublicProfileView({
           {profile.portfolio_url && (
             <SocialLink href={profile.portfolio_url} label="Portfolio">
               <Globe className="size-4" />
+            </SocialLink>
+          )}
+          {profile.linkedin_url && (
+            <SocialLink href={profile.linkedin_url} label="LinkedIn">
+              <LinkedinIcon />
             </SocialLink>
           )}
           {profile.github_url && (
@@ -188,52 +183,56 @@ export function PublicProfileView({
         </div>
       </div>
 
-      {/* Application tracker — owner only (statuses and notes are private). */}
-      {isOwner && (
-        <div className="mt-12">
-          <div className="mb-4 flex items-center gap-2">
-            <BriefcaseBusiness className="size-5 text-primary" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              {t("tracker.title")}
-            </h2>
-            <span
-              className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground"
-              title={t("tracker.privateHint")}
-            >
-              <Lock className="size-3" /> {t("tracker.private")}
-            </span>
-          </div>
-          <ApplicationsTracker companies={companies} compact />
-        </div>
-      )}
+      {/* Owner shortcuts to their private activity. */}
+      {isOwner && <OwnerActivity />}
 
       {/* Contributions */}
       <div className="mt-12">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("profile.contributions", { count: resources.length })}
+          {t("profile.contributions", { count: contributions })}
         </h2>
-        {resources.length === 0 ? (
+        {companiesAdded > 0 && (
+          <p className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Building2 className="size-4" />
+            {t("profile.companiesAdded", { count: companiesAdded })}
+          </p>
+        )}
+        {contributions === 0 ? (
           <p className="py-10 text-center text-muted-foreground">
             {t("profile.noContributions")}
           </p>
         ) : (
-          <ResourceGrid resources={resources} />
+          resources.length > 0 && <ResourceGrid resources={resources} />
         )}
       </div>
 
-      {/* My submissions — owner only, so users can track pending/rejected
-          items and resubmit, right where they look for their own activity. */}
-      {isOwner && (
-        <div className="mt-12">
-          <div className="mb-4 flex items-center gap-2">
-            <Send className="size-5 text-primary" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              {t("submissions.title")}
-            </h2>
-          </div>
-          <MySubmissions categories={categories} />
-        </div>
-      )}
+    </div>
+  );
+}
+
+/** Links to the owner's applications and submissions, with live counts. */
+function OwnerActivity() {
+  const { t } = useTranslation();
+  const { items: tracked } = useCompanyTracker();
+  const { items: submitted } = useSubmissions();
+  const cards = [
+    { href: "/applications", icon: BriefcaseBusiness, label: t("nav.applications"), count: tracked.length },
+    { href: "/submissions", icon: Send, label: t("nav.submissions"), count: submitted.length },
+  ];
+  return (
+    <div className="mt-10 grid gap-3 sm:grid-cols-2">
+      {cards.map(({ href, icon: Icon, label, count }) => (
+        <Link
+          key={href}
+          href={href}
+          className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
+        >
+          <Icon className="size-5 text-primary" />
+          <span className="flex-1 font-medium">{label}</span>
+          <span className="text-lg font-semibold tabular-nums">{count}</span>
+          <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      ))}
     </div>
   );
 }

@@ -55,6 +55,7 @@ const EDITABLE = [
   "twitterUrl",
   "instagramUrl",
   "dribbbleUrl",
+  "linkedinUrl",
   "showEmail",
 ] as const;
 type EditableKey = (typeof EDITABLE)[number];
@@ -112,6 +113,7 @@ const MAX_LEN: Record<string, number> = {
   twitterUrl: 200,
   instagramUrl: 200,
   dribbbleUrl: 200,
+  linkedinUrl: 200,
 };
 
 /** Update editable profile fields (own only). Caps lengths server-side. */
@@ -160,6 +162,7 @@ const PUBLIC_COLUMNS = {
   twitter_url: user.twitterUrl,
   instagram_url: user.instagramUrl,
   dribbble_url: user.dribbbleUrl,
+  linkedin_url: user.linkedinUrl,
   show_email: user.showEmail,
 } as const;
 

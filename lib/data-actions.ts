@@ -56,6 +56,8 @@ export async function toggleFavorite(
 
 export type NotificationRow = {
   id: string;
+  type: string;
+  data: Record<string, string> | null;
   title: string | null;
   body: string | null;
   url: string | null;
@@ -69,6 +71,8 @@ export async function listNotifications(): Promise<NotificationRow[]> {
   const rows = await getDb()
     .select({
       id: notifications.id,
+      type: notifications.type,
+      data: notifications.data,
       title: notifications.title,
       body: notifications.body,
       url: notifications.url,
@@ -81,6 +85,8 @@ export async function listNotifications(): Promise<NotificationRow[]> {
     .limit(30);
   return rows.map((r) => ({
     id: r.id,
+    type: r.type,
+    data: r.data ?? null,
     title: r.title,
     body: r.body,
     url: r.url,
