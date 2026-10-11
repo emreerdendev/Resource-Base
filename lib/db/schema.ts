@@ -46,7 +46,9 @@ export const user = sqliteTable(
   ],
 );
 
-export const session = sqliteTable("session", {
+export const session = sqliteTable(
+  "session",
+  {
   id: text("id").primaryKey(),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
   token: text("token").notNull().unique(),
@@ -57,9 +59,13 @@ export const session = sqliteTable("session", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-});
+  },
+  (t) => [index("session_user_idx").on(t.userId), index("session_expires_idx").on(t.expiresAt)],
+);
 
-export const account = sqliteTable("account", {
+export const account = sqliteTable(
+  "account",
+  {
   id: text("id").primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
@@ -75,25 +81,43 @@ export const account = sqliteTable("account", {
   password: text("password"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-});
+  },
+  (t) => [index("account_user_idx").on(t.userId)],
+);
 
-export const verification = sqliteTable("verification", {
+export const verification = sqliteTable(
+  "verification",
+  {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }),
   updatedAt: integer("updated_at", { mode: "timestamp" }),
-});
+  },
+  (t) => [
+    index("verification_identifier_idx").on(t.identifier),
+    index("verification_expires_idx").on(t.expiresAt),
+  ],
+);
 
 // Better Auth rate-limit store. Persisted in D1 so the limiter works across
 // Worker isolates (the default in-memory store resets per isolate = useless).
-export const rateLimit = sqliteTable("rateLimit", {
-  id: text("id").primaryKey(),
-  key: text("key"),
-  count: integer("count"),
-  lastRequest: integer("last_request"),
-});
+// Every auth request looks its row up by key and prunes by last_request, so
+// both are indexed (without them each lookup scanned the whole table).
+export const rateLimit = sqliteTable(
+  "rateLimit",
+  {
+    id: text("id").primaryKey(),
+    key: text("key"),
+    count: integer("count"),
+    lastRequest: integer("last_request"),
+  },
+  (t) => [
+    uniqueIndex("rate_limit_key_idx").on(t.key),
+    index("rate_limit_last_request_idx").on(t.lastRequest),
+  ],
+);
 
 /* -------------------------------------------------------------------------- */
 /*  Application tables (user data: favorites, notifications, clicks, etc.)    */
@@ -112,7 +136,11 @@ export const favorites = sqliteTable(
       .notNull()
       .default(sql`(unixepoch())`),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.resourceId] })],
+  // resource_id index: the public per-resource counts group by it.
+  (t) => [
+    primaryKey({ columns: [t.userId, t.resourceId] }),
+    index("favorites_resource_idx").on(t.resourceId),
+  ],
 );
 
 // was public.notifications

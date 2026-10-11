@@ -61,6 +61,12 @@ export async function getAuth() {
 
   return betterAuth({
     database: drizzleAdapter(db, { provider: "sqlite", schema }),
+    // The signed session is cached in a short-lived cookie, so most session
+    // checks (every server action, every get-session) skip the D1 lookup.
+    // Trade-off: a revoked session stays usable for up to 5 minutes.
+    session: {
+      cookieCache: { enabled: true, maxAge: 5 * 60 },
+    },
     secret: env.BETTER_AUTH_SECRET,
     // Locally, derive the base URL from the incoming request so both `next dev`
     // (:3000) and `cf:preview` (:8788) build the right OAuth redirect_uri;
@@ -84,13 +90,20 @@ export async function getAuth() {
     // across Worker isolates — the default in-memory store resets per isolate.
     // Strict limits on email-sending + account-creation paths to block abuse
     // ("denial of wallet" / brute force). Windows are in SECONDS.
+    //
+    // The global window is an hour on purpose: Better Auth prunes rows older
+    // than the global window, so a 60s window silently wiped the hourly
+    // counters below and turned them into per-minute limits.
     rateLimit: {
       enabled: true,
       storage: "database",
       modelName: "rateLimit",
-      window: 60,
-      max: 100,
+      window: 3600,
+      max: 300,
       customRules: {
+        // Read-only and called on every page load / tab focus — limiting it
+        // would cost a D1 write per call for no protection.
+        "/get-session": false,
         "/request-password-reset": { window: 3600, max: 3 }, // sends email
         "/forget-password": { window: 3600, max: 3 }, // alias
         "/send-verification-email": { window: 3600, max: 5 }, // sends email
