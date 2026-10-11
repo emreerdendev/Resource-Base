@@ -16,15 +16,64 @@ import {
   CITIES,
   SECTORS,
   WORK_MODELS,
+  type City,
+  type Sector,
+  type WorkModel,
 } from "@/lib/company-taxonomy";
 import { shuffle } from "@/lib/company-utils";
 import type { Company } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type Mine = "" | "tracked" | "untracked";
+type FacetKey = "city" | "work" | "channel" | "sector";
+type Selection = Record<FacetKey, string[]>;
 
 /** Channels that map to concrete links/addresses on the listing. */
 const FILTER_CHANNELS = ["email", "career", "linkedin"] as const;
+
+/** Location option matching every company with a free-text place. */
+const OTHER_LOCATIONS = "other";
+/** Free-text places shown as their own chip (the rest are under "Other"). */
+const TOP_OTHER_PLACES = 8;
+
+const FACETS: FacetKey[] = ["city", "work", "channel", "sector"];
+
+/** Does company `c` match one selected value of facet `key`? */
+function matches(c: Company, key: FacetKey, v: string): boolean {
+  switch (key) {
+    case "city":
+      return v === OTHER_LOCATIONS
+        ? c.otherLocations.length > 0
+        : c.cities.includes(v as City) || c.otherLocations.includes(v);
+    case "work":
+      return c.workModels.includes(v as WorkModel);
+    case "channel":
+      return v === "email"
+        ? c.emails.length > 0
+        : v === "career"
+          ? c.careerLinks.length > 0
+          : Boolean(c.linkedin);
+    case "sector":
+      return c.sectors.includes(v as Sector);
+  }
+}
+
+/** Values within a facet are OR'd; facets are AND'd together. */
+const matchesFacet = (c: Company, key: FacetKey, values: string[]) =>
+  values.length === 0 || values.some((v) => matches(c, key, v));
+
+/** Read a facet from the URL (?city=a&city=b), dropping unknown values. */
+function readFacet(params: URLSearchParams, key: FacetKey): string[] {
+  const all = params.getAll(key).filter(Boolean);
+  const known: Record<FacetKey, readonly string[] | null> = {
+    city: null, // quick-pick slugs, "other" or any free-text place
+    work: WORK_MODELS,
+    channel: FILTER_CHANNELS,
+    sector: SECTORS,
+  };
+  const allowed = known[key];
+  return [...new Set(allowed ? all.filter((v) => allowed.includes(v)) : all)];
+}
 
 /**
  * The company directory. Arrives already shuffled from the server (a fresh
@@ -45,13 +94,20 @@ export function CompaniesClient({
 
   const [companies, setCompanies] = useState(initial);
   const [q, setQ] = useState(params.get("q") ?? "");
-  const [city, setCity] = useState(params.get("city") ?? "");
-  const [workModel, setWorkModel] = useState(params.get("work") ?? "");
-  const [channel, setChannel] = useState(params.get("channel") ?? "");
-  const [sector, setSector] = useState(params.get("sector") ?? "");
-  const [mine, setMine] = useState<Mine>((params.get("mine") as Mine) ?? "");
+  const [selected, setSelected] = useState<Selection>(() => ({
+    city: readFacet(params, "city"),
+    work: readFacet(params, "work"),
+    channel: readFacet(params, "channel"),
+    sector: readFacet(params, "sector"),
+  }));
+  const [mineParam, setMine] = useState<Mine>(() => {
+    const m = params.get("mine");
+    return m === "tracked" || m === "untracked" ? m : "";
+  });
+  // "My tracker" only means something when signed in.
+  const mine: Mine = user ? mineParam : "";
   const [showFilters, setShowFilters] = useState(
-    Boolean(params.get("city") || params.get("work") || params.get("channel") || params.get("sector")),
+    () => FACETS.some((k) => params.getAll(k).length > 0) || Boolean(params.get("mine")),
   );
 
   // 60 per page on desktop (20×3), 30 on mobile.
@@ -70,23 +126,21 @@ export function CompaniesClient({
   useEffect(() => {
     const sp = new URLSearchParams();
     if (q) sp.set("q", q);
-    if (city) sp.set("city", city);
-    if (workModel) sp.set("work", workModel);
-    if (channel) sp.set("channel", channel);
-    if (sector) sp.set("sector", sector);
-    if (mine) sp.set("mine", mine);
+    for (const k of FACETS) for (const v of selected[k]) sp.append(k, v);
+    if (mineParam) sp.set("mine", mineParam);
     const qs = sp.toString();
     window.history.replaceState(null, "", qs ? `/companies?${qs}` : "/companies");
-  }, [q, city, workModel, channel, sector, mine]);
+  }, [q, selected, mineParam]);
 
   const fuse = useMemo(
     () =>
       new Fuse(companies, {
         keys: [
-          { name: "name", weight: 0.7 },
+          { name: "name", weight: 0.65 },
           { name: "website", weight: 0.1 },
           { name: "emails", weight: 0.1 },
           { name: "clients", weight: 0.1 },
+          { name: "otherLocations", weight: 0.05 },
         ],
         threshold: 0.34,
         ignoreLocation: true,
@@ -95,32 +149,74 @@ export function CompaniesClient({
     [companies],
   );
 
-  const filtered = useMemo(() => {
-    let list = q.trim() ? fuse.search(q).map((r) => r.item) : companies;
-    if (city)
-      list = list.filter(
-        (c) => c.cities.includes(city as never) || c.otherLocations.includes(city),
-      );
-    if (workModel) list = list.filter((c) => c.workModels.includes(workModel as never));
-    if (sector) list = list.filter((c) => c.sectors.includes(sector as never));
-    if (channel)
-      list = list.filter((c) =>
-        channel === "email"
-          ? c.emails.length > 0
-          : channel === "career"
-            ? c.careerLinks.length > 0
-            : channel === "linkedin"
-              ? Boolean(c.linkedin)
-              : c.channels.includes(channel as never),
-      );
-    if (mine && user)
-      list = list.filter((c) => Boolean(getTracked(c._id)) === (mine === "tracked"));
-    return list;
-  }, [q, city, workModel, sector, channel, mine, user, fuse, companies, getTracked]);
+  // Search + "my tracker" first; facets are applied on top of this base.
+  const searched = useMemo(() => {
+    const list = q.trim() ? fuse.search(q).map((r) => r.item) : companies;
+    return mine ? list.filter((c) => Boolean(getTracked(c._id)) === (mine === "tracked")) : list;
+  }, [q, fuse, companies, mine, getTracked]);
+
+  const filtered = useMemo(
+    () => searched.filter((c) => FACETS.every((k) => matchesFacet(c, k, selected[k]))),
+    [searched, selected],
+  );
+
+  /**
+   * Result count per option, given everything else that's active (search,
+   * tracker and the OTHER facets) — so a chip's number is what you'd get by
+   * adding it, and chips that would yield nothing can be disabled.
+   */
+  const countsFor = (key: FacetKey, values: string[]) => {
+    const base = searched.filter((c) =>
+      FACETS.every((k) => k === key || matchesFacet(c, k, selected[k])),
+    );
+    return new Map(values.map((v) => [v, base.filter((c) => matches(c, key, v)).length]));
+  };
+
+  // Locations: every quick-pick city (fixed, same list as the suggestion
+  // form), then the most common free-text places, then "Other locations" for
+  // all of them — so the facet scales without a fixed world list.
+  const locationOptions = useMemo(() => {
+    const freq = new Map<string, number>();
+    for (const c of companies)
+      for (const o of c.otherLocations) freq.set(o, (freq.get(o) ?? 0) + 1);
+    const top = [...freq]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, TOP_OTHER_PLACES)
+      .map(([v]) => v);
+    // Keep a place picked from a shared link visible even if it isn't top.
+    const pickedOthers = selected.city.filter(
+      (v) => v !== OTHER_LOCATIONS && !(CITIES as readonly string[]).includes(v) && !top.includes(v),
+    );
+    return [
+      ...CITIES.map((v) => ({ value: v, label: t(`companies.city.${v}`) })),
+      ...[...top, ...pickedOthers].map((v) => ({ value: v, label: v })),
+      ...(freq.size > 0 || selected.city.includes(OTHER_LOCATIONS)
+        ? [{ value: OTHER_LOCATIONS, label: t("companies.otherLocations") }]
+        : []),
+    ];
+  }, [companies, selected.city, t]);
+
+  // Sectors are an open-ended taxonomy: offer the ones in use (plus any picked).
+  const sectorOptions = SECTORS.filter(
+    (s) => selected.sector.includes(s) || companies.some((c) => c.sectors.includes(s)),
+  ).map((v) => ({ value: v, label: t(`companies.sector.${v}`) }));
+
+  const facetOptions: Record<FacetKey, { value: string; label: string }[]> = {
+    city: locationOptions,
+    work: WORK_MODELS.map((v) => ({ value: v, label: t(`companies.workModel.${v}`) })),
+    channel: FILTER_CHANNELS.map((v) => ({ value: v, label: t(`companies.channel.${v}`) })),
+    sector: sectorOptions,
+  };
+  const facetLabels: Record<FacetKey, string> = {
+    city: t("companies.facet.city"),
+    work: t("companies.facet.workModel"),
+    channel: t("companies.facet.channel"),
+    sector: t("companies.facet.sector"),
+  };
 
   // Back to page 1 whenever the result set changes (state keyed by filters,
   // so no reset effect is needed).
-  const filterKey = [q, city, workModel, channel, sector, mine].join("|");
+  const filterKey = JSON.stringify([q, selected, mine]);
   const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
   const page = pageState.key === filterKey ? pageState.page : 1;
   const setPage = (p: number) => setPageState({ key: filterKey, page: p });
@@ -137,39 +233,32 @@ export function CompaniesClient({
     );
   };
 
-  const filterCount = [city, workModel, channel, sector, mine].filter(Boolean).length;
+  const toggleValue = (key: FacetKey, v: string) =>
+    setSelected((s) => ({
+      ...s,
+      [key]: s[key].includes(v) ? s[key].filter((x) => x !== v) : [...s[key], v],
+    }));
+
+  // Active selections as removable chips (visible even with the panel closed).
+  const active = [
+    ...FACETS.flatMap((key) =>
+      selected[key].map((v) => ({
+        id: `${key}:${v}`,
+        label: facetOptions[key].find((o) => o.value === v)?.label ?? v,
+        remove: () => toggleValue(key, v),
+      })),
+    ),
+    ...(mine
+      ? [{ id: "mine", label: t(`companies.mine.${mine}`), remove: () => setMine("") }]
+      : []),
+  ];
+  const filterCount = active.length;
   const hasFilters = filterCount > 0 || q.trim();
   const reset = () => {
     setQ("");
-    setCity("");
-    setWorkModel("");
-    setChannel("");
-    setSector("");
+    setSelected({ city: [], work: [], channel: [], sector: [] });
     setMine("");
   };
-  const toggle = (setter: (v: string) => void, current: string) => (v: string) =>
-    setter(v === current ? "" : v);
-
-  // Locations: the quick-pick cities that occur, then free-text places (e.g.
-  // "Berlin, Germany") by how many companies list them — so the facet grows
-  // with the data instead of a fixed world list.
-  const locationOptions = useMemo(() => {
-    const others = new Map<string, number>();
-    for (const c of companies)
-      for (const o of c.otherLocations) others.set(o, (others.get(o) ?? 0) + 1);
-    return [
-      ...CITIES.filter((v) => companies.some((c) => c.cities.includes(v))).map((v) => ({
-        value: v,
-        label: t(`companies.city.${v}`),
-      })),
-      ...[...others]
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-        .map(([v]) => ({ value: v, label: v })),
-    ];
-  }, [companies, t]);
-
-  // Only offer sectors that actually occur, so no chip ever yields nothing.
-  const sectors = SECTORS.filter((s) => companies.some((c) => c.sectors.includes(s)));
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -215,38 +304,21 @@ export function CompaniesClient({
           </div>
 
           {showFilters && (
-            <div className="mt-3 space-y-3 rounded-lg border border-border bg-card p-4">
-              <Facet
-                label={t("companies.facet.city")}
-                options={locationOptions}
-                value={city}
-                onChange={toggle(setCity, city)}
-              />
-              <Facet
-                label={t("companies.facet.workModel")}
-                options={WORK_MODELS.filter((v) => v !== "onsite").map((v) => ({
-                  value: v,
-                  label: t(`companies.workModel.${v}`),
-                }))}
-                value={workModel}
-                onChange={toggle(setWorkModel, workModel)}
-              />
-              <Facet
-                label={t("companies.facet.channel")}
-                options={FILTER_CHANNELS.map((v) => ({
-                  value: v,
-                  label: t(`companies.channel.${v}`),
-                }))}
-                value={channel}
-                onChange={toggle(setChannel, channel)}
-              />
-              {sectors.length > 0 && (
-                <Facet
-                  label={t("companies.facet.sector")}
-                  options={sectors.map((v) => ({ value: v, label: t(`companies.sector.${v}`) }))}
-                  value={sector}
-                  onChange={toggle(setSector, sector)}
-                />
+            <div className="mt-3 max-h-[60vh] space-y-3 overflow-y-auto rounded-lg border border-border bg-card p-4">
+              {FACETS.map((key) =>
+                facetOptions[key].length > 0 ? (
+                  <Facet
+                    key={key}
+                    label={facetLabels[key]}
+                    options={facetOptions[key]}
+                    counts={countsFor(
+                      key,
+                      facetOptions[key].map((o) => o.value),
+                    )}
+                    selected={selected[key]}
+                    onToggle={(v) => toggleValue(key, v)}
+                  />
+                ) : null,
               )}
               {user && (
                 <Facet
@@ -255,19 +327,31 @@ export function CompaniesClient({
                     { value: "tracked", label: t("companies.mine.tracked") },
                     { value: "untracked", label: t("companies.mine.untracked") },
                   ]}
-                  value={mine}
-                  onChange={(v) => setMine(v === mine ? "" : (v as Mine))}
+                  selected={mine ? [mine] : []}
+                  onToggle={(v) => setMine(v === mine ? "" : (v as Mine))}
                 />
               )}
             </div>
           )}
 
           {hasFilters && (
-            <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span>{t("browse.results", { count: filtered.length })}</span>
               <Button variant="ghost" size="sm" onClick={reset} className="h-7">
                 <X className="size-3.5" /> {t("browse.clear")}
               </Button>
+              {active.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={a.remove}
+                  aria-label={t("companies.removeFilter", { filter: a.label })}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground transition-colors hover:bg-secondary/70"
+                >
+                  {a.label}
+                  <X className="size-3" />
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -309,34 +393,46 @@ export function CompaniesClient({
 function Facet({
   label,
   options,
-  value,
-  onChange,
+  counts,
+  selected,
+  onToggle,
 }: {
   label: string;
   options: { value: string; label: string }[];
-  value: string;
-  onChange: (v: string) => void;
+  /** Result count per option; options that would yield nothing are disabled. */
+  counts?: Map<string, number>;
+  selected: string[];
+  onToggle: (v: string) => void;
 }) {
   return (
     <div>
       <p className="mb-1.5 text-xs font-medium text-muted-foreground">{label}</p>
       <div className="flex flex-wrap gap-1.5">
-        {options.map((o) => (
-          <button
-            key={o.value}
-            type="button"
-            onClick={() => onChange(o.value)}
-            aria-pressed={value === o.value}
-            className={cn(
-              "cursor-pointer rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-              value === o.value
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background hover:bg-muted",
-            )}
-          >
-            {o.label}
-          </button>
-        ))}
+        {options.map((o) => {
+          const on = selected.includes(o.value);
+          const count = counts?.get(o.value);
+          const empty = count === 0 && !on;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => onToggle(o.value)}
+              aria-pressed={on}
+              disabled={empty}
+              className={cn(
+                "rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                on
+                  ? "cursor-pointer border-primary bg-primary text-primary-foreground"
+                  : empty
+                    ? "cursor-not-allowed border-border bg-background opacity-45"
+                    : "cursor-pointer border-border bg-background hover:bg-muted",
+              )}
+            >
+              {o.label}
+              {count !== undefined && <span className="ml-1 opacity-60">{count}</span>}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
