@@ -19,6 +19,16 @@ function usernameStem(raw: string | null | undefined): string {
   return cleaned || "user";
 }
 
+/** Bound a new user's display name and keep only an https avatar URL. */
+function cleanIdentity(data: { name?: unknown; image?: unknown }) {
+  const name = typeof data.name === "string" ? data.name.trim().slice(0, 60) : "";
+  const image =
+    typeof data.image === "string" && data.image.length <= 500 && data.image.startsWith("https://")
+      ? data.image
+      : null;
+  return { name, image };
+}
+
 /**
  * Better Auth instance — built PER REQUEST (the Drizzle adapter depends on the
  * per-request D1 binding from getCloudflareContext(); env is undefined at module
@@ -167,12 +177,19 @@ export async function getAuth() {
         // signing in with Google/GitHub/GitLab/email for the same address all
         // resolve to a single user (avoids the "account_not_linked" error).
         enabled: true,
-        trustedProviders: ["google", "github", "gitlab"],
+        // Trusted = linked even without the provider confirming the email.
+        // Only Google always verifies it; GitHub reports verification itself,
+        // and GitLab often omits it, so trusting those let an unverified
+        // provider email take over an existing account.
+        trustedProviders: ["google"],
       },
     },
     databaseHooks: {
       user: {
         create: {
+          // Sign-up input and provider profiles both land here; keep the
+          // fields that end up on public profiles bounded and http(s)-only.
+          before: async (data) => ({ data: { ...data, ...cleanIdentity(data) } }),
           // Auto-assign a unique username on signup (replaces handle_new_user).
           after: async (createdUser) => {
             const stem = usernameStem(createdUser.name || createdUser.email);
@@ -193,17 +210,21 @@ export async function getAuth() {
         },
       },
     },
+    // Profile fields are written only by lib/profile-actions (which validates
+    // them), never through Better Auth's own endpoints: `input: false` keeps
+    // them out of sign-up, and the generic update/delete endpoints are off.
+    disabledPaths: ["/update-user", "/change-email", "/delete-user"],
     user: {
       additionalFields: {
         username: { type: "string", required: false, input: false },
-        fullName: { type: "string", required: false },
-        bio: { type: "string", required: false },
-        portfolioUrl: { type: "string", required: false },
-        githubUrl: { type: "string", required: false },
-        twitterUrl: { type: "string", required: false },
-        instagramUrl: { type: "string", required: false },
-        dribbbleUrl: { type: "string", required: false },
-        showEmail: { type: "boolean", required: false, defaultValue: false },
+        fullName: { type: "string", required: false, input: false },
+        bio: { type: "string", required: false, input: false },
+        portfolioUrl: { type: "string", required: false, input: false },
+        githubUrl: { type: "string", required: false, input: false },
+        twitterUrl: { type: "string", required: false, input: false },
+        instagramUrl: { type: "string", required: false, input: false },
+        dribbbleUrl: { type: "string", required: false, input: false },
+        showEmail: { type: "boolean", required: false, defaultValue: false, input: false },
       },
     },
     // captcha (if enabled) runs before nextCookies; nextCookies MUST be last.
