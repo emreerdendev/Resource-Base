@@ -12,6 +12,7 @@ import {
 import { listSubmissions } from "@/lib/data-actions";
 import { useAuth } from "@/components/auth/auth-provider";
 import type { Submission } from "@/lib/types";
+import { loadViewer } from "@/lib/viewer";
 
 type SubmissionsValue = {
   items: Submission[];
@@ -47,9 +48,25 @@ export function SubmissionsProvider({ children }: { children: React.ReactNode })
   // Load once when auth resolves. We deliberately don't refetch on window
   // focus — moderation decisions are rare and already arrive via notifications,
   // so refetching on every tab refocus only caused redundant queries.
+  const userId = user?.id;
   useEffect(() => {
-    load();
-  }, [load]);
+    let active = true;
+    if (!userId) {
+      Promise.resolve().then(() => {
+        if (!active) return;
+        setItems([]);
+        setLoading(false);
+      });
+    } else {
+      loadViewer(userId)
+        .then((v) => active && setItems(v.submissions as Submission[]))
+        .catch(() => {})
+        .finally(() => active && setLoading(false));
+    }
+    return () => {
+      active = false;
+    };
+  }, [userId]);
 
   const value = useMemo<SubmissionsValue>(
     () => ({ items, loading, reload: load }),

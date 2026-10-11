@@ -10,6 +10,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { loadViewer } from "@/lib/viewer";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
   listTrackedCompanies,
@@ -68,8 +69,8 @@ export function CompanyTrackerProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     if (!userId) return;
     let active = true;
-    listTrackedCompanies()
-      .then((rows) => {
+    loadViewer(userId)
+      .then(({ tracked: rows }) => {
         if (active) setState({ userId, items: rows });
       })
       .catch(() => {

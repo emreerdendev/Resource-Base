@@ -1,11 +1,10 @@
 "use server";
 
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import {
   favorites,
   notifications,
-  resourceClicks,
   submissions,
 } from "@/lib/db/schema";
 import { getSessionUser, requireUser } from "@/lib/authz";
@@ -53,27 +52,6 @@ export async function toggleFavorite(
   return { favorited: true };
 }
 
-/* --------------------------- public aggregates ---------------------------- */
-
-export async function getClickCounts(): Promise<Record<string, number>> {
-  const rows = await getDb()
-    .select({ id: resourceClicks.resourceId, count: resourceClicks.count })
-    .from(resourceClicks);
-  const map: Record<string, number> = {};
-  for (const r of rows) map[r.id] = Number(r.count);
-  return map;
-}
-
-export async function getFavoriteCounts(): Promise<Record<string, number>> {
-  const rows = await getDb()
-    .select({ resourceId: favorites.resourceId, count: sql<number>`count(*)` })
-    .from(favorites)
-    .groupBy(favorites.resourceId);
-  const map: Record<string, number> = {};
-  for (const r of rows) map[r.resourceId] = Number(r.count);
-  return map;
-}
-
 /* --------------------------- notifications (own) -------------------------- */
 
 export type NotificationRow = {
@@ -111,13 +89,14 @@ export async function listNotifications(): Promise<NotificationRow[]> {
   }));
 }
 
-export async function markNotificationsRead(ids: string[]): Promise<void> {
-  if (ids.length === 0) return;
+/** Mark every unread notification of the signed-in user as read. */
+export async function markAllNotificationsRead(): Promise<void> {
   const me = await requireUser();
+  if (await overLimit("RL_USER", `notif:${me.id}`)) return;
   await getDb()
     .update(notifications)
     .set({ readAt: new Date() })
-    .where(and(eq(notifications.userId, me.id), inArray(notifications.id, ids)));
+    .where(and(eq(notifications.userId, me.id), isNull(notifications.readAt)));
 }
 
 /* ---------------------------- submissions (own) --------------------------- */

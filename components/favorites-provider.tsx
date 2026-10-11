@@ -10,7 +10,8 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { listFavorites, toggleFavorite } from "@/lib/data-actions";
+import { toggleFavorite } from "@/lib/data-actions";
+import { loadViewer } from "@/lib/viewer";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useFavoriteCounts } from "@/components/favorite-counts-provider";
 
@@ -35,23 +36,25 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [ids, setIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const userId = user?.id;
   useEffect(() => {
     let active = true;
-    if (!user) {
-      setIds([]);
-      setLoading(false);
-      return;
+    if (!userId) {
+      Promise.resolve().then(() => {
+        if (!active) return;
+        setIds([]);
+        setLoading(false);
+      });
+    } else {
+      loadViewer(userId)
+        .then((v) => active && setIds(v.favorites))
+        .catch(() => {})
+        .finally(() => active && setLoading(false));
     }
-    setLoading(true);
-    listFavorites().then((rows) => {
-      if (!active) return;
-      setIds(rows);
-      setLoading(false);
-    });
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [userId]);
 
   const toggle = useCallback(
     async (id: string) => {

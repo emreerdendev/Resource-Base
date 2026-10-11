@@ -12,13 +12,13 @@ import { useTranslation } from "react-i18next";
 export function NotificationsClient() {
   const { t } = useTranslation();
   const { user, loading, openAuth } = useAuth();
-  const { items, markAllRead } = useNotifications();
+  const { items, unread, isNew, markAllRead } = useNotifications();
 
-  // Mark everything read when the page is opened.
+  // Opening the page reads everything — including notifications that arrive
+  // after mount (they load asynchronously). They stay highlighted via isNew.
   useEffect(() => {
-    if (user) markAllRead();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    if (unread > 0) markAllRead();
+  }, [unread, markAllRead]);
 
   if (!loading && !user) {
     return (
@@ -55,7 +55,7 @@ export function NotificationsClient() {
               <div
                 className={cn(
                   "rounded-xl border border-border bg-card p-4 transition-colors",
-                  !n.read_at && "border-primary/30 bg-primary/5",
+                  (!n.read_at || isNew(n.id)) && "border-primary/30 bg-primary/5",
                 )}
               >
                 <p className="font-medium">{n.title}</p>

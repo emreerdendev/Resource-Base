@@ -180,6 +180,7 @@ export const de = {
     description: "Durchsuche Unternehmen, Ressourcen, Kategorien und Tags.",
     placeholder: "Unternehmen, Ressourcen, Tags suchen…",
     empty: "Keine Treffer.",
+    loading: "Wird geladen…",
     featured: "Empfohlen",
     results: "Ressourcen",
     goTo: "Gehe zu",

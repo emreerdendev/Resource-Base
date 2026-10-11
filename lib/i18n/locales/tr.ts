@@ -180,6 +180,7 @@ export const tr = {
     description: "Şirketlerde, kaynaklarda, kategorilerde ve etiketlerde ara.",
     placeholder: "Şirket, kaynak, etiket ara…",
     empty: "Eşleşme yok.",
+    loading: "Yükleniyor…",
     featured: "Öne çıkanlar",
     results: "Kaynaklar",
     goTo: "Git",

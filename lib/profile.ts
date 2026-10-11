@@ -16,6 +16,7 @@ import {
 } from "@/lib/profile-actions";
 import { useAuth } from "@/components/auth/auth-provider";
 import type { Profile } from "@/lib/types";
+import { loadViewer } from "@/lib/viewer";
 
 export type EditableProfile = Pick<
   Profile,
@@ -96,9 +97,27 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   }, [user]);
 
+  // Initial load comes from the shared viewer request; reloads use `load`.
+  const userId = user?.id;
+  const email = user?.email ?? null;
   useEffect(() => {
-    load();
-  }, [load]);
+    let active = true;
+    if (!userId) {
+      Promise.resolve().then(() => {
+        if (!active) return;
+        setProfile(null);
+        setLoading(false);
+      });
+    } else {
+      loadViewer(userId)
+        .then(({ profile: row }) => active && setProfile(row ? toProfile(row, email) : null))
+        .catch(() => {})
+        .finally(() => active && setLoading(false));
+    }
+    return () => {
+      active = false;
+    };
+  }, [userId, email]);
 
   const update = useCallback(
     async (fields: Partial<EditableProfile>) => {

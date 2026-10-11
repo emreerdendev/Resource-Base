@@ -1,44 +1,97 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   listNotifications,
-  markNotificationsRead,
+  markAllNotificationsRead,
   type NotificationRow,
 } from "@/lib/data-actions";
 import { useAuth } from "@/components/auth/auth-provider";
+import { loadViewer } from "@/lib/viewer";
 
 export type Notification = NotificationRow;
 
-/**
- * Loads the signed-in user's notifications (own only, server action) and
- * exposes the unread count plus a markAllRead helper.
- */
-export function useNotifications() {
-  const { user } = useAuth();
-  const [items, setItems] = useState<Notification[]>([]);
+type NotificationsValue = {
+  items: Notification[];
+  unread: number;
+  /** Unread when this page load marked them read — still shown as new. */
+  isNew: (id: string) => boolean;
+  markAllRead: () => Promise<void>;
+  reload: () => Promise<void>;
+};
 
-  const load = useCallback(async () => {
-    if (!user) {
-      setItems([]);
-      return;
-    }
-    setItems(await listNotifications());
-  }, [user]);
+const NotificationsContext = createContext<NotificationsValue | null>(null);
+
+/**
+ * The signed-in user's notifications, shared by the header badge and the
+ * notifications page so marking them read clears the badge immediately.
+ */
+export function NotificationsProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const userId = user?.id;
+  const [state, setState] = useState<{ userId?: string; items: Notification[] }>({
+    items: [],
+  });
+  const [newIds, setNewIds] = useState<ReadonlySet<string>>(new Set());
+  // Signed out (or switched user): nothing to show, no effect needed.
+  const items = useMemo(
+    () => (state.userId === userId ? state.items : []),
+    [state, userId],
+  );
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (!userId) return;
+    let active = true;
+    loadViewer(userId)
+      .then((v) => active && setState({ userId, items: v.notifications }))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [userId]);
 
-  const unread = items.filter((n) => !n.read_at).length;
+  const reload = useCallback(async () => {
+    if (!userId) return;
+    setState({ userId, items: await listNotifications() });
+  }, [userId]);
+
+  const unreadIds = useMemo(() => items.filter((n) => !n.read_at).map((n) => n.id), [items]);
 
   const markAllRead = useCallback(async () => {
-    const ids = items.filter((n) => !n.read_at).map((n) => n.id);
-    if (ids.length === 0) return;
+    if (!userId || unreadIds.length === 0) return;
     const now = new Date().toISOString();
-    setItems((prev) => prev.map((n) => ({ ...n, read_at: n.read_at ?? now })));
-    await markNotificationsRead(ids);
-  }, [items]);
+    setNewIds((prev) => new Set([...prev, ...unreadIds]));
+    setState((s) => ({
+      ...s,
+      items: s.items.map((n) => ({ ...n, read_at: n.read_at ?? now })),
+    }));
+    await markAllNotificationsRead().catch(() => {});
+  }, [userId, unreadIds]);
 
-  return { items, unread, markAllRead, reload: load };
+  const value = useMemo<NotificationsValue>(
+    () => ({
+      items,
+      unread: unreadIds.length,
+      isNew: (id) => newIds.has(id),
+      markAllRead,
+      reload,
+    }),
+    [items, unreadIds, newIds, markAllRead, reload],
+  );
+
+  return createElement(NotificationsContext.Provider, { value }, children);
+}
+
+export function useNotifications(): NotificationsValue {
+  const ctx = useContext(NotificationsContext);
+  if (!ctx) throw new Error("useNotifications must be used within <NotificationsProvider>");
+  return ctx;
 }

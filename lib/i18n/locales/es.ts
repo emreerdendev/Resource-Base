@@ -180,6 +180,7 @@ export const es = {
     description: "Busca entre empresas, recursos, categorías y etiquetas.",
     placeholder: "Buscar empresas, recursos, etiquetas…",
     empty: "Sin resultados.",
+    loading: "Cargando…",
     featured: "Destacados",
     results: "Recursos",
     goTo: "Ir a",

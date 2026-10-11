@@ -15,22 +15,47 @@ import {
 } from "@/components/ui/command";
 import { createCompanySearch } from "@/lib/company-search";
 import { createResourceSearch } from "@/lib/resource-search";
-import type { Company, Resource } from "@/lib/types";
+import type { SearchIndex } from "@/lib/types";
 
 /** Fired by the header search button to open the palette from anywhere. */
 export const OPEN_COMMAND_EVENT = "open-command-palette";
 
-export function CommandPalette({
-  resources,
-  companies = [],
-}: {
-  resources: Resource[];
-  companies?: Company[];
-}) {
+const EMPTY: SearchIndex = { resources: [], companies: [] };
+
+// One fetch per page load, shared by every open; a failure retries next open.
+let indexPromise: Promise<SearchIndex> | null = null;
+function loadIndex(): Promise<SearchIndex> {
+  indexPromise ??= fetch("/api/search-index")
+    .then((r) => (r.ok ? (r.json() as Promise<SearchIndex>) : Promise.reject(r.status)))
+    .catch((err) => {
+      indexPromise = null;
+      throw err;
+    });
+  return indexPromise;
+}
+
+/**
+ * ⌘K search over every resource and company. The dataset is fetched the first
+ * time the palette opens rather than shipped with each page.
+ */
+export function CommandPalette() {
   const { t } = useTranslation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [index, setIndex] = useState<SearchIndex | null>(null);
+  const { resources, companies } = index ?? EMPTY;
+
+  useEffect(() => {
+    if (!open || index) return;
+    let active = true;
+    loadIndex()
+      .then((data) => active && setIndex(data))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [open, index]);
 
   // Build the search indexes once (see lib/search.ts for the ranking).
   const searchResources = useMemo(() => createResourceSearch(resources), [resources]);
@@ -86,7 +111,7 @@ export function CommandPalette({
           onValueChange={setQuery}
         />
         <CommandList>
-        <CommandEmpty>{t("command.empty")}</CommandEmpty>
+        <CommandEmpty>{index ? t("command.empty") : t("command.loading")}</CommandEmpty>
         {companyResults.length > 0 && (
           <CommandGroup heading={t("command.companies")}>
             {companyResults.map((c) => (

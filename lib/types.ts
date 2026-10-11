@@ -153,3 +153,26 @@ export interface Company {
 export interface CompanyWithRelated extends Company {
   related: Company[]
 }
+
+/** A resource as the ⌘K palette needs it — the slim shape /api/search-index serves. */
+export type ResourceHit = Pick<Resource, '_id' | 'name' | 'url' | 'featured' | 'author' | 'description'> & {
+  categories: { title: string }[]
+  tags: { title: string }[]
+}
+
+/** A company as the ⌘K palette needs it. */
+export type CompanyHit = Pick<
+  Company,
+  '_id' | 'name' | 'slug' | 'website' | 'emails' | 'clients' | 'otherLocations'
+>
+
+export interface SearchIndex {
+  resources: ResourceHit[]
+  companies: CompanyHit[]
+}
+
+/** Public per-resource counts served by /api/counts. */
+export interface ResourceCounts {
+  clicks: Record<string, number>
+  favorites: Record<string, number>
+}

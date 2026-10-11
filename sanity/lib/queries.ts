@@ -154,3 +154,22 @@ export const companyBySlugQuery = groq`
     } | order(_score desc, name asc)[0...6]
   }
 `
+
+/**
+ * The ⌘K palette's dataset, served by /api/search-index and fetched only when
+ * the palette opens — so pages no longer carry every resource and company.
+ */
+export const searchIndexQuery = groq`{
+  "resources": *[${PUBLISHED}] | order(featured desc, addedAt desc) {
+    _id, name, url, featured, author,
+    description,
+    "categories": coalesce(categories[]->{ title }, []),
+    "tags": coalesce(tags[]->{ title }, [])
+  },
+  "companies": *[${PUBLISHED_COMPANY}] | order(name asc) {
+    _id, name, "slug": slug.current, website,
+    "emails": coalesce(emails, []),
+    "clients": coalesce(clients, []),
+    "otherLocations": coalesce(otherLocations, [])
+  }
+}`
