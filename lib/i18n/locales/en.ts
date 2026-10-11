@@ -13,6 +13,8 @@ export const en = {
     save: "Save profile",
     saved: "Profile saved.",
     saveError: "Could not save. Please try again.",
+    invalidUrl: "Links must be web addresses (https://…).",
+    tooLong: "A field is too long.",
     usernameTaken: "That username is taken.",
     usernameRateLimited: "Too many username changes. Try again later.",
     contributions: "Contributions ({{count}})",
@@ -341,6 +343,7 @@ export const en = {
   },
 
   account: {
+    reauthRequired: "For your security, sign out and sign back in, then try again.",
     title: "Your data",
     export: "Export my data",
     exportError: "Couldn't export your data. Please try again.",

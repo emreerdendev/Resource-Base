@@ -13,6 +13,8 @@ export const tr = {
     save: "Profili kaydet",
     saved: "Profil kaydedildi.",
     saveError: "Kaydedilemedi. Lütfen tekrar dene.",
+    invalidUrl: "Bağlantılar web adresi olmalı (https://…).",
+    tooLong: "Bir alan çok uzun.",
     usernameTaken: "Bu kullanıcı adı alınmış.",
     usernameRateLimited: "Çok fazla kullanıcı adı değişikliği. Sonra tekrar dene.",
     contributions: "Katkılar ({{count}})",
@@ -339,6 +341,7 @@ export const tr = {
   },
 
   account: {
+    reauthRequired: "Güvenliğin için çıkış yapıp tekrar giriş yap, sonra yeniden dene.",
     title: "Verilerin",
     export: "Verilerimi dışa aktar",
     exportError: "Verilerin dışa aktarılamadı. Lütfen tekrar dene.",

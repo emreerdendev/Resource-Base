@@ -4,7 +4,8 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { user } from "@/lib/db/schema";
 import { getAuth } from "@/lib/auth";
-import { getSessionUser } from "@/lib/authz";
+import { requireFreshUser } from "@/lib/authz";
+import { isSameOrigin } from "@/lib/request";
 import { writeClient } from "@/sanity/lib/writeClient";
 
 export const runtime = "nodejs";
@@ -21,8 +22,14 @@ export const runtime = "nodejs";
  * attribution is cleared.
  */
 export async function POST(req: NextRequest) {
-  const me = await getSessionUser();
-  if (!me) return new NextResponse("Unauthorized", { status: 401 });
+  if (!isSameOrigin(req)) return new NextResponse("Forbidden", { status: 403 });
+  let me;
+  try {
+    me = await requireFreshUser();
+  } catch {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+  if (me === "stale") return NextResponse.json({ error: "reauth" }, { status: 403 });
 
   let body: { confirm?: string };
   try {
@@ -36,14 +43,17 @@ export async function POST(req: NextRequest) {
 
   const userId = me.id;
 
-  // 1) Anonymize this user's Sanity submissions (best-effort).
+  // 1) Anonymize this user's Sanity documents (best-effort): their
+  //    submissions, and the attribution on resources they contributed.
   try {
     await writeClient
-      .patch({
-        query: `*[_type == "submission" && submittedBy == $uid]`,
-        params: { uid: userId },
-      })
-      .unset(["submittedBy", "email"])
+      .transaction()
+      .patch({ query: `*[_type == "submission" && submittedBy == $uid]`, params: { uid: userId } }, (p) =>
+        p.unset(["submittedBy", "email"]),
+      )
+      .patch({ query: `*[_type == "resource" && submittedBy == $uid]`, params: { uid: userId } }, (p) =>
+        p.unset(["submittedBy"]),
+      )
       .commit();
   } catch (err) {
     console.error("sanity anonymize failed", err);

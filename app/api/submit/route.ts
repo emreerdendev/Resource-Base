@@ -8,6 +8,7 @@ import { parseCompanySuggestion } from "@/lib/company-submission";
 import { slugify } from "@/lib/slug";
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isPlainId, isResourceId } from "@/sanity/lib/slugs";
+import { isSameOrigin } from "@/lib/request";
 
 export const runtime = "nodejs";
 
@@ -43,6 +44,9 @@ function isValidUrl(url: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isSameOrigin(req)) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
   // Auth is required — derive the user from the verified server session, never
   // from the request body (so a client cannot spoof someone else's userId or
   // submit anonymously).

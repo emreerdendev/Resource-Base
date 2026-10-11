@@ -5,8 +5,9 @@ import { and, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { user } from "@/lib/db/schema";
 import { getAuth } from "@/lib/auth";
-import { getSessionUser, requireUser } from "@/lib/authz";
-import { isRateLimited } from "@/lib/rate-limit";
+import { getSessionUser, requireFreshUser, requireUser } from "@/lib/authz";
+import { isRateLimited, overLimit } from "@/lib/rate-limit";
+import { normalizeWebUrl } from "@/lib/company-input";
 
 const PW_MIN = 8;
 const PW_MAX = 64;
@@ -21,8 +22,14 @@ const PW_MAX = 64;
 export async function setMyPassword(
   newPassword: string,
 ): Promise<{ error: string | null }> {
-  await requireUser();
-  if (newPassword.length < PW_MIN || newPassword.length > PW_MAX)
+  // Adding a password creates a login that outlives every session, so it
+  // needs a recent sign-in, not just any open session.
+  if ((await requireFreshUser()) === "stale") return { error: "reauth" };
+  if (
+    typeof newPassword !== "string" ||
+    newPassword.length < PW_MIN ||
+    newPassword.length > PW_MAX
+  )
     return { error: "invalid_password" };
 
   const auth = await getAuth();
@@ -62,6 +69,7 @@ export async function setUsername(
   next: string,
 ): Promise<{ error: string | null }> {
   const me = await requireUser();
+  if (typeof next !== "string") return { error: "invalid_username" };
   const cleaned = next.trim().toLowerCase();
   if (!USERNAME_RE.test(cleaned)) return { error: "invalid_username" };
   // A human changes their handle rarely; cap at 5/hour to stop a script from
@@ -111,15 +119,24 @@ export async function updateProfile(
   fields: Record<string, unknown>,
 ): Promise<{ error: string | null }> {
   const me = await requireUser();
+  if (!fields || typeof fields !== "object") return { error: "invalid" };
+  if (await overLimit("RL_USER", `profile:${me.id}`)) return { error: "rate_limited" };
   const patch: Record<string, unknown> = {};
   for (const key of EDITABLE) {
     if (!(key in fields)) continue;
-    let v = fields[key] ?? null;
-    if (typeof v === "string") {
-      v = v.trim();
-      const cap = MAX_LEN[key];
-      if (cap && (v as string).length > cap) return { error: "too_long" };
-      if (v === "") v = null;
+    const raw = fields[key] ?? null;
+    if (key === "showEmail") {
+      if (typeof raw !== "boolean") return { error: "invalid" };
+      patch[key] = raw;
+      continue;
+    }
+    if (raw !== null && typeof raw !== "string") return { error: "invalid" };
+    let v = raw?.trim() || null;
+    if (v && v.length > MAX_LEN[key]) return { error: "too_long" };
+    // Links render as <a href> on the public profile: http(s) only.
+    if (v && key.endsWith("Url")) {
+      v = normalizeWebUrl(v);
+      if (!v) return { error: "invalid_url" };
     }
     patch[key] = v;
   }
@@ -147,6 +164,7 @@ const PUBLIC_COLUMNS = {
 } as const;
 
 export async function fetchPublicProfile(username: string) {
+  if (typeof username !== "string" || username.length > 40) return null;
   const db = getDb();
   const [row] = await db
     .select(PUBLIC_COLUMNS)
@@ -162,6 +180,9 @@ export async function fetchPublicProfile(username: string) {
 }
 
 export async function fetchProfilesByIds(ids: string[]) {
+  // Public and called with ids from the page; D1 caps bound parameters at 100.
+  if (!Array.isArray(ids)) ids = [];
+  ids = ids.filter((id): id is string => typeof id === "string" && id.length <= 64).slice(0, 90);
   if (ids.length === 0)
     return {} as Record<
       string,
@@ -184,6 +205,7 @@ export async function fetchProfilesByIds(ids: string[]) {
 
 /** Email only if the user opted in (replaces public_email RPC). */
 export async function fetchPublicEmail(userId: string): Promise<string | null> {
+  if (typeof userId !== "string" || userId.length > 64) return null;
   const db = getDb();
   const [row] = await db
     .select({ email: user.email })

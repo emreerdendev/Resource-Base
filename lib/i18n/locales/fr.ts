@@ -13,6 +13,8 @@ export const fr = {
     save: "Enregistrer le profil",
     saved: "Profil enregistré.",
     saveError: "Échec de l’enregistrement. Réessayez.",
+    invalidUrl: "Les liens doivent être des adresses web (https://…).",
+    tooLong: "Un champ est trop long.",
     usernameTaken: "Ce nom d’utilisateur est déjà pris.",
     usernameRateLimited: "Trop de changements de nom. Réessayez plus tard.",
     contributions: "Contributions ({{count}})",
@@ -341,6 +343,7 @@ export const fr = {
   },
 
   account: {
+    reauthRequired: "Par sécurité, déconnecte-toi puis reconnecte-toi, et réessaie.",
     title: "Vos données",
     export: "Exporter mes données",
     exportError: "Impossible d'exporter vos données. Veuillez réessayer.",

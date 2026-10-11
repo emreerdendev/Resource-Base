@@ -27,3 +27,21 @@ export async function requireUser(): Promise<SessionUser> {
   if (!user) throw new Response("Unauthorized", { status: 401 });
   return user;
 }
+
+/** How recent a sign-in must be for account-level changes. */
+const FRESH_SESSION_MS = 15 * 60 * 1000;
+
+/**
+ * The user, only if they signed in within the last 15 minutes — required for
+ * irreversible or account-takeover-relevant actions (delete account, add a
+ * password), so a stolen or forgotten-open session can't perform them.
+ * Returns "stale" when signed in earlier; the UI asks to sign in again.
+ */
+export async function requireFreshUser(): Promise<SessionUser | "stale"> {
+  const auth = await getAuth();
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Response("Unauthorized", { status: 401 });
+  const signedInAt = new Date(session.session.createdAt).getTime();
+  if (Date.now() - signedInAt > FRESH_SESSION_MS) return "stale";
+  return session.user as SessionUser;
+}

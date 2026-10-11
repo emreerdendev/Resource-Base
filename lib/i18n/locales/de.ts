@@ -13,6 +13,8 @@ export const de = {
     save: "Profil speichern",
     saved: "Profil gespeichert.",
     saveError: "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    invalidUrl: "Links müssen Webadressen sein (https://…).",
+    tooLong: "Ein Feld ist zu lang.",
     usernameTaken: "Dieser Benutzername ist vergeben.",
     usernameRateLimited: "Zu viele Namensänderungen. Versuche es später erneut.",
     contributions: "Beiträge ({{count}})",
@@ -341,6 +343,7 @@ export const de = {
   },
 
   account: {
+    reauthRequired: "Melde dich zur Sicherheit ab und wieder an und versuche es dann erneut.",
     title: "Deine Daten",
     export: "Meine Daten exportieren",
     exportError: "Daten konnten nicht exportiert werden. Bitte erneut versuchen.",

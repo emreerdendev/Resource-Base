@@ -56,6 +56,11 @@ export function AccountDangerZone() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ confirm: "DELETE" }),
       });
+      if (res.status === 403) {
+        toast.error(t("account.reauthRequired"));
+        setDeleting(false);
+        return;
+      }
       if (!res.ok) throw new Error(await res.text());
       toast.success(t("account.deleted"));
       // Clear local session and go home.

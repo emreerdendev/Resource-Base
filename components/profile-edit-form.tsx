@@ -133,7 +133,16 @@ export function ProfileEditForm() {
         dribbble_url: fields.dribbble_url || null,
         show_email: fields.show_email,
       });
-      if (error) throw new Error(error);
+      if (error)
+        throw new Error(
+          error === "invalid_url"
+            ? t("profile.invalidUrl")
+            : error === "too_long"
+              ? t("profile.tooLong")
+              : error === "rate_limited"
+                ? t("card.favoriteRateLimited")
+                : t("profile.saveError"),
+        );
       toast.success(t("profile.saved"));
       router.push(`/profile/${nextUsername || profile!.username}`);
     } catch (err) {

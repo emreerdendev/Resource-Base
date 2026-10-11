@@ -73,7 +73,7 @@ export function ProfileChangePassword() {
         toast.success(t("auth.passwordChanged"));
       } else {
         const { error } = await setMyPassword(next);
-        if (error) throw new Error(t("auth.failed"));
+        if (error) throw new Error(t(error === "reauth" ? "account.reauthRequired" : "auth.failed"));
         toast.success(t("auth.passwordSet"));
         await refresh(); // flip the section into change-password mode
       }
