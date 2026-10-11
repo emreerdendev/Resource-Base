@@ -22,6 +22,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { normalizeLinkedinJobsUrl } from "@/lib/company-input";
 import { hasContact, hostLabel, searchLinks } from "@/lib/company-utils";
 import type { Company } from "@/lib/types";
 
@@ -154,6 +155,7 @@ export function CompanyDetails({
   const search = searchLinks(company.name);
   const places = [
     ...company.cities.map((c) => t(`companies.city.${c}`)),
+    ...company.otherLocations,
     ...company.workModels.map((w) => t(`companies.workModel.${w}`)),
   ];
 
@@ -176,7 +178,7 @@ export function CompanyDetails({
             ))}
             {company.linkedin && (
               <LinkRow
-                href={company.linkedin}
+                href={normalizeLinkedinJobsUrl(company.linkedin) ?? company.linkedin}
                 icon={<LinkedinIcon className="size-4" />}
                 label={t("company.linkedin")}
               />

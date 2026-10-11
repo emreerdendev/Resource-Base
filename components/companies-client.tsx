@@ -97,7 +97,10 @@ export function CompaniesClient({
 
   const filtered = useMemo(() => {
     let list = q.trim() ? fuse.search(q).map((r) => r.item) : companies;
-    if (city) list = list.filter((c) => c.cities.includes(city as never));
+    if (city)
+      list = list.filter(
+        (c) => c.cities.includes(city as never) || c.otherLocations.includes(city),
+      );
     if (workModel) list = list.filter((c) => c.workModels.includes(workModel as never));
     if (sector) list = list.filter((c) => c.sectors.includes(sector as never));
     if (channel)
@@ -146,6 +149,24 @@ export function CompaniesClient({
   };
   const toggle = (setter: (v: string) => void, current: string) => (v: string) =>
     setter(v === current ? "" : v);
+
+  // Locations: the quick-pick cities that occur, then free-text places (e.g.
+  // "Berlin, Germany") by how many companies list them — so the facet grows
+  // with the data instead of a fixed world list.
+  const locationOptions = useMemo(() => {
+    const others = new Map<string, number>();
+    for (const c of companies)
+      for (const o of c.otherLocations) others.set(o, (others.get(o) ?? 0) + 1);
+    return [
+      ...CITIES.filter((v) => companies.some((c) => c.cities.includes(v))).map((v) => ({
+        value: v,
+        label: t(`companies.city.${v}`),
+      })),
+      ...[...others]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .map(([v]) => ({ value: v, label: v })),
+    ];
+  }, [companies, t]);
 
   // Only offer sectors that actually occur, so no chip ever yields nothing.
   const sectors = SECTORS.filter((s) => companies.some((c) => c.sectors.includes(s)));
@@ -197,7 +218,7 @@ export function CompaniesClient({
             <div className="mt-3 space-y-3 rounded-lg border border-border bg-card p-4">
               <Facet
                 label={t("companies.facet.city")}
-                options={CITIES.map((v) => ({ value: v, label: t(`companies.city.${v}`) }))}
+                options={locationOptions}
                 value={city}
                 onChange={toggle(setCity, city)}
               />

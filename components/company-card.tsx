@@ -22,6 +22,7 @@ export function CompanyCard({ company }: { company: Company }) {
 
   const places = [
     ...company.cities.map((c) => t(`companies.city.${c}`)),
+    ...company.otherLocations,
     ...company.workModels.map((w) => t(`companies.workModel.${w}`)),
   ];
   const ways = [
