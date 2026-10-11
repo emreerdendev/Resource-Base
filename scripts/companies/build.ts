@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import type { ApplicationChannel, City, Sector, WorkModel } from '../../lib/company-taxonomy'
+import { normalizeLinkedinJobsUrl } from '../../lib/company-input'
 import { parseCsv } from '../../lib/csv'
 import { slugify } from '../../lib/slug'
 
@@ -141,7 +142,9 @@ export function buildSeeds(csv: string): CompanySeed[] {
     const links = [websiteRaw, ...['W2', 'Platform URL', 'P2'].map((c) => normalizeUrl(get(row, c)))].filter(
       (u): u is string => Boolean(u)
     )
-    const linkedin = links.find(isLinkedin)
+    // Company pages point at their jobs tab (…/company/acme/jobs/).
+    const linkedinRaw = links.find(isLinkedin)
+    const linkedin = linkedinRaw && (normalizeLinkedinJobsUrl(linkedinRaw) ?? linkedinRaw)
     const website = websiteRaw && !isLinkedin(websiteRaw) ? websiteRaw : undefined
     const careerLinks = links.slice(1).filter((u) => !isLinkedin(u))
 
