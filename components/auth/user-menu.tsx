@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Bell, BriefcaseBusiness, LogOut, Plus, Star, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ export function UserMenu() {
   const { user, loading, openAuth, signOut } = useAuth();
   const { unread } = useNotifications();
   const { profile } = useProfile();
+  const [failedAvatar, setFailedAvatar] = useState<string | null>(null);
 
   if (loading) {
     return <div className="size-9 animate-pulse rounded-full bg-muted" />;
@@ -44,6 +46,8 @@ export function UserMenu() {
   // Prefer the edited DB name; fall back to the Better Auth name, then email.
   const name = profile?.full_name || user.name || user.email || "Account";
   const avatar = profile?.avatar_url || user.image || undefined;
+  // Provider avatar URLs can expire or be blocked — fall back to the initial.
+  const showAvatar = avatar && avatar !== failedAvatar;
   // Provider badge (which OAuth the user signed in with) is stored in Better
   // Auth's account table, not on the session user. Omitted for now (no badge)
   // — can be re-added via an account lookup if desired.
@@ -60,9 +64,15 @@ export function UserMenu() {
           aria-label="Account menu"
         >
           <span className="grid size-full place-items-center overflow-hidden rounded-full border border-border bg-muted">
-            {avatar ? (
+            {showAvatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatar} alt="" className="size-full object-cover" />
+              <img
+                src={avatar}
+                alt=""
+                referrerPolicy="no-referrer"
+                onError={() => setFailedAvatar(avatar)}
+                className="size-full object-cover"
+              />
             ) : (
               <span className="font-medium text-foreground">{initial(name)}</span>
             )}
