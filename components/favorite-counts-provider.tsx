@@ -23,6 +23,11 @@ export function useFavoriteCounts() {
   return ctx;
 }
 
+/** Adjust counts without loading them — for the favorites provider itself. */
+export function useFavoriteCountsBump() {
+  return (useContext(FavoriteCountsContext) ?? FALLBACK).bump;
+}
+
 /**
  * How many users favorited each resource (public, from the cached
  * /api/counts). Mirrors ClickCountsProvider: `bump` adjusts locally when the

@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { toggleFavorite } from "@/lib/data-actions";
 import { loadViewer } from "@/lib/viewer";
 import { useAuth } from "@/components/auth/auth-provider";
-import { useFavoriteCounts } from "@/components/favorite-counts-provider";
+import { useFavoriteCountsBump } from "@/components/favorite-counts-provider";
 
 type FavoritesValue = {
   ids: string[];
@@ -32,7 +32,8 @@ const FavoritesContext = createContext<FavoritesValue | null>(null);
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { bump } = useFavoriteCounts();
+  // Not useFavoriteCounts(): that would load the counts on every page.
+  const bump = useFavoriteCountsBump();
   const [ids, setIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
