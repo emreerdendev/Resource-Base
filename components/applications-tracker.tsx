@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BriefcaseBusiness, Loader2, NotebookPen, Search } from "lucide-react";
+import { BriefcaseBusiness, Download, Loader2, NotebookPen, Search, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
 import { CompanyLogo } from "@/components/company-logo";
@@ -12,6 +12,8 @@ import { useCompanyTracker } from "@/components/company-tracker-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { TrackedCompany } from "@/lib/company-actions";
+import { createCompanySearch } from "@/lib/company-search";
+import { toCsv } from "@/lib/csv";
 import { APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/company-taxonomy";
 import type { Company } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -52,36 +54,76 @@ function Row({ company, tracked }: { company: Company; tracked: TrackedCompany }
   );
 }
 
+type SortKey = "recent" | "name" | "status";
+const SORTS: SortKey[] = ["recent", "name", "status"];
+/** "Status" sort: furthest along first, closed ones last. */
+const STATUS_ORDER: ApplicationStatus[] = ["offer", "interview", "applied", "saved", "rejected"];
+
 /**
  * The user's application pipeline: every saved company with its status and
- * note, filterable by status. `compact` renders the profile summary (counts +
- * the latest few) with a link to the full /applications page.
+ * note, filterable by status, searchable, sortable and exportable. Entries of
+ * companies since removed from the directory are listed separately so their
+ * notes aren't silently lost.
  */
-export function ApplicationsTracker({
-  companies,
-  compact = false,
-}: {
-  companies: Company[];
-  compact?: boolean;
-}) {
-  const { t } = useTranslation();
+export function ApplicationsTracker({ companies }: { companies: Company[] }) {
+  const { t, i18n } = useTranslation();
   const { user, loading: authLoading, openAuth } = useAuth();
   const { items, loading } = useCompanyTracker();
   const [status, setStatus] = useState<ApplicationStatus | "">("");
   const [q, setQ] = useState("");
+  const [sort, setSort] = useState<SortKey>("recent");
 
   const byId = useMemo(() => new Map(companies.map((c) => [c._id, c])), [companies]);
-  // Companies later hidden/removed from the directory simply drop out.
-  const rows = items.filter((x) => byId.has(x.companyId));
+  const rows = useMemo(() => items.filter((x) => byId.has(x.companyId)), [items, byId]);
+  const removed = useMemo(() => items.filter((x) => !byId.has(x.companyId)), [items, byId]);
   const counts = Object.fromEntries(
     APPLICATION_STATUSES.map((s) => [s, rows.filter((r) => r.status === s).length]),
   ) as Record<ApplicationStatus, number>;
 
-  const needle = q.trim().toLocaleLowerCase();
-  const visible = rows
-    .filter((r) => !status || r.status === status)
-    .filter((r) => !needle || byId.get(r.companyId)!.name.toLocaleLowerCase().includes(needle));
-  const shown = compact ? visible.slice(0, 5) : visible;
+  // Same Turkish-insensitive search as the directory, over tracked companies.
+  const search = useMemo(
+    () => createCompanySearch(rows.map((r) => byId.get(r.companyId)!)),
+    [rows, byId],
+  );
+  const visible = useMemo(() => {
+    const matched = q.trim() ? new Set(search(q).map((c) => c._id)) : null;
+    const list = rows
+      .filter((r) => !status || r.status === status)
+      .filter((r) => !matched || matched.has(r.companyId));
+    const name = (r: TrackedCompany) => byId.get(r.companyId)!.name;
+    if (sort === "name")
+      return [...list].sort((a, b) => name(a).localeCompare(name(b), i18n.language));
+    if (sort === "status")
+      return [...list].sort(
+        (a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status),
+      );
+    return list; // server order: most recently updated first
+  }, [rows, status, q, search, sort, byId, i18n.language]);
+
+  function exportCsv() {
+    const csv = toCsv([
+      ["Company", "Status", "Note", "Updated", "Website", "Career page", "LinkedIn", "Emails"],
+      ...rows.map((r) => {
+        const c = byId.get(r.companyId)!;
+        return [
+          c.name,
+          t(`tracker.status.${r.status}`),
+          r.note,
+          r.updatedAt.slice(0, 10),
+          c.website,
+          c.careerLinks[0],
+          c.linkedin,
+          c.emails.join(" "),
+        ];
+      }),
+    ]);
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "my-applications.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   if (!authLoading && !user) {
     return (
@@ -100,14 +142,12 @@ export function ApplicationsTracker({
       </div>
     );
   }
-  if (rows.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border py-16 text-center">
         <BriefcaseBusiness className="mx-auto size-6 text-muted-foreground" />
         <p className="mt-3 text-muted-foreground">{t("tracker.empty")}</p>
-        {!compact && (
-          <p className="mt-1 text-sm text-muted-foreground">{t("tracker.import.emptyHint")}</p>
-        )}
+        <p className="mt-1 text-sm text-muted-foreground">{t("tracker.import.emptyHint")}</p>
         <Button asChild className="mt-4">
           <Link href="/companies">{t("tracker.browse")}</Link>
         </Button>
@@ -137,8 +177,8 @@ export function ApplicationsTracker({
         ))}
       </div>
 
-      {!compact && (
-        <div className="relative">
+      <div className="flex flex-wrap gap-2">
+        <div className="relative min-w-48 flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
@@ -148,27 +188,77 @@ export function ApplicationsTracker({
             className="pl-9"
           />
         </div>
-      )}
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortKey)}
+          aria-label={t("tracker.sort.label")}
+          className="h-9 cursor-pointer rounded-md border border-input bg-background px-2 text-sm"
+        >
+          {SORTS.map((k) => (
+            <option key={k} value={k}>
+              {t(`tracker.sort.${k}`)}
+            </option>
+          ))}
+        </select>
+        {rows.length > 0 && (
+          <Button variant="outline" onClick={exportCsv}>
+            <Download className="size-4" /> {t("tracker.exportCsv")}
+          </Button>
+        )}
+      </div>
 
-      {shown.length === 0 ? (
+      {visible.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">{t("tracker.noneInStatus")}</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {shown.map((r) => (
+          {visible.map((r) => (
             <Row key={r.companyId} company={byId.get(r.companyId)!} tracked={r} />
           ))}
         </ul>
       )}
 
-      {compact && (
-        <Link
-          href="/applications"
-          className="inline-flex items-center gap-1 self-center text-sm font-medium text-primary hover:underline"
-        >
-          {t("tracker.viewAll", { count: rows.length })} <ArrowRight className="size-3.5" />
-        </Link>
-      )}
+      {removed.length > 0 && <RemovedCompanies items={removed} />}
     </div>
+  );
+}
+
+/** Tracked companies no longer in the directory: status + note, removable. */
+function RemovedCompanies({ items }: { items: TrackedCompany[] }) {
+  const { t } = useTranslation();
+  const { setStatus } = useCompanyTracker();
+  // The company document is gone, so its id ("company-acme-inc") is the only
+  // name left.
+  const label = (id: string) =>
+    id.replace(/^company-/, "").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return (
+    <details className="mt-4 rounded-xl border border-dashed border-border p-3">
+      <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
+        {t("tracker.removedTitle", { count: items.length })}
+      </summary>
+      <p className="mt-2 text-xs text-muted-foreground">{t("tracker.removedHint")}</p>
+      <ul className="mt-3 flex flex-col gap-2">
+        {items.map((r) => (
+          <li key={r.companyId} className="flex items-start gap-3 rounded-lg bg-muted/40 p-3">
+            <div className="min-w-0 flex-1">
+              <p className="font-medium">{label(r.companyId)}</p>
+              <p className="text-xs text-muted-foreground">
+                {t(`tracker.status.${r.status}`)}
+                {r.note && ` · ${r.note}`}
+              </p>
+            </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              aria-label={t("tracker.remove")}
+              title={t("tracker.remove")}
+              onClick={() => setStatus(r.companyId, null)}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 

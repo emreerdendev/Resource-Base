@@ -84,8 +84,7 @@ export function CompanyTrackerProvider({ children }: { children: React.ReactNode
   const upsertLocal = useCallback(
     (companyId: string, patch: Partial<TrackedCompany> | null) =>
       setItems((prev) => {
-        const rest = prev.filter((x) => x.companyId !== companyId);
-        if (patch === null) return rest;
+        if (patch === null) return prev.filter((x) => x.companyId !== companyId);
         const current = prev.find((x) => x.companyId === companyId);
         const next: TrackedCompany = {
           companyId,
@@ -95,7 +94,11 @@ export function CompanyTrackerProvider({ children }: { children: React.ReactNode
           ...patch,
           updatedAt: new Date().toISOString(),
         };
-        return [next, ...rest];
+        // Updated in place so a list doesn't jump while it's being edited;
+        // newly tracked companies go first.
+        return current
+          ? prev.map((x) => (x.companyId === companyId ? next : x))
+          : [next, ...prev];
       }),
     [setItems],
   );
