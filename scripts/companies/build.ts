@@ -146,7 +146,10 @@ export function buildSeeds(csv: string): CompanySeed[] {
     const linkedinRaw = links.find(isLinkedin)
     const linkedin = linkedinRaw && (normalizeLinkedinJobsUrl(linkedinRaw) ?? linkedinRaw)
     const website = websiteRaw && !isLinkedin(websiteRaw) ? websiteRaw : undefined
-    const careerLinks = links.slice(1).filter((u) => !isLinkedin(u))
+    // Everything that isn't the company's own site or LinkedIn is a place to
+    // apply (Lever, hrpanda, Kariyer.net …). Filter by value, not position:
+    // when there's no website the first link IS a career link.
+    const careerLinks = links.filter((u) => u !== websiteRaw && !isLinkedin(u))
 
     const dropped = DROP_EMAILS[name] ?? []
     const emails = [

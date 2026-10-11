@@ -198,8 +198,12 @@
     "name": "Analyzify",
     "slug": "analyzify",
     "emails": [],
-    "careerLinks": [],
-    "channels": [],
+    "careerLinks": [
+      "https://analyzify.hrpanda.co/"
+    ],
+    "channels": [
+      "career"
+    ],
     "cities": [],
     "workModels": [],
     "sectors": [],
@@ -245,7 +249,9 @@
     "name": "AppNation",
     "slug": "appnation",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://jobs.lever.co/appnation"
+    ],
     "channels": [
       "hr",
       "message",
@@ -264,8 +270,12 @@
     "name": "AppNava",
     "slug": "appnava",
     "emails": [],
-    "careerLinks": [],
-    "channels": [],
+    "careerLinks": [
+      "https://appnava.com/career/#open-roles"
+    ],
+    "channels": [
+      "career"
+    ],
     "cities": [],
     "workModels": [],
     "sectors": [],
@@ -275,7 +285,9 @@
     "name": "Armut.com",
     "slug": "armut-com",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://applyto.armut.com/positions"
+    ],
     "channels": [
       "career"
     ],
@@ -330,7 +342,9 @@
     "name": "Atos",
     "slug": "atos",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://jobs.atos.net/search/?createNewAlert=false&q=&locationsearch=&optionsFacetsDD_country=&optionsFacetsDD_city=&optionsFacetsDD_customfield2="
+    ],
     "channels": [
       "career"
     ],
@@ -624,8 +638,12 @@
     "name": "Cloudyflex",
     "slug": "cloudyflex",
     "emails": [],
-    "careerLinks": [],
-    "channels": [],
+    "careerLinks": [
+      "https://cloudyflex.zohorecruit.com/jobs/Careers"
+    ],
+    "channels": [
+      "career"
+    ],
     "cities": [],
     "workModels": [],
     "sectors": [],
@@ -653,7 +671,9 @@
     "emails": [
       "helloworld@coderspace.io"
     ],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://app.gethirex.com/o/coderspace/"
+    ],
     "channels": [
       "career",
       "email"
@@ -1411,7 +1431,9 @@
     "name": "HubX",
     "slug": "hubx",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://hubx.hrpanda.co/"
+    ],
     "channels": [
       "hr",
       "message",
@@ -1490,9 +1512,12 @@
     "emails": [
       "ik@ikas.com"
     ],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://ikas.hrpanda.co/tr"
+    ],
     "channels": [
-      "email"
+      "email",
+      "career"
     ],
     "cities": [],
     "workModels": [],
@@ -1596,9 +1621,12 @@
     "slug": "insider-one",
     "linkedin": "https://www.linkedin.com/company/insiderone/jobs/",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://jobs.lever.co/insiderone?team=Software%20Development"
+    ],
     "channels": [
       "hr",
+      "career",
       "linkedin"
     ],
     "cities": [],
@@ -1769,7 +1797,9 @@
     "name": "iyzico",
     "slug": "iyzico",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://jobs.lever.co/iyzico"
+    ],
     "channels": [
       "career"
     ],
@@ -1883,9 +1913,12 @@
     "emails": [
       "info@kolaysoft.com.tr"
     ],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://www.kolaysoft.com.tr/en/kolaysoft-kariyer#pozisyonlar"
+    ],
     "channels": [
-      "email"
+      "email",
+      "career"
     ],
     "cities": [],
     "workModels": [],
@@ -1931,7 +1964,9 @@
     "name": "Logo Yazılım",
     "slug": "logo-yazilim",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://live.peoplise.com/logo/career"
+    ],
     "channels": [
       "career"
     ],
@@ -2064,7 +2099,9 @@
     "name": "Mantu / Amaris Consulting",
     "slug": "mantu-amaris-consulting",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://careers.mantu.com/jobs"
+    ],
     "channels": [
       "hr",
       "career"
@@ -2083,7 +2120,9 @@
     "name": "Mars Athletic Club",
     "slug": "mars-athletic-club",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://live.peoplise.com/marsathletic/career/"
+    ],
     "channels": [
       "hr",
       "career"
@@ -2166,7 +2205,9 @@
     "name": "Midas",
     "slug": "midas",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://jobs.lever.co/getmidas"
+    ],
     "channels": [
       "hr",
       "linkedin",
@@ -2251,7 +2292,9 @@
     "name": "MobileAction",
     "slug": "mobileaction",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://jobs.lever.co/mobile-action"
+    ],
     "channels": [
       "career"
     ],
@@ -2299,7 +2342,9 @@
     "name": "MobTech",
     "slug": "mobtech",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://recruitx.com.tr/Portal/Jobs"
+    ],
     "channels": [
       "hr",
       "linkedin",
@@ -3039,7 +3084,9 @@
     "name": "Protel",
     "slug": "protel",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://protel.hrpanda.co/tr"
+    ],
     "channels": [
       "career"
     ],
@@ -3240,7 +3287,9 @@
     "name": "SevenApps",
     "slug": "sevenapps",
     "emails": [],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://sevenapps.hrpanda.co/"
+    ],
     "channels": [
       "hr",
       "career"
@@ -3546,9 +3595,12 @@
     "emails": [
       "info@technohr.tr"
     ],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://technohr.tr/is-ilanlari/"
+    ],
     "channels": [
       "email",
+      "career",
       "linkedin"
     ],
     "cities": [],
@@ -3843,9 +3895,12 @@
     "emails": [
       "info@udogames.com"
     ],
-    "careerLinks": [],
+    "careerLinks": [
+      "https://udogames.com/career-page/"
+    ],
     "channels": [
-      "email"
+      "email",
+      "career"
     ],
     "cities": [],
     "workModels": [],
