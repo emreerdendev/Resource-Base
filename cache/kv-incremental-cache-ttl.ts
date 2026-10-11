@@ -27,11 +27,15 @@ type IncrementalCache = Extract<IncrementalCacheOverride, { get: unknown }>;
  * every revalidation, so the TTL only ever reaps entries nothing is reading
  * anymore (stale builds, dropped routes). `get`/`delete` are unchanged.
  *
- * TTL is 30 days: comfortably longer than the 1-hour `revalidate` safety net in
- * sanity/lib/fetch.ts and any realistic deploy cadence, so live pages never
- * expire out from under traffic — a miss would just be regenerated anyway.
+ * TTL is 7 days: longer than the 1-day `revalidate` safety net in
+ * sanity/lib/fetch.ts, so pages in use are rewritten before they expire, while
+ * each deploy's stranded build-id keys are reaped within a week. A miss is just
+ * regenerated.
+ *
+ * Error pages (404s for made-up slugs, 500s) are never stored: each distinct
+ * junk URL would otherwise become its own KV write plus a week of storage.
  */
-const TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
+const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 const NAME = "cf-kv-incremental-cache-ttl";
 const BINDING_NAME = "NEXT_INC_CACHE_KV";
@@ -77,6 +81,7 @@ class KVIncrementalCacheWithTtl {
     const kv = getCloudflareContext().env[BINDING_NAME];
     if (!kv) throw new Error("No KV Namespace");
     debugCache("KVIncrementalCacheWithTtl", `set ${key}`);
+    if (isErrorPage(value)) return;
     try {
       await kv.put(
         this.getKVKey(key, cacheType),
@@ -107,6 +112,11 @@ class KVIncrementalCacheWithTtl {
       cacheType,
     });
   }
+}
+
+function isErrorPage(value: unknown): boolean {
+  const status = (value as { meta?: { status?: number } } | null)?.meta?.status;
+  return typeof status === "number" && status >= 400;
 }
 
 // Cast through unknown: the structural shape matches OpenNext's IncrementalCache

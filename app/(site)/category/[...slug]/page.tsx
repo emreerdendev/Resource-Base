@@ -6,24 +6,29 @@ import { sanityFetch } from "@/sanity/lib/fetch";
 import {
   allCategoriesQuery,
   categoryBySlugQuery,
-  categorySlugsQuery,
 } from "@/sanity/lib/queries";
+import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 export async function generateStaticParams() {
-  const slugs = await sanityFetch<string[]>({
-    query: categorySlugsQuery,
-    tags: ["category"],
-  });
+  const slugs = await listSlugs("category");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
 
+/**
+ * Only `/category/<slug>` is a page. The catch-all exists for legacy nested
+ * URLs (`/category/<parent>/<child>`), which redirect when the chain is real.
+ * Anything else 404s before any per-slug fetch: every distinct URL that
+ * rendered a page used to be cached in KV, so arbitrary prefixes
+ * (`/category/x/videos`, `/category/y/videos`, …) grew storage without bound.
+ */
 async function load(slugParts: string[]) {
-  // The catch-all gives the full path; the category itself is the last segment.
-  const slug = slugParts[slugParts.length - 1];
+  const slug = slugParts[0];
+  if (slugParts.length !== 1 || !(await hasSlug("category", slug)))
+    return { slug, category: null };
   const category = await sanityFetch<CategoryWithResources | null>({
     query: categoryBySlugQuery,
     params: { slug },
@@ -47,13 +52,26 @@ export async function generateMetadata({
   };
 }
 
+async function redirectLegacyPath(parentSlug: string, childSlug: string) {
+  const all = await sanityFetch<Category[]>({
+    query: allCategoriesQuery,
+    tags: ["category"],
+  });
+  if (all.some((c) => c.slug === childSlug && c.parentSlug === parentSlug))
+    permanentRedirect(`/category/${childSlug}`);
+}
+
 export default async function CategoryPage({
   params,
 }: {
   params: Promise<{ slug: string[] }>;
 }) {
-  const { slug, category } = await load((await params).slug);
-  if (!category) notFound();
+  const parts = (await params).slug;
+  const { slug, category } = await load(parts);
+  if (!category) {
+    if (parts.length === 2) await redirectLegacyPath(parts[0], parts[1]);
+    notFound();
+  }
 
   const allCategories = await sanityFetch<Category[]>({
     query: allCategoriesQuery,

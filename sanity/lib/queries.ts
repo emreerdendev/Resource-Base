@@ -86,6 +86,7 @@ export const tagBySlugQuery = groq`
 export const categorySlugsQuery = groq`*[_type == "category" && defined(slug.current)].slug.current`
 export const tagSlugsQuery = groq`*[_type == "tag" && defined(slug.current)].slug.current`
 export const resourceSlugsQuery = groq`*[${PUBLISHED} && defined(slug.current)].slug.current`
+export const resourceIdsQuery = groq`*[${PUBLISHED}]._id`
 
 /**
  * A single published resource by slug, plus "suggested" resources: others that
@@ -138,6 +139,7 @@ export const allCompaniesQuery = groq`
 `
 
 export const companySlugsQuery = groq`*[${PUBLISHED_COMPANY}].slug.current`
+export const companyIdsQuery = groq`*[${PUBLISHED_COMPANY}]._id`
 
 /** A company by slug plus a few others sharing a sector or city. */
 export const companyBySlugQuery = groq`

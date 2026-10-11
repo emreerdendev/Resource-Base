@@ -2,19 +2,18 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ResourceDetail } from "@/components/resource-detail";
 import { sanityFetch } from "@/sanity/lib/fetch";
-import { resourceBySlugQuery, resourceSlugsQuery } from "@/sanity/lib/queries";
+import { resourceBySlugQuery } from "@/sanity/lib/queries";
+import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
 import type { ResourceWithRelated } from "@/lib/types";
 import { siteUrl, siteName } from "@/lib/site";
 
 export async function generateStaticParams() {
-  const slugs = await sanityFetch<string[]>({
-    query: resourceSlugsQuery,
-    tags: ["resource"],
-  });
+  const slugs = await listSlugs("resource");
   return slugs.map((slug) => ({ slug }));
 }
 
 async function load(slug: string) {
+  if (!(await hasSlug("resource", slug))) return null;
   return sanityFetch<ResourceWithRelated | null>({
     query: resourceBySlugQuery,
     params: { slug },

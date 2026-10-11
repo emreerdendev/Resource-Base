@@ -1,21 +1,20 @@
 import { ResourceGrid } from "@/components/resource-grid";
 import type { TagWithResources } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
-import { tagBySlugQuery, tagSlugsQuery } from "@/sanity/lib/queries";
+import { tagBySlugQuery } from "@/sanity/lib/queries";
+import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
 import { ChevronRight, Hash } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
-  const slugs = await sanityFetch<string[]>({
-    query: tagSlugsQuery,
-    tags: ["tag"],
-  });
+  const slugs = await listSlugs("tag");
   return slugs.map((slug) => ({ slug }));
 }
 
 async function load(slug: string) {
+  if (!(await hasSlug("tag", slug))) return null;
   return sanityFetch<TagWithResources | null>({
     query: tagBySlugQuery,
     params: { slug },

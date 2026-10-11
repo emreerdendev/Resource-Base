@@ -4,17 +4,16 @@ import { CompanyPageView } from "@/components/company-page";
 import { siteName, siteUrl } from "@/lib/site";
 import type { CompanyWithRelated } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
-import { companyBySlugQuery, companySlugsQuery } from "@/sanity/lib/queries";
+import { companyBySlugQuery } from "@/sanity/lib/queries";
+import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
 
 export async function generateStaticParams() {
-  const slugs = await sanityFetch<string[]>({
-    query: companySlugsQuery,
-    tags: ["company"],
-  });
+  const slugs = await listSlugs("company");
   return slugs.map((slug) => ({ slug }));
 }
 
 async function load(slug: string) {
+  if (!(await hasSlug("company", slug))) return null;
   return sanityFetch<CompanyWithRelated | null>({
     query: companyBySlugQuery,
     params: { slug },
