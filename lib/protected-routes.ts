@@ -7,6 +7,7 @@ export const PROTECTED_PAGES = [
   "/favorites",
   "/applications",
   "/notifications",
+  "/submissions",
   "/profile/edit",
 ];
 

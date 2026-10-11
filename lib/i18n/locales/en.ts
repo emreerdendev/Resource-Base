@@ -19,6 +19,8 @@ export const en = {
     usernameRateLimited: "Too many username changes. Try again later.",
     contributions: "Contributions ({{count}})",
     noContributions: "No contributions yet.",
+    companiesAdded_one: "{{count}} company added to the directory",
+    companiesAdded_other: "{{count}} companies added to the directory",
   },
 
   categories: {
@@ -45,10 +47,14 @@ export const en = {
     profile: "Profile",
     categories: "Categories",
     notifications: "Notifications",
-    favorites: "Favorites",
+    favorites: "Favorite resources",
     submit: "Add a resource",
     signOut: "Sign out",
     account: "Account",
+    submissions: "My submissions",
+    settings: "Settings",
+    unread_one: "{{count}} unread notification",
+    unread_other: "{{count}} unread notifications",
   },
 
   home: {
@@ -151,8 +157,8 @@ export const en = {
   resource: { share: "Share", related: "Suggested resources" },
 
   contributor: {
-    count_one: "{{count}} resource",
-    count_other: "{{count}} resources",
+    count_one: "{{count}} contribution",
+    count_other: "{{count}} contributions",
     tier: {
       newcomer: "Newcomer",
       contributor: "Contributor",
@@ -203,6 +209,26 @@ export const en = {
     title: "Notifications",
     empty: "No notifications yet.",
     signInPrompt: "Sign in to see your notifications.",
+    browse: "Browse companies",
+    approvedTitle: {
+      new: "Your resource was approved 🎉",
+      fix: "Your fix was applied ✅",
+      taxonomy: "Your fix was applied ✅",
+      company: "Your company suggestion was approved 🎉",
+    },
+    approvedBody: {
+      new: "“{{name}}” is now live in the directory.",
+      fix: "Thanks! “{{name}}” now points to the corrected link.",
+      taxonomy: "Thanks! The categories and tags of “{{name}}” were updated.",
+      company: "“{{name}}” is now in the company directory.",
+    },
+    rejectedTitle: "Your submission needs changes",
+    rejectedBody: "“{{name}}” wasn’t approved.",
+    rejectedReason: "“{{name}}” wasn’t approved: {{reason}}",
+    resubmitHint: {
+      company: "You can suggest it again with more details.",
+      other: "You can edit and resubmit it.",
+    },
   },
 
   submit: {
@@ -229,7 +255,7 @@ export const en = {
   submissions: {
     company: "Company suggestion",
     title: "My submissions",
-    empty: "You haven't submitted any resources yet.",
+    empty: "You haven’t suggested anything yet.",
     status: { pending: "Pending", approved: "Approved", rejected: "Rejected" },
     reasonLabel: "Reason",
     noReason: "This submission wasn't approved.",
@@ -241,6 +267,8 @@ export const en = {
     resubmit: "Resubmit",
     resubmitSuccess: "Resubmitted! It's back in the review queue.",
     resubmitError: "Couldn't resubmit. Please try again.",
+    subtitle: "Companies and resources you’ve suggested, and where each review stands.",
+    suggestAgain: "Suggest again",
   },
 
   auth: {
@@ -484,10 +512,16 @@ export const en = {
     all: "All",
     searchPlaceholder: "Search your list…",
     noneInStatus: "No companies here yet.",
-    viewAll: "View all {{count}}",
     updated: "Updated {{date}}",
-    private: "Private",
-    privateHint: "Your statuses and notes are never shown to other people.",
+    sort: {
+      label: "Sort",
+      recent: "Recently updated",
+      name: "Name",
+      status: "Status",
+    },
+    removedTitle: "No longer listed ({{count}})",
+    removedHint: "These companies were removed from the directory. Your statuses and notes stay until you remove them.",
+    exportCsv: "Export CSV",
   },
 
   suggest: {

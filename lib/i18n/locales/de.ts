@@ -19,6 +19,8 @@ export const de = {
     usernameRateLimited: "Zu viele Namensänderungen. Versuche es später erneut.",
     contributions: "Beiträge ({{count}})",
     noContributions: "Noch keine Beiträge.",
+    companiesAdded_one: "{{count}} Unternehmen zum Verzeichnis hinzugefügt",
+    companiesAdded_other: "{{count}} Unternehmen zum Verzeichnis hinzugefügt",
   },
 
   categories: {
@@ -45,10 +47,14 @@ export const de = {
     profile: "Profil",
     categories: "Kategorien",
     notifications: "Benachrichtigungen",
-    favorites: "Favoriten",
+    favorites: "Favorisierte Ressourcen",
     submit: "Ressource hinzufügen",
     signOut: "Abmelden",
     account: "Konto",
+    submissions: "Meine Vorschläge",
+    settings: "Einstellungen",
+    unread_one: "{{count}} ungelesene Benachrichtigung",
+    unread_other: "{{count}} ungelesene Benachrichtigungen",
   },
 
   home: {
@@ -151,8 +157,8 @@ export const de = {
   resource: { share: "Teilen", related: "Vorgeschlagene Ressourcen" },
 
   contributor: {
-    count_one: "{{count}} Ressource",
-    count_other: "{{count}} Ressourcen",
+    count_one: "{{count}} Beitrag",
+    count_other: "{{count}} Beiträge",
     tier: {
       newcomer: "Neuling",
       contributor: "Beitragender",
@@ -203,6 +209,26 @@ export const de = {
     title: "Benachrichtigungen",
     empty: "Noch keine Benachrichtigungen.",
     signInPrompt: "Melde dich an, um deine Benachrichtigungen zu sehen.",
+    browse: "Unternehmen ansehen",
+    approvedTitle: {
+      new: "Deine Ressource wurde angenommen 🎉",
+      fix: "Deine Korrektur wurde übernommen ✅",
+      taxonomy: "Deine Korrektur wurde übernommen ✅",
+      company: "Dein Unternehmensvorschlag wurde angenommen 🎉",
+    },
+    approvedBody: {
+      new: "„{{name}}“ ist jetzt im Verzeichnis.",
+      fix: "Danke! „{{name}}“ verweist jetzt auf den korrigierten Link.",
+      taxonomy: "Danke! Kategorien und Tags von „{{name}}“ wurden aktualisiert.",
+      company: "„{{name}}“ ist jetzt im Unternehmensverzeichnis.",
+    },
+    rejectedTitle: "Dein Vorschlag braucht Änderungen",
+    rejectedBody: "„{{name}}“ wurde nicht angenommen.",
+    rejectedReason: "„{{name}}“ wurde nicht angenommen: {{reason}}",
+    resubmitHint: {
+      company: "Du kannst es mit mehr Details erneut vorschlagen.",
+      other: "Du kannst es bearbeiten und erneut einreichen.",
+    },
   },
 
   submit: {
@@ -229,7 +255,7 @@ export const de = {
   submissions: {
     company: "Unternehmensvorschlag",
     title: "Meine Einreichungen",
-    empty: "Du hast noch keine Ressourcen eingereicht.",
+    empty: "Du hast noch nichts vorgeschlagen.",
     status: { pending: "Ausstehend", approved: "Genehmigt", rejected: "Abgelehnt" },
     reasonLabel: "Grund",
     noReason: "Diese Einreichung wurde nicht genehmigt.",
@@ -241,6 +267,8 @@ export const de = {
     resubmit: "Erneut senden",
     resubmitSuccess: "Erneut gesendet! Wieder in der Prüfung.",
     resubmitError: "Erneutes Senden fehlgeschlagen. Bitte erneut versuchen.",
+    subtitle: "Unternehmen und Ressourcen, die du vorgeschlagen hast, und der Stand jeder Prüfung.",
+    suggestAgain: "Erneut vorschlagen",
   },
 
   auth: {
@@ -484,10 +512,16 @@ export const de = {
     all: "Alle",
     searchPlaceholder: "In deiner Liste suchen…",
     noneInStatus: "Hier gibt es noch keine Unternehmen.",
-    viewAll: "Alle {{count}} ansehen",
     updated: "Aktualisiert am {{date}}",
-    private: "Privat",
-    privateHint: "Deine Status und Notizen werden niemals anderen angezeigt.",
+    sort: {
+      label: "Sortieren",
+      recent: "Zuletzt aktualisiert",
+      name: "Name",
+      status: "Status",
+    },
+    removedTitle: "Nicht mehr gelistet ({{count}})",
+    removedHint: "Diese Unternehmen wurden aus dem Verzeichnis entfernt. Status und Notizen bleiben, bis du sie entfernst.",
+    exportCsv: "Als CSV exportieren",
   },
 
   suggest: {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   ArrowUpRight,
@@ -29,6 +30,7 @@ import { PricingSelect } from "@/components/pricing-select";
 import { TaxonomyProposal } from "@/components/taxonomy-proposal";
 import { useSubmissions } from "@/lib/submissions";
 import { cn, favicon } from "@/lib/utils";
+import { slugify } from "@/lib/slug";
 import type { Category, Submission, SubmissionStatus } from "@/lib/types";
 
 const OTHER = "__other__";
@@ -368,6 +370,20 @@ function SubmissionDialog({
                   </div>
                 )}
 
+                {s.kind === "company" && s.status === "rejected" && s.name && (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href={`/submit?type=company&name=${encodeURIComponent(s.name)}`}>
+                      {t("submissions.suggestAgain")}
+                    </Link>
+                  </Button>
+                )}
+                {s.kind === "company" && s.status === "approved" && s.name && (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href={`/company/${slugify(s.name)}`}>
+                      {s.name} <ArrowUpRight className="size-3.5" />
+                    </Link>
+                  </Button>
+                )}
                 {canEdit && (
                   <Button
                     variant="outline"

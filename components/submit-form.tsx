@@ -9,14 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { IconInput } from "@/components/ui/icon-input";
 import { PricingSelect } from "@/components/pricing-select";
-import { useProfile } from "@/lib/profile";
+import { useSubmissions } from "@/lib/submissions";
 import type { Category, Pricing } from "@/lib/types";
 
 const OTHER = "__other__";
 
 export function SubmitForm({ categories }: { categories: Category[] }) {
   const { t } = useTranslation();
-  const { profile } = useProfile();
+  const { reload: reloadSubmissions } = useSubmissions();
   const [pending, setPending] = useState(false);
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
@@ -59,8 +59,13 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
           note: data.note,
         }),
       });
+      if (res.status === 429) {
+        toast.error(t("card.favoriteRateLimited"));
+        return;
+      }
       if (!res.ok) throw new Error(await res.text());
       toast.success(t("submit.success"));
+      reloadSubmissions();
       form.reset();
       setName("");
       setUrl("");
@@ -81,20 +86,18 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
           {t("submit.title")}
         </h1>
         <p className="mt-2 text-muted-foreground">{t("submit.subtitle")}</p>
-        {profile?.username && (
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="mt-3"
-            type="button"
-          >
-            <Link href={`/profile/${profile.username}`}>
-              <ListChecks className="size-3.5" />
-              {t("submit.viewMine")}
-            </Link>
-          </Button>
-        )}
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          type="button"
+        >
+          <Link href="/submissions">
+            <ListChecks className="size-3.5" />
+            {t("submit.viewMine")}
+          </Link>
+        </Button>
       </div>
       <div>
         <label className="mb-1.5 block text-sm font-medium">

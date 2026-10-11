@@ -29,7 +29,7 @@ import {
   normalizeWebUrl,
 } from "@/lib/company-input";
 import { CITIES, WORK_MODELS, type City, type WorkModel } from "@/lib/company-taxonomy";
-import { useProfile } from "@/lib/profile";
+import { useSubmissions } from "@/lib/submissions";
 import { cn } from "@/lib/utils";
 
 const CHIP =
@@ -94,7 +94,7 @@ const splitEmails = (v: string) => v.split(/[,;\s]+/).filter(Boolean);
 export function CompanySubmitForm({ initialName = "" }: { initialName?: string }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { profile } = useProfile();
+  const { reload: reloadSubmissions } = useSubmissions();
   const [pending, setPending] = useState(false);
   const [name, setName] = useState(initialName);
   const [website, setWebsite] = useState("");
@@ -204,8 +204,13 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
         }
         return;
       }
+      if (res.status === 429) {
+        toast.error(t("card.favoriteRateLimited"));
+        return;
+      }
       if (!res.ok) throw new Error(await res.text());
       toast.success(t("suggest.success"));
+      reloadSubmissions();
       reset();
     } catch {
       toast.error(t("submit.error"));
@@ -219,14 +224,12 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
       <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-tight">{t("suggest.title")}</h1>
         <p className="mt-2 text-muted-foreground">{t("suggest.subtitle")}</p>
-        {profile?.username && (
-          <Button asChild variant="outline" size="sm" className="mt-3" type="button">
-            <Link href={`/profile/${profile.username}`}>
-              <ListChecks className="size-3.5" />
-              {t("submit.viewMine")}
-            </Link>
-          </Button>
-        )}
+        <Button asChild variant="outline" size="sm" className="mt-3" type="button">
+          <Link href="/submissions">
+            <ListChecks className="size-3.5" />
+            {t("submit.viewMine")}
+          </Link>
+        </Button>
       </div>
 
       <div>

@@ -19,6 +19,8 @@ export const tr = {
     usernameRateLimited: "Çok fazla kullanıcı adı değişikliği. Sonra tekrar dene.",
     contributions: "Katkılar ({{count}})",
     noContributions: "Henüz katkı yok.",
+    companiesAdded_one: "Dizine {{count}} şirket ekledi",
+    companiesAdded_other: "Dizine {{count}} şirket ekledi",
   },
 
   categories: {
@@ -45,10 +47,14 @@ export const tr = {
     profile: "Profil",
     categories: "Kategoriler",
     notifications: "Bildirimler",
-    favorites: "Favoriler",
+    favorites: "Favori kaynaklar",
     submit: "Kaynak ekle",
     signOut: "Çıkış yap",
     account: "Hesap",
+    submissions: "Önerilerim",
+    settings: "Ayarlar",
+    unread_one: "{{count}} okunmamış bildirim",
+    unread_other: "{{count}} okunmamış bildirim",
   },
 
   home: {
@@ -151,8 +157,8 @@ export const tr = {
   resource: { share: "Paylaş", related: "Önerilen kaynaklar" },
 
   contributor: {
-    count_one: "{{count}} kaynak",
-    count_other: "{{count}} kaynak",
+    count_one: "{{count}} katkı",
+    count_other: "{{count}} katkı",
     tier: {
       newcomer: "Yeni katkıcı",
       contributor: "Katkıcı",
@@ -203,6 +209,26 @@ export const tr = {
     title: "Bildirimler",
     empty: "Henüz bildirim yok.",
     signInPrompt: "Bildirimlerini görmek için giriş yap.",
+    browse: "Şirketlere göz at",
+    approvedTitle: {
+      new: "Kaynağın onaylandı 🎉",
+      fix: "Düzeltmen uygulandı ✅",
+      taxonomy: "Düzeltmen uygulandı ✅",
+      company: "Şirket önerin onaylandı 🎉",
+    },
+    approvedBody: {
+      new: "“{{name}}” artık dizinde yayında.",
+      fix: "Teşekkürler! “{{name}}” artık düzeltilmiş bağlantıya gidiyor.",
+      taxonomy: "Teşekkürler! “{{name}}” için kategori ve etiketler güncellendi.",
+      company: "“{{name}}” artık şirket dizininde.",
+    },
+    rejectedTitle: "Önerin değişiklik gerektiriyor",
+    rejectedBody: "“{{name}}” onaylanmadı.",
+    rejectedReason: "“{{name}}” onaylanmadı: {{reason}}",
+    resubmitHint: {
+      company: "Daha fazla ayrıntıyla tekrar önerebilirsin.",
+      other: "Düzenleyip tekrar gönderebilirsin.",
+    },
   },
 
   submit: {
@@ -229,7 +255,7 @@ export const tr = {
   submissions: {
     company: "Şirket önerisi",
     title: "Gönderilerim",
-    empty: "Henüz hiç kaynak göndermedin.",
+    empty: "Henüz bir şey önermedin.",
     status: { pending: "Beklemede", approved: "Onaylandı", rejected: "Reddedildi" },
     reasonLabel: "Gerekçe",
     noReason: "Bu gönderi onaylanmadı.",
@@ -241,6 +267,8 @@ export const tr = {
     resubmit: "Tekrar gönder",
     resubmitSuccess: "Tekrar gönderildi! İnceleme sırasına alındı.",
     resubmitError: "Tekrar gönderilemedi. Lütfen tekrar dene.",
+    subtitle: "Önerdiğin şirketler ve kaynaklar, her birinin inceleme durumuyla.",
+    suggestAgain: "Tekrar öner",
   },
 
   auth: {
@@ -482,10 +510,16 @@ export const tr = {
     all: "Tümü",
     searchPlaceholder: "Listende ara…",
     noneInStatus: "Burada henüz şirket yok.",
-    viewAll: "Tümünü gör ({{count}})",
     updated: "{{date}} güncellendi",
-    private: "Özel",
-    privateHint: "Durumların ve notların asla başkalarına gösterilmez.",
+    sort: {
+      label: "Sırala",
+      recent: "Son güncellenen",
+      name: "Ad",
+      status: "Durum",
+    },
+    removedTitle: "Artık listede yok ({{count}})",
+    removedHint: "Bu şirketler dizinden kaldırıldı. Durumların ve notların sen kaldırana kadar saklanır.",
+    exportCsv: "CSV olarak dışa aktar",
   },
 
   suggest: {
