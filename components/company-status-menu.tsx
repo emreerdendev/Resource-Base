@@ -127,7 +127,7 @@ export function CompanyStatusMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="min-w-44"
+        className="min-w-52"
         onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuLabel className="text-xs text-muted-foreground">
@@ -150,6 +150,7 @@ export function CompanyStatusMenu({
         <DropdownMenuItem
           variant="destructive"
           onClick={() => void setStatus(companyId, null)}
+          className="whitespace-nowrap"
         >
           <Trash2 className="size-4" />
           {t("tracker.remove")}
