@@ -121,6 +121,7 @@ const COMPANY_FIELDS = groq`
   "careerLinks": coalesce(careerLinks, []),
   "channels": coalesce(channels, []),
   "cities": coalesce(cities, []),
+  "otherLocations": coalesce(otherLocations, []),
   "workModels": coalesce(workModels, []),
   "sectors": coalesce(sectors, []),
   "clients": coalesce(clients, []),

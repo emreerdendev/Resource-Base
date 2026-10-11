@@ -142,6 +142,8 @@ export interface Company {
   careerLinks: string[]
   channels: ApplicationChannel[]
   cities: City[]
+  /** Free-text places outside the quick-pick cities ("Berlin, Germany"). */
+  otherLocations: string[]
   workModels: WorkModel[]
   sectors: Sector[]
   clients: string[]

@@ -349,6 +349,7 @@ async function submitCompany(data: Record<string, unknown>, userId: string, emai
       ...(c.linkedin && { companyLinkedin: c.linkedin }),
       companyEmails: c.emails,
       companyCities: c.cities,
+      companyOtherLocations: c.otherLocations,
       companyWorkModels: c.workModels,
       note: c.note,
       email: email.slice(0, 200),

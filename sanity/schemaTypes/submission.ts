@@ -128,6 +128,15 @@ export const submission = defineType({
       hidden: ({ parent }) => parent?.kind !== 'company',
     }),
     defineField({
+      name: 'companyOtherLocations',
+      title: 'Other locations',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+      description: 'Free-text places outside the quick-pick cities, e.g. "Berlin, Germany".',
+      hidden: ({ parent }) => parent?.kind !== 'company',
+    }),
+    defineField({
       name: 'companyWorkModels',
       title: 'Work models',
       type: 'array',

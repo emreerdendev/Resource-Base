@@ -57,6 +57,7 @@ type CompanySubmissionDoc = {
   companyLinkedin?: string;
   companyEmails?: string[];
   companyCities?: string[];
+  companyOtherLocations?: string[];
   companyWorkModels?: string[];
 };
 
@@ -68,7 +69,7 @@ type CompanySubmissionDoc = {
  */
 async function createCompanyFromSubmission(submissionId: string): Promise<string | null> {
   const doc = await writeClient.fetch<CompanySubmissionDoc | null>(
-    `*[_id == $id][0]{ name, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, companyCities, companyWorkModels }`,
+    `*[_id == $id][0]{ name, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, companyCities, companyOtherLocations, companyWorkModels }`,
     { id: submissionId },
   );
   const name = doc?.name?.trim();
@@ -94,6 +95,7 @@ async function createCompanyFromSubmission(submissionId: string): Promise<string
     careerLinks,
     channels,
     cities: doc.companyCities ?? [],
+    otherLocations: doc.companyOtherLocations ?? [],
     workModels: doc.companyWorkModels ?? [],
     sectors: [],
     clients: [],

@@ -93,6 +93,16 @@ export const company = defineType({
       options: { list: studioOptions(CITIES), layout: 'grid' },
     }),
     defineField({
+      name: 'otherLocations',
+      title: 'Other locations',
+      type: 'array',
+      group: 'taxonomy',
+      of: [defineArrayMember({ type: 'string' })],
+      options: { layout: 'tags' },
+      description:
+        'Places outside the city list above, as "City, Country" (e.g. "Berlin, Germany"). Shown as-is and offered as a filter.',
+    }),
+    defineField({
       name: 'workModels',
       title: 'Work models',
       type: 'array',
