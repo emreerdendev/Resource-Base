@@ -1,3 +1,10 @@
+import {
+  MAX_OTHER_LOCATIONS,
+  normalizeEmail,
+  normalizeLinkedinJobsUrl,
+  normalizeLocation,
+  normalizeWebUrl,
+} from "@/lib/company-input";
 import { CITIES, WORK_MODELS, type City, type WorkModel } from "@/lib/company-taxonomy";
 
 /** A community-suggested company, validated and normalized server-side. */
@@ -5,26 +12,17 @@ export type CompanySuggestion = {
   name: string;
   website?: string;
   careerUrl?: string;
+  /** Always the company's LinkedIn jobs tab (…/company/<slug>/jobs/). */
   linkedin?: string;
   emails: string[];
   cities: City[];
+  /** Free-text places outside the quick-pick cities ("Berlin, Germany"). */
+  otherLocations: string[];
   workModels: WorkModel[];
   note: string;
 };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-function cleanUrl(raw: unknown): string | undefined | null {
-  const v = typeof raw === "string" ? raw.trim() : "";
-  if (!v) return undefined;
-  try {
-    const u = new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`);
-    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
-    return u.toString().slice(0, 500);
-  } catch {
-    return null; // present but malformed
-  }
-}
+const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
 const pick = <T extends string>(raw: unknown, allowed: readonly T[]): T[] =>
   Array.from(
@@ -38,31 +36,38 @@ const pick = <T extends string>(raw: unknown, allowed: readonly T[]): T[] =>
 export function parseCompanySuggestion(
   data: Record<string, unknown>,
 ): { ok: true; value: CompanySuggestion } | { ok: false; error: string } {
-  const name = typeof data.name === "string" ? data.name.trim().slice(0, 120) : "";
+  const name = str(data.name).slice(0, 120);
   if (name.length < 2) return { ok: false, error: "A company name is required" };
 
-  const website = cleanUrl(data.website);
-  const careerUrl = cleanUrl(data.careerUrl);
-  const linkedin = cleanUrl(data.linkedin);
-  if (website === null || careerUrl === null || linkedin === null)
-    return { ok: false, error: "Invalid URL" };
-  if (linkedin && !/(^|\.)linkedin\.com$/i.test(new URL(linkedin).hostname))
-    return { ok: false, error: "LinkedIn URL must be on linkedin.com" };
+  const url = (raw: string, normalize: (v: string) => string | null) =>
+    raw ? (normalize(raw) ?? null) : undefined;
+  const website = url(str(data.website), normalizeWebUrl);
+  const careerUrl = url(str(data.careerUrl), normalizeWebUrl);
+  const linkedin = url(str(data.linkedin), normalizeLinkedinJobsUrl);
+  if (website === null || careerUrl === null) return { ok: false, error: "Invalid URL" };
+  if (linkedin === null)
+    return { ok: false, error: "LinkedIn must be a company page (linkedin.com/company/…)" };
 
-  const emails = Array.from(
-    new Set(
-      String(data.emails ?? "")
-        .split(/[,;\s]+/)
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean),
-    ),
-  );
-  if (emails.some((e) => !EMAIL_RE.test(e) || e.length > 200))
-    return { ok: false, error: "Invalid email" };
+  const rawEmails = String(data.emails ?? "")
+    .split(/[,;\s]+/)
+    .filter(Boolean);
+  const emails = Array.from(new Set(rawEmails.map(normalizeEmail)));
+  if (emails.some((e) => e === null)) return { ok: false, error: "Invalid email" };
   if (emails.length > 5) return { ok: false, error: "Too many emails" };
 
   if (!website && !careerUrl && !linkedin && !emails.length)
     return { ok: false, error: "Add at least one way to apply" };
+
+  const cities = new Set(pick(data.cities, CITIES));
+  const otherLocations = new Set<string>();
+  const rawOthers = Array.isArray(data.otherLocations) ? data.otherLocations : [];
+  if (rawOthers.length > MAX_OTHER_LOCATIONS) return { ok: false, error: "Too many locations" };
+  for (const raw of rawOthers) {
+    const loc = normalizeLocation(String(raw));
+    if (!loc) return { ok: false, error: "Invalid location" };
+    if ("city" in loc) cities.add(loc.city);
+    else otherLocations.add(loc.other);
+  }
 
   return {
     ok: true,
@@ -71,10 +76,11 @@ export function parseCompanySuggestion(
       website,
       careerUrl,
       linkedin,
-      emails,
-      cities: pick(data.cities, CITIES),
+      emails: emails as string[],
+      cities: [...cities],
+      otherLocations: [...otherLocations],
       workModels: pick(data.workModels, WORK_MODELS),
-      note: typeof data.note === "string" ? data.note.trim().slice(0, 1000) : "",
+      note: str(data.note).slice(0, 1000),
     },
   };
 }

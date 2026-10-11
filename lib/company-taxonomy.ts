@@ -15,7 +15,17 @@ export const APPLICATION_CHANNELS = [
 ] as const;
 export type ApplicationChannel = (typeof APPLICATION_CHANNELS)[number];
 
-export const CITIES = ["istanbul", "ankara", "izmir"] as const;
+/** Turkish tech hubs offered as quick picks; anything else is a free-text
+ *  "other location" (see lib/company-input.ts). */
+export const CITIES = [
+  "istanbul",
+  "ankara",
+  "izmir",
+  "bursa",
+  "kocaeli",
+  "antalya",
+  "eskisehir",
+] as const;
 export type City = (typeof CITIES)[number];
 
 export const WORK_MODELS = ["remote", "hybrid", "onsite"] as const;
@@ -66,6 +76,10 @@ export const STUDIO_LABELS: Record<string, string> = {
   istanbul: "İstanbul",
   ankara: "Ankara",
   izmir: "İzmir",
+  bursa: "Bursa",
+  kocaeli: "Kocaeli",
+  antalya: "Antalya",
+  eskisehir: "Eskişehir",
   remote: "Remote",
   hybrid: "Hybrid",
   onsite: "On-site",
