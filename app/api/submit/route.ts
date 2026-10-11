@@ -1,36 +1,36 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { getDb } from "@/lib/db";
 import { submissions } from "@/lib/db/schema";
 import { getSessionUser } from "@/lib/authz";
 import { parseCompanySuggestion } from "@/lib/company-submission";
 import { slugify } from "@/lib/slug";
+import { isRateLimited, overLimit } from "@/lib/rate-limit";
+import { isPlainId, isResourceId } from "@/sanity/lib/slugs";
 
 export const runtime = "nodejs";
 
-// In-memory rate limit (per warm instance). Keyed by user id — submit is
-// always authenticated, so this can't be bypassed by spoofing IPs or rotating
-// addresses (only by creating many accounts). Cold starts reset the window,
-// which is acceptable for this low-stakes endpoint. For a hard guarantee,
-// swap this for Upstash Redis (Ratelimit.slidingWindow) keyed by the same id.
-const hits = new Map<string, { count: number; resetAt: number }>();
-const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 5;
+/** Submissions create Sanity documents, so they're capped three ways. */
+const MAX_PER_DAY = 20;
+const MAX_PENDING = 20;
 
-function rateLimited(key: string): boolean {
-  const now = Date.now();
-  // Opportunistic cleanup so the map can't grow unbounded across requests.
-  if (hits.size > 5000) {
-    for (const [k, v] of hits) if (now > v.resetAt) hits.delete(k);
-  }
-  const entry = hits.get(key);
-  if (!entry || now > entry.resetAt) {
-    hits.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > MAX_PER_WINDOW;
+/** Body fields arrive untyped — anything that isn't a string reads as "". */
+const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+
+/**
+ * Burst limit (free binding, per minute), daily cap (KV, only touched by real
+ * submissions) and a ceiling on open submissions in the review queue — so one
+ * account can't fill the Sanity dataset or the moderation queue.
+ */
+async function submitLimited(userId: string): Promise<boolean> {
+  if (await overLimit("RL_SUBMIT", `submit:${userId}`)) return true;
+  const [{ open }] = await getDb()
+    .select({ open: count() })
+    .from(submissions)
+    .where(and(eq(submissions.userId, userId), eq(submissions.status, "pending")));
+  if (open >= MAX_PENDING) return true;
+  return isRateLimited(`submit-day:${userId}`, MAX_PER_DAY, 86400);
 }
 
 function isValidUrl(url: string): boolean {
@@ -51,24 +51,27 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  // Rate limit per user (more robust than per-IP for an authed endpoint).
-  if (rateLimited(user.id)) {
-    return new NextResponse("Too many requests", { status: 429 });
-  }
-
-  let data: Record<string, string>;
+  let data: Record<string, unknown>;
   try {
     data = await req.json();
   } catch {
+    return new NextResponse("Invalid body", { status: 400 });
+  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
     return new NextResponse("Invalid body", { status: 400 });
   }
 
   // Honeypot: real users never fill this.
   if (data.company) return NextResponse.json({ ok: true });
 
+  // Rate limit per user (more robust than per-IP for an authed endpoint).
+  if (await submitLimited(user.id)) {
+    return new NextResponse("Too many requests", { status: 429 });
+  }
+
   // Company suggestions have their own shape and approval path.
   if (data.kind === "company") {
-    return submitCompany(data as Record<string, unknown>, user.id, user.email ?? "");
+    return submitCompany(data, user.id, user.email ?? "");
   }
 
   // Submission kinds: "new" (brand-new resource), "fix" (correct a broken URL),
@@ -77,13 +80,15 @@ export async function POST(req: NextRequest) {
   const kind =
     data.kind === "fix" || data.kind === "taxonomy" ? data.kind : "new";
   const isFix = kind === "fix" || kind === "taxonomy";
-  const targetResourceId = isFix ? (data.targetResourceId ?? "").trim() : "";
-  if (isFix && !targetResourceId) {
-    return new NextResponse("Missing target resource", { status: 400 });
+  const targetResourceId = isFix ? str(data.targetResourceId) : "";
+  // Fixes may only target a published resource — never a draft or any other
+  // document type (the id is used to read and, on approval, patch the doc).
+  if (isFix && !(await isResourceId(targetResourceId))) {
+    return new NextResponse("Unknown target resource", { status: 400 });
   }
 
-  const name = (data.name ?? "").trim();
-  const url = (data.url ?? "").trim();
+  const name = str(data.name);
+  const url = str(data.url);
   // A URL is required everywhere except taxonomy fixes (which don't touch it).
   if (!name || (kind !== "taxonomy" && !isValidUrl(url))) {
     return new NextResponse("Name and a valid URL are required", {
@@ -96,11 +101,11 @@ export async function POST(req: NextRequest) {
   const email = user.email ?? "";
 
   const PRICINGS = ["free", "freemium", "paid"];
-  const pricing = PRICINGS.includes(data.pricing) ? data.pricing : undefined;
+  const pricing = PRICINGS.includes(str(data.pricing)) ? str(data.pricing) : undefined;
   // Tags arrive comma-separated; normalize to a clean, deduped, capped list.
   const tags = Array.from(
     new Set(
-      String(data.tags ?? "")
+      str(data.tags)
         .split(",")
         .map((tg) => tg.trim().slice(0, 40))
         .filter(Boolean),
@@ -112,20 +117,14 @@ export async function POST(req: NextRequest) {
     Array.from(
       new Set(
         (Array.isArray(raw) ? raw : [])
-          .map((v) => String(v).trim().slice(0, 60))
+          .map((v) => str(v).slice(0, 60))
           .filter(Boolean),
       ),
     ).slice(0, cap);
-  const proposedCategories = cleanList(
-    (data as Record<string, unknown>).proposedCategories,
-    12,
-  );
-  const proposedTags = cleanList(
-    (data as Record<string, unknown>).proposedTags,
-    20,
-  );
+  const proposedCategories = cleanList(data.proposedCategories, 12);
+  const proposedTags = cleanList(data.proposedTags, 20);
   // Proposed description (taxonomy fixes only): trimmed, capped, null when empty.
-  const rawDescription = (data as Record<string, unknown>).proposedDescription;
+  const rawDescription = data.proposedDescription;
   const proposedDescription =
     kind === "taxonomy" && typeof rawDescription === "string"
       ? rawDescription.trim().slice(0, 1000) || null
@@ -154,8 +153,9 @@ export async function POST(req: NextRequest) {
       tags?: string[];
       description?: string | null;
     } | null>(
-      `*[_id == $id][0]{ "categories": categories[]->slug.current, "tags": tags[]->slug.current, description }`,
+      `*[_type == "resource" && _id == $id][0]{ "categories": categories[]->slug.current, "tags": tags[]->slug.current, description }`,
       { id: targetResourceId },
+      { perspective: "published" },
     );
     originalCategories = (snap?.categories ?? []).filter(Boolean);
     originalTags = (snap?.tags ?? []).filter(Boolean);
@@ -165,16 +165,19 @@ export async function POST(req: NextRequest) {
   const fields = {
     name: name.slice(0, 200),
     url,
-    suggestedCategory: (data.suggestedCategory ?? "").slice(0, 100),
+    suggestedCategory: str(data.suggestedCategory).slice(0, 100),
     pricing,
     tags,
-    note: (data.note ?? "").slice(0, 1000),
+    note: str(data.note).slice(0, 1000),
   };
 
   // Resubmit path: the user edited a previously rejected submission. We update
   // that same doc back to "pending" (clearing the rejection reason) instead of
   // creating a duplicate. Ownership is enforced against submittedBy.
-  const resubmitId = (data.submissionId ?? "").trim();
+  const resubmitId = str(data.submissionId);
+  if (resubmitId && !isPlainId(resubmitId)) {
+    return new NextResponse("Not found", { status: 404 });
+  }
 
   try {
     const db = getDb();
@@ -184,7 +187,9 @@ export async function POST(req: NextRequest) {
       const existing = await writeClient.fetch<{
         submittedBy?: string;
         status?: string;
-      } | null>(`*[_id == $id][0]{submittedBy, status}`, { id: resubmitId });
+      } | null>(`*[_type == "submission" && _id == $id][0]{submittedBy, status}`, {
+        id: resubmitId,
+      });
 
       if (!existing || existing.submittedBy !== userId) {
         return new NextResponse("Not found", { status: 404 });
