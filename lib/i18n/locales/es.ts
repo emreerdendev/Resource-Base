@@ -359,6 +359,8 @@ export const es = {
   },
 
   companies: {
+    otherLocations: "Otras ubicaciones",
+    removeFilter: "Quitar filtro: {{filter}}",
     badge: "{{count}} empresas y cómo postular",
     titleLead: "Encuentra tu próxima",
     titleHighlight: "empresa.",
@@ -369,7 +371,7 @@ export const es = {
     unknownLocation: "Ubicación no indicada",
     noContactShort: "Sin contacto todavía",
     facet: {
-      city: "Ciudad",
+      city: "Ubicación",
       workModel: "Modalidad",
       channel: "Cómo postular",
       sector: "Sector",

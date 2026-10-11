@@ -357,6 +357,8 @@ export const tr = {
   },
 
   companies: {
+    otherLocations: "Diğer konumlar",
+    removeFilter: "Filtreyi kaldır: {{filter}}",
     badge: "{{count}} şirket ve başvuru bilgileri",
     titleLead: "Bir sonraki",
     titleHighlight: "şirketini bul.",
@@ -367,7 +369,7 @@ export const tr = {
     unknownLocation: "Konum belirtilmemiş",
     noContactShort: "Henüz iletişim bilgisi yok",
     facet: {
-      city: "Şehir",
+      city: "Konum",
       workModel: "Çalışma modeli",
       channel: "Başvuru kanalı",
       sector: "Sektör",
