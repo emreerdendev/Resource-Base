@@ -113,8 +113,8 @@ Hosted on **Cloudflare Workers** via OpenNext. Pushing to `main` triggers an aut
 Notes:
 - Runtime secrets are set with `wrangler secret put`; the public `NEXT_PUBLIC_*` and Sanity tokens must also be present as **Build variables** in Workers Builds (Next.js inlines them / fetches Sanity at build time).
 - Apply new D1 migrations to production with `pnpm db:migrate:remote` before (or right after) deploying a schema change.
-- Add a Sanity webhook (**sanity.io/manage → API → Webhooks**) pointing at `/api/revalidate` (content revalidation — make sure its filter includes the `company` type) and `/api/notify` (submission-approval notifications), each sharing its respective secret.
-- The broken-link checker runs daily as a separate Cron Trigger Worker (`workers/link-check-cron`).
+- Add a Sanity webhook (**sanity.io/manage → API → Webhooks**) pointing at `/api/revalidate` (content revalidation — make sure its filter includes the `company` type) and `/api/notify` (submission-approval notifications), each sharing its respective secret. Give the revalidate webhook the projection `{ _type, "skip": delta::changedOnly((lastCheckedAt, httpStatus)) }` so the link checker's daily bookkeeping doesn't re-render the site.
+- The broken-link checker runs daily as a separate Cron Trigger Worker (`workers/link-check-cron`), which also deletes expired sessions, verification tokens, stale rate-limit rows and read notifications older than 180 days. Redeploy it (`cd workers/link-check-cron && pnpm deploy`) after changing it.
 
 ### Production hardening
 
@@ -127,7 +127,11 @@ Two extra steps lock down the auth endpoints against bot abuse and spam. Both ar
    - **Rate:** `10` requests per `10 seconds` per client IP
    - **Action:** `Block` for `10 seconds`
 
-   This is defense-in-depth on top of the in-app per-IP and per-recipient limits. The Free plan allows **one** rate-limiting rule, so spend it on `/api/auth/`. On a paid plan you can add a second, looser rule on all API routes (`URI Path contains /api/`, e.g. `100` requests per `10 seconds`, action `Managed Challenge`) — but it's optional: the click counter, favorite toggles and username changes are already KV-rate-limited per IP/user in-app, and Cloudflare's automatic DDoS protection covers volumetric floods on every plan.
+   This is defense-in-depth on top of the in-app per-IP and per-recipient limits. The Free plan allows **one** rate-limiting rule, so spend it on `/api/auth/`. On a paid plan you can add a second, looser rule on all API routes (`URI Path contains /api/`, e.g. `100` requests per `10 seconds`, action `Managed Challenge`) — but it's optional: clicks, favorites, the tracker, profile edits and submissions are already rate-limited in-app (Workers Rate Limiting bindings, see `wrangler.jsonc`), and Cloudflare's automatic DDoS protection covers volumetric floods on every plan.
+
+3. **Usage alerts.** Cloudflare has no spending cap, so set **Notifications → Usage-based billing** alerts for Workers, KV, D1 and Durable Objects to hear about an unusual month early.
+
+4. **www → apex.** Add a **Rules → Redirect Rules** rule (`www.resource-base.com/*` → `https://resource-base.com/${1}`, 301). It runs before the Worker, so those requests cost nothing; the middleware redirect is only a fallback.
 
 ## Disclaimer
 
