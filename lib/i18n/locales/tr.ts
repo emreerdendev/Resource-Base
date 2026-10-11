@@ -381,6 +381,10 @@ export const tr = {
       istanbul: "İstanbul",
       ankara: "Ankara",
       izmir: "İzmir",
+      bursa: "Bursa",
+      kocaeli: "Kocaeli",
+      antalya: "Antalya",
+      eskisehir: "Eskişehir",
     },
     workModel: {
       remote: "Uzaktan",
@@ -479,6 +483,16 @@ export const tr = {
   },
 
   suggest: {
+    invalidUrl: "Geçerli bir link gir, ör. https://ornek.com/kariyer",
+    invalidLinkedin: "Bir LinkedIn şirket sayfası gir, ör. linkedin.com/company/acme — otomatik olarak ilanlar sekmesine çevrilir.",
+    invalidEmail: "E-posta adreslerini kontrol et (en fazla 5, virgülle ayrılmış).",
+    locations: "Konum",
+    otherLocation: "Diğer…",
+    otherLocationPlaceholder: "Şehir, Ülke — ör. Berlin, Almanya",
+    addLocation: "Ekle",
+    invalidLocation: "Sadece harf kullan: “Şehir” veya “Şehir, Ülke”.",
+    tooManyLocations: "En fazla {{count}} farklı konum ekleyebilirsin.",
+    removeLocation: "{{place}} konumunu kaldır",
     title: "Şirket öner",
     subtitle: "Burada olması gereken bir şirket mi biliyorsun? Nasıl başvurulacağını paylaş — her öneri yayına girmeden önce incelenir.",
     name: "Şirket adı",

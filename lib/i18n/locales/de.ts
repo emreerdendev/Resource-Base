@@ -383,6 +383,10 @@ export const de = {
       istanbul: "Istanbul",
       ankara: "Ankara",
       izmir: "Izmir",
+      bursa: "Bursa",
+      kocaeli: "Kocaeli",
+      antalya: "Antalya",
+      eskisehir: "Eskişehir",
     },
     workModel: {
       remote: "Remote",
@@ -481,6 +485,16 @@ export const de = {
   },
 
   suggest: {
+    invalidUrl: "Gib einen gültigen Link ein, z. B. https://example.com/careers",
+    invalidLinkedin: "Nutze eine LinkedIn-Unternehmensseite, z. B. linkedin.com/company/acme — sie wird auf den Jobs-Tab gesetzt.",
+    invalidEmail: "Prüfe die E-Mail-Adressen (bis zu 5, kommagetrennt).",
+    locations: "Standort",
+    otherLocation: "Andere…",
+    otherLocationPlaceholder: "Stadt, Land — z. B. Berlin, Deutschland",
+    addLocation: "Hinzufügen",
+    invalidLocation: "Nur Buchstaben, als „Stadt“ oder „Stadt, Land“.",
+    tooManyLocations: "Du kannst bis zu {{count}} weitere Standorte hinzufügen.",
+    removeLocation: "{{place}} entfernen",
     title: "Unternehmen vorschlagen",
     subtitle: "Kennst du ein Unternehmen, das hierher gehört? Teile, wie man sich bewirbt — wir prüfen jeden Vorschlag.",
     name: "Name des Unternehmens",
