@@ -8,9 +8,9 @@ import { SubmitCta } from "@/components/submit-cta";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { createResourceSearch } from "@/lib/resource-search";
 import type { Category, Resource, Tag } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import Fuse from "fuse.js";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -93,34 +93,19 @@ export function BrowseClient({
     router.replace(qs ? `${basePath}?${qs}` : basePath, { scroll: false });
   }, [q, cat, activeTags, lang, pricing, sort, router, basePath]);
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(resources, {
-        keys: [
-          { name: "name", weight: 0.5 },
-          { name: "tags.title", weight: 0.25 },
-          { name: "categories.title", weight: 0.15 },
-          { name: "description", weight: 0.07 },
-          { name: "author", weight: 0.03 },
-        ],
-        threshold: 0.38,
-        ignoreLocation: true,
-        minMatchCharLength: 2,
-      }),
-    [resources],
-  );
+  const search = useMemo(() => createResourceSearch(resources), [resources]);
 
   // Everything except the tag filter — the base set the tag facet counts and
   // the final result both build on. Keeping it separate lets tag counts reflect
   // the *other* active filters (category/pricing/language/search).
   const baseFiltered = useMemo(() => {
-    let list = q.trim() ? fuse.search(q).map((r) => r.item) : [...resources];
+    let list = q.trim() ? search(q) : [...resources];
     if (cat)
       list = list.filter((r) => r.categories?.some((c) => c.slug === cat));
     if (lang) list = list.filter((r) => r.language?.includes(lang));
     if (pricing) list = list.filter((r) => (r.pricing ?? "free") === pricing);
     return list;
-  }, [q, cat, lang, pricing, fuse, resources]);
+  }, [q, cat, lang, pricing, search, resources]);
 
   const filtered = useMemo(() => {
     // Tags are OR'd: a resource matches if it carries ANY selected tag, so

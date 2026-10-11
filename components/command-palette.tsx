@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import Fuse from "fuse.js";
 import { ArrowUpRight, Boxes, Building2, Hash, Search } from "lucide-react";
 import {
   Command,
@@ -15,6 +14,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { createCompanySearch } from "@/lib/company-search";
+import { createResourceSearch } from "@/lib/resource-search";
 import type { Company, Resource } from "@/lib/types";
 
 /** Fired by the header search button to open the palette from anywhere. */
@@ -32,23 +32,8 @@ export function CommandPalette({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  // Build the fuzzy index once. name > tags > description > author.
-  const fuse = useMemo(
-    () =>
-      new Fuse(resources, {
-        keys: [
-          { name: "name", weight: 0.5 },
-          { name: "tags.title", weight: 0.25 },
-          { name: "categories.title", weight: 0.15 },
-          { name: "description", weight: 0.07 },
-          { name: "author", weight: 0.03 },
-        ],
-        threshold: 0.38,
-        ignoreLocation: true,
-        minMatchCharLength: 2,
-      }),
-    [resources],
-  );
+  // Build the search indexes once (see lib/search.ts for the ranking).
+  const searchResources = useMemo(() => createResourceSearch(resources), [resources]);
 
   const searchCompanies = useMemo(() => createCompanySearch(companies), [companies]);
 
@@ -71,11 +56,8 @@ export function CommandPalette({
   const results = useMemo(() => {
     if (!query.trim())
       return resources.filter((r) => r.featured).slice(0, 8);
-    return fuse
-      .search(query)
-      .slice(0, 12)
-      .map((r) => r.item);
-  }, [query, fuse, resources]);
+    return searchResources(query).slice(0, 12);
+  }, [query, searchResources, resources]);
 
   const companyResults = useMemo(
     () =>
@@ -120,6 +102,7 @@ export function CommandPalette({
             ))}
           </CommandGroup>
         )}
+        {results.length > 0 && (
         <CommandGroup heading={query ? t("command.results") : t("command.featured")}>
           {results.map((r) => (
             <CommandItem
@@ -139,6 +122,7 @@ export function CommandPalette({
             </CommandItem>
           ))}
         </CommandGroup>
+        )}
         <CommandGroup heading={t("command.goTo")}>
           <CommandItem value="browse-companies" onSelect={() => go("/companies")}>
             <Building2 className="size-4 opacity-60" />
