@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { user } from "@/lib/db/schema";
+import { cvs, user } from "@/lib/db/schema";
+import { cvBucket } from "@/lib/cv-files";
 import { getAuth } from "@/lib/auth";
 import { requireFreshUser } from "@/lib/authz";
 import { isSameOrigin } from "@/lib/request";
@@ -16,7 +17,7 @@ export const runtime = "nodejs";
  * body), so a user can only delete their own account.
  *
  * Order: anonymize the user's Sanity submission docs, then delete the user row
- * — which cascades sessions/favorites/notifications/company applications
+ * — which cascades sessions/favorites/notifications/company applications/CVs
  * (on-delete-cascade FKs) and
  * sets submissions.user_id to null. Published resources stay; submitter
  * attribution is cleared.
@@ -59,14 +60,18 @@ export async function POST(req: NextRequest) {
     console.error("sanity anonymize failed", err);
   }
 
-  // 2) Delete the user row (cascades sessions/favorites/notifications; nulls
-  //    submissions.user_id).
+  // 2) Delete the user row (cascades sessions, favorites, notifications, the
+  //    tracker and the CV row; nulls submissions.user_id), then the CV file in
+  //    R2 — only once the row that points at it is gone.
+  const db = getDb();
+  const [cv] = await db.select({ fileKey: cvs.fileKey }).from(cvs).where(eq(cvs.userId, userId)).limit(1);
   try {
-    await getDb().delete(user).where(eq(user.id, userId));
+    await db.delete(user).where(eq(user.id, userId));
   } catch (err) {
     console.error("user delete failed", err);
     return new NextResponse("Server error", { status: 500 });
   }
+  if (cv) await cvBucket().delete(cv.fileKey).catch((err) => console.error("cv file delete failed", err));
 
   // 3) Sign the now-orphaned session out (clears cookies).
   try {

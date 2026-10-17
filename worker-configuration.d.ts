@@ -9,6 +9,7 @@ interface __BaseEnv_CloudflareEnv {
 	RL_PUBLIC: RateLimit;
 	RL_USER: RateLimit;
 	RL_SUBMIT: RateLimit;
+	CV_BUCKET: R2Bucket;
 	ASSETS: Fetcher;
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;

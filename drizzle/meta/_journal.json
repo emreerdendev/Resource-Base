@@ -43,6 +43,13 @@
       "when": 1792242614044,
       "tag": "0005_gitlab_email_verified",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792243081812,
+      "tag": "0006_cvs",
+      "breakpoints": true
     }
   ]
 }

@@ -177,3 +177,17 @@ export interface ResourceCounts {
   clicks: Record<string, number>
   favorites: Record<string, number>
 }
+
+/** A published CV as listed in the directory (/api/cvs). The PDF itself is behind sign-in. */
+export interface CvListing {
+  id: string
+  title: string
+  field: string
+  seniority: string
+  language: string
+  technologies: string[]
+  summary: string | null
+  likeCount: number
+  publishedAt: string | null
+  owner: { username: string | null; name: string | null; avatar: string | null }
+}

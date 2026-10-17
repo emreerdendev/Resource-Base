@@ -46,6 +46,9 @@
       "id": "7972c906f2c84a05adf9975ba9a95643"
     }
   ],
+  // Uploaded CVs (PDF). R2's free tier covers 10 GB and egress is free; with
+  // one CV per user capped at 2 MB that is ~5,000+ CVs before any charge.
+  "r2_buckets": [{ "binding": "CV_BUCKET", "bucket_name": "resource-base-cvs" }],
   // Workers Rate Limiting — per-location counters kept in memory by Cloudflare,
   // free and with no KV/D1 writes. Used for every short-window abuse limit
   // (lib/rate-limit.ts `overLimit`); KV is kept only for hourly/daily caps.

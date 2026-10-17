@@ -42,6 +42,14 @@ export const structure: StructureResolver = (S) =>
               '(_type == "company" && status == "pending") || (_type == "submission" && kind == "company" && status == "pending")'
             )
         ),
+      S.listItem()
+        .title('📄 Pending CVs')
+        .child(
+          S.documentList()
+            .title('Pending CVs')
+            .filter('_type == "submission" && kind == "cv" && status == "pending"')
+            .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
+        ),
       S.divider(),
       S.documentTypeListItem('company').title('All companies'),
       S.documentTypeListItem('resource').title('All resources'),

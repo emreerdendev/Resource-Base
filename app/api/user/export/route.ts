@@ -7,6 +7,8 @@ import {
   submissions,
   notifications,
   companyApplications,
+  cvs,
+  cvLikes,
 } from "@/lib/db/schema";
 import { getSessionUser } from "@/lib/authz";
 
@@ -22,7 +24,7 @@ export async function GET() {
   if (!me) return new NextResponse("Unauthorized", { status: 401 });
 
   const db = getDb();
-  const [profileRows, favRows, subRows, notifRows, appRows] = await Promise.all([
+  const [profileRows, favRows, subRows, notifRows, appRows, cvRows, cvLikeRows] = await Promise.all([
     db.select().from(user).where(eq(user.id, me.id)).limit(1),
     db.select().from(favorites).where(eq(favorites.userId, me.id)),
     db.select().from(submissions).where(eq(submissions.userId, me.id)),
@@ -31,6 +33,8 @@ export async function GET() {
       .select()
       .from(companyApplications)
       .where(eq(companyApplications.userId, me.id)),
+    db.select().from(cvs).where(eq(cvs.userId, me.id)),
+    db.select().from(cvLikes).where(eq(cvLikes.userId, me.id)),
   ]);
 
   const payload = {
@@ -41,6 +45,9 @@ export async function GET() {
     submissions: subRows,
     notifications: notifRows,
     companyApplications: appRows,
+    // The PDF itself opens from Edit Profile → CV; this is its listing.
+    cv: cvRows[0] ?? null,
+    likedCvs: cvLikeRows,
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

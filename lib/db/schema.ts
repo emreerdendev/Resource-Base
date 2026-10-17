@@ -260,3 +260,59 @@ export const companyApplications = sqliteTable(
     index("company_applications_user_updated_idx").on(t.userId, t.updatedAt),
   ],
 );
+
+/* -------------------------------------------------------------------------- */
+/*  CV directory. The PDF lives in R2 (CV_BUCKET); this row is its listing.   */
+/* -------------------------------------------------------------------------- */
+
+// One CV per user. Listed only once an editor approves it in Sanity
+// (status "published"); the owner can unlist it ("hidden") at any time.
+export const cvs = sqliteTable(
+  "cvs",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    field: text("field").notNull(),
+    seniority: text("seniority").notNull(),
+    language: text("language").notNull(),
+    technologies: text("technologies", { mode: "json" }).$type<string[]>().notNull().default(sql`'[]'`),
+    summary: text("summary"),
+    fileKey: text("file_key").notNull(),
+    fileSize: integer("file_size").notNull(),
+    status: text("status").notNull().default("pending"),
+    rejectionReason: text("rejection_reason"),
+    sanitySubmissionId: text("sanity_submission_id"),
+    // Denormalized so listing never counts the likes table.
+    likeCount: integer("like_count").notNull().default(0),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    publishedAt: integer("published_at", { mode: "timestamp" }),
+  },
+  (t) => [index("cvs_status_published_idx").on(t.status, t.publishedAt)],
+);
+
+export const cvLikes = sqliteTable(
+  "cv_likes",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    cvId: text("cv_id")
+      .notNull()
+      .references(() => cvs.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.cvId] }), index("cv_likes_cv_idx").on(t.cvId)],
+);

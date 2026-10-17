@@ -6,12 +6,14 @@
  * relying on it for compliance.
  */
 
+import { contactEmail } from "@/lib/site";
+
 export type LegalSection = { heading: string; body: string[] };
 export type LegalDoc = { title: string; updated: string; intro: string; sections: LegalSection[] };
 
-const CONTACT = "emreerden@pm.me";
+const CONTACT = contactEmail;
 // Update when the policy text changes.
-export const LEGAL_UPDATED = "2026-10-10";
+export const LEGAL_UPDATED = "2026-10-17";
 
 const privacyEn: LegalDoc = {
   title: "Privacy Policy",
@@ -55,9 +57,16 @@ const privacyEn: LegalDoc = {
       ],
     },
     {
+      heading: "CVs",
+      body: [
+        "If you share a CV we store the PDF (in Cloudflare R2), its listing details (headline, field, seniority, language, technologies, summary) and which users liked it. The listing details and your name or username are visible to everyone; the PDF opens only for signed-in users, after review.",
+        "We process your CV because you explicitly agree to share it; you can withdraw that consent at any time by unlisting or deleting it in Edit Profile → CV. Deleting your CV or your account deletes the file and its listing.",
+      ],
+    },
+    {
       heading: "Third parties",
       body: [
-        "We rely on: Cloudflare (hosting, database, authentication & user data, analytics), Sanity (content), and Google (Analytics, favicon images). These providers process data on our behalf under their own terms.",
+        "We rely on: Cloudflare (hosting, database, file storage for CVs, authentication & user data, analytics), Sanity (content), and Google (Analytics, favicon images). These providers process data on our behalf under their own terms.",
       ],
     },
     {
@@ -124,9 +133,16 @@ const privacyTr: LegalDoc = {
       ],
     },
     {
+      heading: "CV'ler",
+      body: [
+        "CV paylaşırsanız PDF dosyasını (Cloudflare R2'de), listeleme bilgilerini (başlık, alan, seviye, dil, teknolojiler, özet) ve hangi kullanıcıların beğendiğini saklarız. Listeleme bilgileri ile adınız veya kullanıcı adınız herkese görünür; PDF ise incelemeden sonra yalnızca giriş yapmış kullanıcılara açılır.",
+        "CV'nizi, paylaşmaya açıkça onay verdiğiniz için işleriz; bu onayı Profili Düzenle → CV bölümünden CV'nizi listeden kaldırarak veya silerek istediğiniz zaman geri alabilirsiniz. CV'nizi veya hesabınızı silmek dosyayı ve listelemeyi de siler.",
+      ],
+    },
+    {
       heading: "Üçüncü taraflar",
       body: [
-        "Şunlara güveniyoruz: Cloudflare (barındırma, veritabanı, kimlik doğrulama ve kullanıcı verisi, analitik), Sanity (içerik), Google (Analytics, favicon görselleri). Bu sağlayıcılar bizim adımıza kendi şartları kapsamında veri işler.",
+        "Şunlara güveniyoruz: Cloudflare (barındırma, veritabanı, CV dosya depolama, kimlik doğrulama ve kullanıcı verisi, analitik), Sanity (içerik), Google (Analytics, favicon görselleri). Bu sağlayıcılar bizim adımıza kendi şartları kapsamında veri işler.",
       ],
     },
     {
@@ -177,6 +193,16 @@ const termsEn: LegalDoc = {
       ],
     },
     {
+      heading: "CVs",
+      body: [
+        "Sharing a CV is optional. By uploading one you confirm that it is your own CV, that you have the right to share everything in it, and that it contains no other person’s personal data and no confidential information of an employer or client.",
+        "After review, your CV can be viewed and downloaded by signed-in users, who may keep copies; we cannot control what they do with them. Remove anything you don’t want strangers to see (phone number, home address, ID numbers) before uploading.",
+        "You keep all rights to your CV and grant us only a non-exclusive, revocable license to store and display it while it is listed. You can unlist or delete it at any time; deleting it removes the file from our storage.",
+        "Resource Base only hosts CVs that users choose to share. We do not verify their contents and are not responsible for them or for decisions anyone makes based on them. Using someone else’s CV as your own, impersonating its owner, or contacting owners for spam or harassment is prohibited.",
+        `To report a CV that infringes your rights (copyright, personal data, impersonation) or breaks these terms, use the “Report” link on the CV or write to ${CONTACT}. We review reports promptly and remove unlawful content.`,
+      ],
+    },
+    {
       heading: "Acceptable use",
       body: [
         "Do not abuse, scrape excessively, attempt to break security, or disrupt the service. We may rate-limit, suspend or remove accounts that violate these terms.",
@@ -220,6 +246,16 @@ const termsTr: LegalDoc = {
       heading: "Gönderiler",
       body: [
         "Bir kaynak, şirket veya düzenleme gönderdiğinizde, bunu paylaşma hakkına sahip olduğunuzu onaylar ve dizinde göstermemiz için bize münhasır olmayan bir lisans verirsiniz. Gönderiler incelenir; düzenlenebilir veya reddedilebilir. Yasa dışı, hak ihlali yapan, kötü amaçlı veya spam içerik göndermeyin.",
+      ],
+    },
+    {
+      heading: "CV'ler",
+      body: [
+        "CV paylaşmak isteğe bağlıdır. Bir CV yüklediğinizde, bunun size ait olduğunu, içindeki her şeyi paylaşma hakkına sahip olduğunuzu ve başka bir kişinin kişisel verisini ya da bir işverenin veya müşterinin gizli bilgisini içermediğini onaylarsınız.",
+        "İncelemeden sonra CV'niz giriş yapmış kullanıcılar tarafından görüntülenebilir ve indirilebilir; bu kişiler kopyasını saklayabilir ve bununla ne yaptıklarını kontrol edemeyiz. Yüklemeden önce tanımadığınız kişilerin görmesini istemediğiniz her şeyi (telefon numarası, ev adresi, kimlik numarası) CV'nizden çıkarın.",
+        "CV'nizle ilgili tüm haklar sizde kalır; bize yalnızca CV'niz listedeyken onu saklamamız ve göstermemiz için münhasır olmayan, geri alınabilir bir lisans verirsiniz. CV'nizi istediğiniz zaman listeden kaldırabilir veya silebilirsiniz; silme işlemi dosyayı depolamamızdan kaldırır.",
+        "Resource Base yalnızca kullanıcıların paylaşmayı seçtiği CV'lere ev sahipliği yapar. İçeriklerini doğrulamaz; bu içeriklerden ve bunlara dayanarak verilen kararlardan sorumlu değildir. Başkasının CV'sini kendinizinmiş gibi kullanmak, sahibinin kimliğine bürünmek veya CV sahiplerine spam ya da taciz amaçlı ulaşmak yasaktır.",
+        `Haklarınızı (telif hakkı, kişisel veri, kimliğe bürünme) ihlal eden ya da bu şartlara aykırı bir CV'yi, CV üzerindeki “Bildir” bağlantısıyla veya ${CONTACT} adresine yazarak bildirebilirsiniz. Bildirimleri hızla inceler ve hukuka aykırı içeriği kaldırırız.`,
       ],
     },
     {

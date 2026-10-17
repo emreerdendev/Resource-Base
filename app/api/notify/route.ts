@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { parseBody } from "next-sanity/webhook";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { notifications, submissions } from "@/lib/db/schema";
+import { cvs, notifications, submissions } from "@/lib/db/schema";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { slugify } from "@/lib/slug";
 import { isPlainId } from "@/sanity/lib/slugs";
@@ -172,7 +172,30 @@ export async function POST(req: NextRequest) {
   const isTaxonomyFix = body.kind === "taxonomy";
   const isFix = isUrlFix || isTaxonomyFix;
   const isCompany = body.kind === "company";
+  const isCv = body.kind === "cv";
   const label = body.name ? `“${body.name}”` : "Your submission";
+
+  // A CV decision publishes or rejects the listing it was made for. A review
+  // of a CV that was since replaced or deleted is stale: nothing to apply.
+  let cvTitle: string | null = null;
+  if (isCv) {
+    const [cv] = await db
+      .select({ id: cvs.id, title: cvs.title })
+      .from(cvs)
+      .where(eq(cvs.sanitySubmissionId, body._id))
+      .limit(1);
+    if (!cv) return NextResponse.json({ skipped: "stale cv review" });
+    cvTitle = cv.title;
+    const now = new Date();
+    await db
+      .update(cvs)
+      .set(
+        approved
+          ? { status: "published", publishedAt: now, rejectionReason: null, updatedAt: now }
+          : { status: "rejected", rejectionReason: body.rejectionReason?.slice(0, 500) ?? null, updatedAt: now },
+      )
+      .where(eq(cvs.id, cv.id));
+  }
 
   // On approval of a company suggestion, publish the company.
   let companySlug: string | null = null;
@@ -236,10 +259,13 @@ export async function POST(req: NextRequest) {
   // The status is part of the key so an approve-after-reject still notifies.
   // `data` lets the UI render the message in the reader's language; title and
   // body keep an English fallback.
-  const kind = isCompany ? "company" : isUrlFix ? "fix" : isTaxonomyFix ? "taxonomy" : "new";
-  const resubmitHint = isCompany
-    ? "You can suggest it again with more details."
-    : "You can edit and resubmit it.";
+  const kind = isCv ? "cv" : isCompany ? "company" : isUrlFix ? "fix" : isTaxonomyFix ? "taxonomy" : "new";
+  const resubmitHint = isCv
+    ? "You can upload an updated CV."
+    : isCompany
+      ? "You can suggest it again with more details."
+      : "You can edit and resubmit it.";
+  const name = cvTitle ?? body.name;
   try {
     await db.insert(notifications).values({
       userId: body.submittedBy,
@@ -247,28 +273,33 @@ export async function POST(req: NextRequest) {
       title: approved
         ? isFix
           ? "Your fix was applied ✅"
-          : isCompany
-            ? "Your company suggestion was approved 🎉"
-            : "Your resource was approved 🎉"
+          : isCv
+            ? "Your CV is now listed 🎉"
+            : isCompany
+              ? "Your company suggestion was approved 🎉"
+              : "Your resource was approved 🎉"
         : "Your submission needs changes",
       body: approved
         ? isUrlFix
           ? `Thanks! ${label} now points to the corrected link.`
           : isTaxonomyFix
             ? `Thanks! The categories/tags for ${label} were updated.`
-            : isCompany
-              ? `${label} is now in the company directory.`
-              : `${label} is now live in the directory.`
+            : isCv
+              ? `“${name}” is now in the CV directory.`
+              : isCompany
+                ? `${label} is now in the company directory.`
+                : `${label} is now live in the directory.`
         : body.rejectionReason
           ? `${label} wasn’t approved: ${body.rejectionReason}`
           : `${label} wasn’t approved. ${resubmitHint}`,
       data: {
         kind,
-        ...(body.name && { name: body.name.slice(0, 200) }),
+        ...(name && { name: name.slice(0, 200) }),
         ...(!approved && body.rejectionReason && { reason: body.rejectionReason.slice(0, 500) }),
       },
-      url:
-        approved && isUrlFix
+      url: isCv
+        ? "/profile/edit?tab=cv"
+        : approved && isUrlFix
           ? (body.url ?? null)
           : approved && companySlug
             ? `/company/${companySlug}`

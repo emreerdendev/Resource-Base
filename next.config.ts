@@ -84,7 +84,8 @@ const csp = [
   "img-src 'self' https: data:",
   "font-src 'self' https://fonts.gstatic.com",
   connectSrc,
-  `frame-src ${TURNSTILE}`,
+  // 'self': the CV preview embeds /api/cv/<id>/file.
+  `frame-src 'self' ${TURNSTILE}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -113,8 +114,21 @@ const nextConfig: NextConfig = {
     // (it loads its own scripts/iframes/eval and manages its own security).
     return [
       {
-        source: "/((?!studio).*)",
+        source: "/((?!studio|api/cv/|api/cv$).*)",
         headers: securityHeaders,
+      },
+      // CV PDFs: framed only by this site (the CV preview). A page CSP here
+      // would stop the browser's PDF viewer; nosniff keeps the bytes from
+      // ever being treated as HTML.
+      {
+        source: "/api/cv/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          ...securityHeaders.filter(
+            (h) => h.key !== "Content-Security-Policy" && h.key !== "X-Frame-Options",
+          ),
+        ],
       },
     ];
   },

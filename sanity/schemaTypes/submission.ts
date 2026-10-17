@@ -1,9 +1,10 @@
 import { defineField, defineType } from 'sanity'
 
 import { CITIES, WORK_MODELS, studioOptions } from '../../lib/company-taxonomy'
+import { CV_FIELDS, CV_LANGUAGES, CV_SENIORITIES, cvStudioOptions } from '../../lib/cv-taxonomy'
 
 /**
- * Community-suggested resource or company. Kept separate from `resource` /
+ * Community-suggested resource, company or CV. Kept separate from `resource` /
  * `company` so the public submit endpoint only needs create access on this one
  * type and can never touch live content. An editor reviews, then approves.
  */
@@ -22,6 +23,7 @@ export const submission = defineType({
           { title: 'URL fix', value: 'fix' },
           { title: 'Category / tag fix', value: 'taxonomy' },
           { title: 'New company', value: 'company' },
+          { title: 'CV', value: 'cv' },
         ],
         layout: 'radio',
       },
@@ -35,7 +37,7 @@ export const submission = defineType({
       description:
         'The resource this fix corrects. On approval the relevant fields are updated automatically.',
       readOnly: true,
-      hidden: ({ parent }) => parent?.kind === 'new' || parent?.kind === 'company',
+      hidden: ({ parent }) => parent?.kind !== 'fix' && parent?.kind !== 'taxonomy',
     }),
     defineField({
       name: 'proposedCategories',
@@ -145,6 +147,55 @@ export const submission = defineType({
       hidden: ({ parent }) => parent?.kind !== 'company',
     }),
     defineField({
+      name: 'cvFileUrl',
+      title: 'CV file (PDF)',
+      type: 'url',
+      description:
+        'Private review link, valid for 30 days. Check it is a real CV with no offensive or unrelated content, then approve to publish it (signed-in users only).',
+      readOnly: true,
+      hidden: ({ parent }) => parent?.kind !== 'cv',
+    }),
+    defineField({
+      name: 'cvId',
+      title: 'CV id',
+      type: 'string',
+      readOnly: true,
+      hidden: ({ parent }) => parent?.kind !== 'cv',
+    }),
+    defineField({
+      name: 'cvField',
+      title: 'Field',
+      type: 'string',
+      options: { list: cvStudioOptions(CV_FIELDS) },
+      readOnly: true,
+      hidden: ({ parent }) => parent?.kind !== 'cv',
+    }),
+    defineField({
+      name: 'cvSeniority',
+      title: 'Seniority',
+      type: 'string',
+      options: { list: cvStudioOptions(CV_SENIORITIES) },
+      readOnly: true,
+      hidden: ({ parent }) => parent?.kind !== 'cv',
+    }),
+    defineField({
+      name: 'cvLanguage',
+      title: 'CV language',
+      type: 'string',
+      options: { list: cvStudioOptions(CV_LANGUAGES) },
+      readOnly: true,
+      hidden: ({ parent }) => parent?.kind !== 'cv',
+    }),
+    defineField({
+      name: 'cvTechnologies',
+      title: 'Technologies',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+      readOnly: true,
+      hidden: ({ parent }) => parent?.kind !== 'cv',
+    }),
+    defineField({
       name: 'name',
       type: 'string',
       validation: (rule) => rule.required(),
@@ -154,12 +205,17 @@ export const submission = defineType({
       type: 'url',
       validation: (rule) =>
         rule.uri({ scheme: ['http', 'https'] }).custom((value, ctx) =>
-          value || (ctx.parent as { kind?: string })?.kind === 'company'
+          value || ['company', 'cv'].includes((ctx.parent as { kind?: string })?.kind ?? '')
             ? true
             : 'Required',
         ),
+      hidden: ({ parent }) => parent?.kind === 'cv',
     }),
-    defineField({ name: 'suggestedCategory', type: 'string' }),
+    defineField({
+      name: 'suggestedCategory',
+      type: 'string',
+      hidden: ({ parent }) => parent?.kind === 'cv',
+    }),
     defineField({
       name: 'pricing',
       type: 'string',
@@ -172,6 +228,7 @@ export const submission = defineType({
         layout: 'radio',
       },
       description: 'Suggested pricing — the submitter’s hint for the editor.',
+      hidden: ({ parent }) => parent?.kind === 'cv',
     }),
     defineField({
       name: 'tags',
@@ -179,6 +236,7 @@ export const submission = defineType({
       of: [{ type: 'string' }],
       description: 'Free-text tag suggestions; editor maps them to real tags.',
       options: { layout: 'tags' },
+      hidden: ({ parent }) => parent?.kind === 'cv',
     }),
     defineField({ name: 'note', type: 'text', rows: 3 }),
     defineField({ name: 'email', type: 'string' }),
@@ -228,7 +286,7 @@ export const submission = defineType({
   preview: {
     select: { title: 'name', url: 'url', status: 'status' },
     prepare({ title, url, status }) {
-      return { title, subtitle: `[${status}] ${url}` }
+      return { title, subtitle: `[${status}] ${url ?? ''}` }
     },
   },
 })
