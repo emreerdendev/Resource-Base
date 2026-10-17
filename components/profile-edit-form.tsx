@@ -1,21 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { AtSign, Eye, EyeOff, Globe, Loader2, Mail, Settings, User } from "lucide-react";
+import { AtSign, Eye, EyeOff, Globe, Loader2, Mail, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LinkedinIcon } from "@/components/brand-icons";
 import { IconInput } from "@/components/ui/icon-input";
-import { PageHeader } from "@/components/page-header";
 import { FormSkeleton } from "@/components/skeletons";
-import { AccountDangerZone } from "@/components/account-danger-zone";
-import { ProfileChangePassword } from "@/components/profile-change-password";
-import { ProfileConnectedAccounts } from "@/components/profile-connected-accounts";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/components/auth/auth-provider";
 import { useProfile } from "@/lib/profile";
 
 type Fields = {
@@ -59,8 +53,6 @@ function fieldsFromProfile(p: {
 
 export function ProfileEditForm() {
   const { t } = useTranslation();
-  const router = useRouter();
-  const { user, loading: authLoading, openAuth } = useAuth();
   const { profile, loading, update, setUsername } = useProfile();
   const [pending, setPending] = useState(false);
   // Snapshot of the profile as last loaded — the baseline we diff against to
@@ -79,32 +71,8 @@ export function ProfileEditForm() {
   const setField = <K extends keyof Fields>(key: K, value: Fields[K]) =>
     setFields((f) => (f ? { ...f, [key]: value } : f));
 
-  if (!authLoading && !user) {
-    return (
-      <div className="py-20 text-center">
-        <p className="text-muted-foreground">{t("profile.signInPrompt")}</p>
-        <Button className="mt-4" onClick={() => openAuth()}>
-          {t("header.signIn")}
-        </Button>
-      </div>
-    );
-  }
-
-  const header = (
-    <PageHeader
-      icon={Settings}
-      title={t("profile.editTitle")}
-      description={t("profile.editSubtitle")}
-    />
-  );
-
   if (loading || !profile || !fields || !baseline) {
-    return (
-      <>
-        {header}
-        <FormSkeleton fields={9} tall={[3]} />
-      </>
-    );
+    return <FormSkeleton fields={9} tall={[3]} />;
   }
 
   // Dirty when any field differs from the loaded baseline; valid when the
@@ -160,7 +128,6 @@ export function ProfileEditForm() {
                 : t("profile.saveError"),
         );
       toast.success(t("profile.saved"));
-      router.push(`/profile/${nextUsername || profile!.username}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("profile.saveError"));
     } finally {
@@ -169,9 +136,7 @@ export function ProfileEditForm() {
   }
 
   return (
-    <>
     <form onSubmit={onSubmit} className="space-y-4">
-      {header}
 
       {/* Email is read-only (managed by auth) with a public-visibility toggle. */}
       <Field label={t("profile.email")}>
@@ -241,15 +206,7 @@ export function ProfileEditForm() {
         {pending && <Loader2 className="size-4 animate-spin" />}
         {t("profile.save")}
       </Button>
-      </form>
-
-      <div className="mt-6 space-y-4">
-        <ProfileConnectedAccounts />
-        <ProfileChangePassword />
-      </div>
-
-      <AccountDangerZone />
-    </>
+    </form>
   );
 }
 
