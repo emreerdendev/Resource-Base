@@ -134,6 +134,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // The contribute forms moved to their own paths. Order matters: the
+      // company rule must come first (query params carry over, e.g. ?name=).
+      {
+        source: "/submit",
+        has: [{ type: "query" as const, key: "type", value: "company" }],
+        destination: "/submit/company",
+        permanent: true,
+      },
+      { source: "/submit", destination: "/submit/resource", permanent: true },
       ...Object.entries(LEGACY_REDIRECTS).map(([source, destination]) => ({
         source,
         destination,

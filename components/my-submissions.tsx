@@ -512,7 +512,7 @@ function SubmissionDialog({
 
                 {s.kind === "company" && s.status === "rejected" && s.name && (
                   <Button asChild variant="outline" className="w-full">
-                    <Link href={`/submit?type=company&name=${encodeURIComponent(s.name)}`}>
+                    <Link href={`/submit/company?name=${encodeURIComponent(s.name)}`}>
                       {t("submissions.suggestAgain")}
                     </Link>
                   </Button>

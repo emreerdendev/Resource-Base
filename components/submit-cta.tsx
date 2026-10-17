@@ -28,10 +28,10 @@ export function SubmitCta({
   const cv = kind === "cv";
   const k = company ? "cta.company" : cv ? "cta.cv" : "cta";
   const href = company
-    ? `/submit?type=company${name?.trim() ? `&name=${encodeURIComponent(name.trim())}` : ""}`
+    ? `/submit/company${name?.trim() ? `?name=${encodeURIComponent(name.trim())}` : ""}`
     : cv
       ? "/profile/edit?tab=cv"
-      : "/submit";
+      : "/submit/resource";
   const ButtonIcon = cv ? Upload : Plus;
 
   const cta = user ? (

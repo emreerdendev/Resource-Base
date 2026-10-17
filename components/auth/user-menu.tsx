@@ -126,12 +126,12 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         {/* Ways to contribute. */}
         <DropdownMenuItem asChild>
-          <Link href="/submit">
+          <Link href="/submit/resource">
             <Plus className="size-4" /> {t("nav.submit")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/submit?type=company">
+          <Link href="/submit/company">
             <Building2 className="size-4" /> {t("nav.suggestCompany")}
           </Link>
         </DropdownMenuItem>

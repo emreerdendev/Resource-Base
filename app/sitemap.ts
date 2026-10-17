@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     sanityFetch<string[]>({ query: companySlugsQuery, tags: ["company"] }),
   ]);
 
-  const staticPaths = ["", "/companies", "/resources", "/categories", "/submit", "/privacy", "/terms"];
+  const staticPaths = ["", "/companies", "/resources", "/categories", "/cvs", "/privacy", "/terms"];
 
   return [
     ...staticPaths.map((p) => ({

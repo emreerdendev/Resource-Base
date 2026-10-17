@@ -149,7 +149,7 @@ export function TrackerImportDialog({ companies }: { companies: Company[] }) {
                     {result.unmatched.map((name) => (
                       <li key={name}>
                         <Link
-                          href={`/submit?type=company&name=${encodeURIComponent(name)}`}
+                          href={`/submit/company?name=${encodeURIComponent(name)}`}
                           className="inline-flex rounded-full border border-border px-2.5 py-0.5 text-xs transition-colors hover:border-primary/40 hover:text-primary"
                         >
                           + {name}
