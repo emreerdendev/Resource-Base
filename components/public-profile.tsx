@@ -9,6 +9,8 @@ import {
   XIcon,
 } from "@/components/brand-icons";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
+import { useCvLikes } from "@/components/cv-likes-provider";
+import { useFavorites } from "@/components/favorites-provider";
 import { ResourceGrid } from "@/components/resource-grid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,9 +29,11 @@ import {
   Eye,
   EyeOff,
   Globe,
+  Heart,
   Mail,
   Pencil,
   Send,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -211,14 +215,21 @@ export function PublicProfileView({
   );
 }
 
-/** Links to the owner's applications and submissions, with live counts. */
+/**
+ * The owner's own lists, with live counts — same order as the account menu:
+ * favorite resources, applications, liked CVs, then submissions.
+ */
 function OwnerActivity() {
   const { t } = useTranslation();
-  const { items: tracked, loading: trackedLoading } = useCompanyTracker();
-  const { items: submitted, loading: submittedLoading } = useSubmissions();
+  const favorites = useFavorites();
+  const tracker = useCompanyTracker();
+  const cvLikes = useCvLikes();
+  const submissions = useSubmissions();
   const cards = [
-    { href: "/applications", icon: BriefcaseBusiness, label: t("nav.applications"), count: trackedLoading ? null : tracked.length },
-    { href: "/submissions", icon: Send, label: t("nav.submissions"), count: submittedLoading ? null : submitted.length },
+    { href: "/favorites", icon: Star, label: t("nav.favorites"), count: favorites.loading ? null : favorites.ids.length },
+    { href: "/applications", icon: BriefcaseBusiness, label: t("nav.applications"), count: tracker.loading ? null : tracker.items.length },
+    { href: "/liked-cvs", icon: Heart, label: t("nav.likedCvs"), count: cvLikes.loading ? null : cvLikes.likedIds.length },
+    { href: "/submissions", icon: Send, label: t("nav.submissions"), count: submissions.loading ? null : submissions.items.length },
   ];
   return (
     <div className="mt-10 grid gap-3 sm:grid-cols-2">
@@ -228,7 +239,9 @@ function OwnerActivity() {
           href={href}
           className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
         >
-          <Icon className="size-5 text-primary" />
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+            <Icon className="size-4" />
+          </span>
           <span className="flex-1 font-medium">{label}</span>
           {count === null ? (
             <Skeleton className="h-6 w-6" />
