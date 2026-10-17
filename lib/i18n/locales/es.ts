@@ -69,21 +69,6 @@ export const es = {
     companiesBody: "Correos de postulación, páginas de empleo y LinkedIn de cada empresa. Guárdalas y sigue cada postulación de “guardada” a “oferta”.",
     resourcesStat: "{{count}}+ recursos · {{categories}} categorías",
     resourcesBody: "Herramientas, librerías, cursos y referencias que vale la pena conocer — con búsqueda, filtros y favoritos.",
-    howItWorks: "Cómo funciona",
-    steps: {
-      find: {
-        title: "Encuentra",
-        body: "Busca empresas por nombre, ciudad, modalidad o sector — en un orden nuevo en cada visita.",
-      },
-      track: {
-        title: "Guarda y sigue",
-        body: "Guarda empresas, marca el estado de cada postulación y toma notas privadas.",
-      },
-      apply: {
-        title: "Postula",
-        body: "Usa el correo, la página de empleo o LinkedIn indicados para contactarlos directamente.",
-      },
-    },
     badge: "{{count}}+ recursos seleccionados",
     titleLead: "Encuentra tu próximo",
     titleHighlight: "recurso.",

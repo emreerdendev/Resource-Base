@@ -69,21 +69,6 @@ export const fr = {
     companiesBody: "E-mails de candidature, pages carrières et LinkedIn pour chaque entreprise. Enregistrez-les et suivez chaque candidature de « enregistrée » à « offre ».",
     resourcesStat: "{{count}}+ ressources · {{categories}} catégories",
     resourcesBody: "Outils, bibliothèques, cours et références à connaître — consultables, filtrables et à garder en favoris.",
-    howItWorks: "Comment ça marche",
-    steps: {
-      find: {
-        title: "Trouver",
-        body: "Cherchez des entreprises par nom, ville, mode de travail ou secteur — dans un ordre nouveau à chaque visite.",
-      },
-      track: {
-        title: "Enregistrer et suivre",
-        body: "Enregistrez des entreprises, indiquez où en est chaque candidature et gardez des notes privées.",
-      },
-      apply: {
-        title: "Postuler",
-        body: "Utilisez l’e-mail, la page carrières ou LinkedIn indiqués pour les contacter directement.",
-      },
-    },
     badge: "{{count}}+ ressources triées sur le volet",
     titleLead: "Trouvez votre prochaine",
     titleHighlight: "ressource.",

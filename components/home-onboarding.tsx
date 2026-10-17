@@ -3,13 +3,12 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  BookmarkCheck,
   Boxes,
   BriefcaseBusiness,
   Building2,
   FileText,
-  Search,
-  Send,
+  Heart,
+  Star,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -74,11 +73,6 @@ export function HomeOnboarding({
   const { t } = useTranslation();
   const { user } = useAuth();
 
-  const steps = [
-    { icon: Search, title: t("home.steps.find.title"), body: t("home.steps.find.body") },
-    { icon: BookmarkCheck, title: t("home.steps.track.title"), body: t("home.steps.track.body") },
-    { icon: Send, title: t("home.steps.apply.title"), body: t("home.steps.apply.body") },
-  ];
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -97,14 +91,24 @@ export function HomeOnboarding({
           {t("home.onboardSubtitle")}
         </p>
         {user && (
-          <Link
-            href="/applications"
-            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-          >
-            <BriefcaseBusiness className="size-4" />
-            {t("home.continueTracking")}
-            <ArrowRight className="size-3.5" />
-          </Link>
+          // Signed in: straight back to your own lists.
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            {[
+              { href: "/applications", icon: BriefcaseBusiness, label: t("home.continueTracking") },
+              { href: "/favorites", icon: Star, label: t("nav.favorites") },
+              { href: "/liked-cvs", icon: Heart, label: t("nav.likedCvs") },
+            ].map(({ href, icon: Icon, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+              >
+                <Icon className="size-4" />
+                {label}
+                <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            ))}
+          </div>
         )}
       </section>
 
@@ -136,29 +140,6 @@ export function HomeOnboarding({
           cta={t("cvs.browse")}
           className={`${ENTER} delay-200 sm:col-span-2 lg:col-span-1`}
         />
-      </section>
-
-      <section className="mt-14">
-        <h2 className="mb-5 text-center text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-          {t("home.howItWorks")}
-        </h2>
-        <ol className="grid gap-4 sm:grid-cols-3">
-          {steps.map(({ icon: Icon, title, body }, i) => (
-            <li
-              key={title}
-              className="flex flex-col gap-2 rounded-xl border border-border/70 bg-card/40 p-5"
-            >
-              <div className="flex items-center gap-2">
-                <span className="grid size-7 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                  {i + 1}
-                </span>
-                <Icon className="size-4 text-primary" />
-                <h3 className="text-sm font-semibold">{title}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">{body}</p>
-            </li>
-          ))}
-        </ol>
       </section>
     </div>
   );

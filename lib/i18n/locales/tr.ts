@@ -69,21 +69,6 @@ export const tr = {
     companiesBody: "Her şirket için başvuru e-postaları, kariyer sayfaları ve LinkedIn. Şirketleri kaydet, her başvuruyu “kaydedildi”den “teklif”e kadar takip et.",
     resourcesStat: "{{count}}+ kaynak · {{categories}} kategori",
     resourcesBody: "Bilmeye değer araçlar, kütüphaneler, kurslar ve referanslar — aranabilir, filtrelenebilir, favorilerine kaydedilebilir.",
-    howItWorks: "Nasıl Çalışır",
-    steps: {
-      find: {
-        title: "Bul",
-        body: "Şirketleri isme, şehre, çalışma modeline veya sektöre göre ara — her ziyarette farklı bir sırayla.",
-      },
-      track: {
-        title: "Kaydet ve Takip Et",
-        body: "Şirketleri kaydet, her başvurunun durumunu işaretle ve özel notlar tut.",
-      },
-      apply: {
-        title: "Başvur",
-        body: "Listelenen e-posta, kariyer sayfası veya LinkedIn ile doğrudan ulaş.",
-      },
-    },
     badge: "{{count}}+ özenle seçilmiş kaynak",
     titleLead: "Bir sonraki",
     titleHighlight: "kaynağını bul.",

@@ -69,21 +69,6 @@ export const en = {
     companiesBody: "Application emails, career pages and LinkedIn for every company. Save them and track each application from “saved” to “offer”.",
     resourcesStat: "{{count}}+ resources · {{categories}} categories",
     resourcesBody: "Tools, libraries, courses and references worth knowing — searchable, filterable and saved to your favorites.",
-    howItWorks: "How It Works",
-    steps: {
-      find: {
-        title: "Find",
-        body: "Search companies by name, city, work model or sector — in a fresh order on every visit.",
-      },
-      track: {
-        title: "Save & Track",
-        body: "Bookmark companies, set where each application stands and keep private notes.",
-      },
-      apply: {
-        title: "Apply",
-        body: "Use the listed email, career page or LinkedIn to reach them directly.",
-      },
-    },
     badge: "{{count}}+ hand-picked resources",
     titleLead: "Find your next",
     titleHighlight: "resource.",

@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Mirrors HomeOnboarding: badge, headline, directory cards, three steps. */
+/** Mirrors HomeOnboarding: badge, headline, directory cards. */
 export default function Loading() {
   return (
     <div className="mx-auto max-w-4xl">
@@ -13,12 +13,6 @@ export default function Loading() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-48 rounded-xl" />
-        ))}
-      </div>
-      <Skeleton className="mx-auto mt-14 mb-5 h-4 w-32" />
-      <div className="grid gap-4 sm:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 rounded-xl" />
         ))}
       </div>
     </div>

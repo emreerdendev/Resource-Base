@@ -101,15 +101,15 @@ export function UserMenu() {
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {/* Own activity first — applications are the main feature. */}
-        <DropdownMenuItem asChild>
-          <Link href="/applications">
-            <BriefcaseBusiness className="size-4" /> {t("nav.applications")}
-          </Link>
-        </DropdownMenuItem>
+        {/* Your saved lists. */}
         <DropdownMenuItem asChild>
           <Link href="/favorites">
             <Star className="size-4" /> {t("nav.favorites")}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/applications">
+            <BriefcaseBusiness className="size-4" /> {t("nav.applications")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -118,16 +118,16 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {/* What you've sent, then (below its own separator) ways to add more. */}
         <DropdownMenuItem asChild>
           <Link href="/submissions">
             <Send className="size-4" /> {t("nav.submissions")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        {/* Ways to contribute. */}
         <DropdownMenuItem asChild>
-          <Link href="/profile/edit?tab=cv">
-            <FileText className="size-4" /> {t("cvs.share")}
+          <Link href="/submit">
+            <Plus className="size-4" /> {t("nav.submit")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -136,8 +136,8 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/submit">
-            <Plus className="size-4" /> {t("nav.submit")}
+          <Link href="/profile/edit?tab=cv">
+            <FileText className="size-4" /> {t("cvs.share")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

@@ -69,21 +69,6 @@ export const de = {
     companiesBody: "Bewerbungs-E-Mails, Karriereseiten und LinkedIn für jedes Unternehmen. Speichere sie und verfolge jede Bewerbung von „gespeichert“ bis „Angebot“.",
     resourcesStat: "{{count}}+ Ressourcen · {{categories}} Kategorien",
     resourcesBody: "Tools, Bibliotheken, Kurse und Referenzen, die man kennen sollte — durchsuchbar, filterbar und als Favoriten speicherbar.",
-    howItWorks: "So funktioniert’s",
-    steps: {
-      find: {
-        title: "Finden",
-        body: "Suche Unternehmen nach Name, Stadt, Arbeitsmodell oder Branche — bei jedem Besuch neu gemischt.",
-      },
-      track: {
-        title: "Speichern & verfolgen",
-        body: "Merke dir Unternehmen, halte den Stand jeder Bewerbung fest und notiere Privates.",
-      },
-      apply: {
-        title: "Bewerben",
-        body: "Nutze die angegebene E-Mail, Karriereseite oder LinkedIn, um sie direkt zu erreichen.",
-      },
-    },
     badge: "{{count}}+ handverlesene Ressourcen",
     titleLead: "Finde deine nächste",
     titleHighlight: "Ressource.",
