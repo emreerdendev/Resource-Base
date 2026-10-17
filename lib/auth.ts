@@ -169,6 +169,15 @@ export async function getAuth() {
       gitlab: {
         clientId: env.GITLAB_CLIENT_ID,
         clientSecret: env.GITLAB_CLIENT_SECRET,
+        // GitLab's /user response has no `email_verified`, so Better Auth
+        // marked every GitLab email unverified: signing in with GitLab to an
+        // existing account was refused ("account not linked"), and accounts
+        // created with GitLab couldn't later link Google/GitHub. GitLab only
+        // lets confirmed accounts sign in with a confirmed primary email, which
+        // `confirmed_at` reflects.
+        mapProfileToUser: (profile) => ({
+          emailVerified: Boolean((profile as { confirmed_at?: string | null }).confirmed_at),
+        }),
       },
     },
     account: {
@@ -178,9 +187,9 @@ export async function getAuth() {
         // resolve to a single user (avoids the "account_not_linked" error).
         enabled: true,
         // Trusted = linked even without the provider confirming the email.
-        // Only Google always verifies it; GitHub reports verification itself,
-        // and GitLab often omits it, so trusting those let an unverified
-        // provider email take over an existing account.
+        // Only Google always verifies it; GitHub and GitLab report verification
+        // themselves (GitLab via the mapping above), so they link whenever
+        // their email is confirmed.
         trustedProviders: ["google"],
       },
     },
