@@ -26,7 +26,7 @@ export const tr = {
 
   categories: {
     title: "Kategoriler",
-    subtitle: "Tüm dizini kategorilere göre keşfet — her şey için kaynaklar.",
+    subtitle: "Tüm kaynak kategorileri, alanlara göre gruplanmış. Kaynaklarını görmek için birini aç.",
     count: "{{count}} kaynak",
     domain: { developer: "Geliştirme", designer: "Tasarım", general: "Genel" },
   },
@@ -60,20 +60,18 @@ export const tr = {
   },
 
   home: {
-    onboardBadge: "Ücretsiz ve topluluk tarafından derlenir",
-    onboardTitleLead: "Nereye başvuracağını bul —",
-    onboardTitleHighlight: "ne öğreneceğini de.",
-    onboardSubtitle: "Resource Base; her birine nasıl başvurulacağıyla birlikte bir şirket dizinini, yazılım, tasarım ve daha fazlası için özenle seçilmiş kaynakları ve topluluğun paylaştığı CV'leri bir araya getirir.",
+    onboardBadge: "Ücretsiz ve topluluk tarafından sürdürülüyor",
+    onboardTitleLead: "Kaynaklar, şirketler ve CV'ler",
+    onboardTitleHighlight: "tek bir dizinde.",
+    onboardSubtitle: "Resource Base; yazılım, tasarım ve daha fazlası için özenle seçilmiş kaynakları, her birine nasıl başvurulacağıyla birlikte şirketleri ve topluluğun paylaştığı CV'leri listeler. Hepsine ücretsiz göz atabilirsin.",
     companiesStat: "{{count}} şirket",
-    companiesBody: "Her şirket için başvuru e-postaları, kariyer sayfaları ve LinkedIn. Şirketleri kaydet, her başvuruyu “kaydedildi”den “teklif”e kadar takip et.",
+    companiesBody: "Her şirketin başvuru e-postaları, kariyer sayfası ve LinkedIn'i. Şirketleri kaydet, her başvuruyu “kaydedildi”den “teklif”e kadar takip et.",
     resourcesStat: "{{count}}+ kaynak · {{categories}} kategori",
-    resourcesBody: "Bilmeye değer araçlar, kütüphaneler, kurslar ve referanslar — aranabilir, filtrelenebilir, favorilerine kaydedilebilir.",
-    badge: "{{count}}+ özenle seçilmiş kaynak",
-    titleLead: "Bir sonraki",
-    titleHighlight: "kaynağını bul.",
-    subtitle: "Yazılım, tasarım ve daha fazlası için özenle seçilmiş araçlar, kurslar ve kaynaklar — tek yerde, aranabilir ve filtrelenebilir.",
+    resourcesBody: "Kategori ve etiketlere göre düzenlenmiş araçlar, kütüphaneler, kurslar ve referanslar. Ara, filtrele, kullandıklarını favorilerine ekle.",
+    badge: "{{count}}+ kaynak",
+    subtitle: "Yazılım, tasarım ve daha fazlası için araçlar, kütüphaneler, kurslar ve referanslar. Ada veya etikete göre ara; kategoriye, fiyata ve dile göre filtrele.",
     cvsStat: "Topluluk tarafından paylaşıldı",
-    cvsBody: "Alana, seviyeye ve teknolojiye göre gerçek CV'ler — başkalarının deneyimini nasıl anlattığını gör, kendininkini paylaş.",
+    cvsBody: "Topluluğun paylaştığı CV'ler; alana, seviyeye ve teknolojiye göre filtrelenebilir. Örnek olarak kullan ya da kendininkini paylaş.",
   },
 
   browse: {
@@ -158,29 +156,29 @@ export const tr = {
   cta: {
     company: {
       title: "Listede olmayan bir şirket mi biliyorsun?",
-      subtitle: "Nasıl başvurulacağıyla birlikte öner — her öneri yayına girmeden önce incelenir.",
+      subtitle: "Nasıl başvurulacağıyla birlikte öner. Her öneri yayınlanmadan önce incelenir.",
       submit: "Şirket Öner",
-      emptyPrompt: "Bulamadın mı? Öner ve başkalarına da yardım et.",
+      emptyPrompt: "Bulamadın mı? Öner, başkaları da bulabilsin.",
     },
     title: "Eksik bir kaynak mı biliyorsun?",
-    subtitle:
-      "Depoya ekle — her gönderi yayına girmeden önce incelenir.",
+    subtitle: "Dizine ekle. Her gönderi yayınlanmadan önce incelenir.",
     submit: "Kaynak Ekle",
-    emptyPrompt: "Bulamadın mı? Ekle, başkalarına da yardım et.",
+    emptyPrompt: "Bulamadın mı? Ekle, başkaları da bulabilsin.",
   },
 
   command: {
     companies: "Şirketler",
     browseCompanies: "Tüm Şirketlere Göz At",
     title: "Ara",
-    description: "Şirketlerde, kaynaklarda, kategorilerde ve etiketlerde ara.",
-    placeholder: "Şirket, kaynak, etiket ara…",
+    description: "Kaynaklarda, şirketlerde, CV'lerde, kategorilerde ve etiketlerde ara.",
+    placeholder: "Kaynak, şirket, CV ara…",
     empty: "Eşleşme yok.",
     loading: "Yükleniyor…",
     featured: "Öne Çıkanlar",
     results: "Kaynaklar",
     goTo: "Git",
     browseAll: "Tüm Kaynaklara Göz At",
+    browseCvs: "Tüm CV'lere Göz At",
   },
 
   category: { home: "Kaynaklar", resources: "{{count}} kaynak" },
@@ -191,7 +189,7 @@ export const tr = {
     title: "Favorilerin",
     empty: "Henüz hiçbir kaynağı favorilerine eklemedin.",
     browse: "Kaynaklara Göz At",
-    subtitle: "Yıldızladığın kaynaklar tek bir yerde. Herhangi bir kaynağın yıldızına dokunarak buraya ekleyebilirsin.",
+    subtitle: "Yıldızladığın kaynaklar. Herhangi bir kaynaktaki yıldızla buraya ekleyebilirsin.",
   },
 
   notifications: {
@@ -221,13 +219,12 @@ export const tr = {
       other: "Düzenleyip tekrar gönderebilirsin.",
       cv: "Güncellenmiş bir CV yükleyebilirsin.",
     },
-    subtitle: "Önerdiğin şirket ve kaynakların inceleme sonuçları: neyin onaylandığı, hangi düzeltmelerin yayına girdiği ve neyin tekrar gözden geçirilmesi gerektiği.",
+    subtitle: "Paylaştıklarının inceleme sonuçları: hangi kaynak, şirket ve CV'lerin onaylandığı, hangi düzeltmelerin uygulandığı ve neyin değişiklik gerektirdiği.",
   },
 
   submit: {
     title: "Kaynak Ekle",
-    subtitle:
-      "Eksik olan harika bir kaynak mı biliyorsun? Ekle — her gönderiyi yayına almadan önce inceliyoruz.",
+    subtitle: "Dizinde eksik olan bir kaynağı öner. Her gönderi yayınlanmadan önce incelenir.",
     name: "İsim",
     url: "URL",
     category: "Kategori",
@@ -260,7 +257,7 @@ export const tr = {
     resubmit: "Tekrar gönder",
     resubmitSuccess: "Tekrar gönderildi! İnceleme sırasına alındı.",
     resubmitError: "Tekrar gönderilemedi. Lütfen tekrar dene.",
-    subtitle: "Önerdiğin şirketler ve kaynaklar, her birinin inceleme durumuyla.",
+    subtitle: "Önerdiğin kaynaklar ve şirketler, her birinin inceleme durumuyla.",
     suggestAgain: "Tekrar Öner",
   },
 
@@ -268,8 +265,7 @@ export const tr = {
     title: "Hoş geldin 👋",
     requiredTitle: "Giriş Yapman Gerekiyor",
     requiredBody: "Bu sayfayı görüntülemek için giriş yapmalısınız.",
-    subtitle:
-      "Başvurularını takip etmek, favori kaydetmek ve deponun büyümesine katkıda bulunmak için katıl.",
+    subtitle: "Kaynakları favorilerine eklemek, başvurularını takip etmek, CV'ni paylaşmak ve öneride bulunmak için giriş yap.",
     google: "Google ile Devam Et",
     github: "GitHub ile Devam Et",
     gitlab: "GitLab ile Devam Et",
@@ -343,8 +339,7 @@ export const tr = {
   },
 
   footer: {
-    tagline:
-      "Başvurabileceğin şirketler ve her şey için kaynaklar — hepsi tek bir yerde!",
+    tagline: "Kaynaklar, şirketler ve CV'ler için topluluk tarafından sürdürülen ücretsiz bir dizin.",
     source: "GitHub'da Yıldızla",
     reportIssue: "Sorun Bildir",
     sponsor: "Sponsor ol",
@@ -384,10 +379,8 @@ export const tr = {
   companies: {
     otherLocations: "Diğer Konumlar",
     removeFilter: "Filtreyi kaldır: {{filter}}",
-    badge: "{{count}} şirket ve başvuru bilgileri",
-    titleLead: "Bir sonraki",
-    titleHighlight: "şirketini bul.",
-    subtitle: "Başvuru e-postaları, kariyer sayfaları ve LinkedIn bağlantılarıyla topluluk tarafından derlenen ücretsiz bir şirket listesi — şirketleri kaydet, tüm başvurularını tek yerden takip et.",
+    badge: "{{count}} şirket",
+    subtitle: "Başvuru e-postaları, kariyer sayfaları ve LinkedIn bilgileriyle şirketler; topluluk tarafından derlenir. İlgilendiklerini kaydet, her başvuruyu listende takip et.",
     searchPlaceholder: "Şirket, e-posta, müşteri ara…",
     shuffle: "Listeyi karıştır",
     empty: "Filtrelerine uyan şirket yok.",
@@ -527,7 +520,7 @@ export const tr = {
     tooManyLocations: "En fazla {{count}} farklı konum ekleyebilirsin.",
     removeLocation: "{{place}} konumunu kaldır",
     title: "Şirket Öner",
-    subtitle: "Burada olması gereken bir şirket mi biliyorsun? Nasıl başvurulacağını paylaş — her öneri yayına girmeden önce incelenir.",
+    subtitle: "Dizinde eksik olan bir şirketi, nasıl başvurulacağıyla birlikte öner. Her öneri yayınlanmadan önce incelenir.",
     name: "Şirket Adı",
     waysHint: "En az birini ekle: başvuru e-postası, kariyer sayfası, LinkedIn veya web sitesi.",
     emails: "Başvuru E-postaları",
@@ -547,7 +540,7 @@ export const tr = {
 
   cvs: {
     title: "CV'ler",
-    subtitle: "Topluluğun paylaştığı gerçek CV'ler; alana, seviyeye ve teknolojiye göre. Başkalarının deneyimini nasıl anlattığını gör, kendi CV'n için fikir edin.",
+    subtitle: "Topluluğun paylaştığı CV'ler. Başvurduğun role yakın örnekler bulmak için alana, seviyeye, dile veya teknolojiye göre filtrele.",
     searchPlaceholder: "Rol veya teknolojiye göre ara…",
     filter: {
       field: "Alan",
@@ -601,7 +594,7 @@ export const tr = {
     },
     liked: {
       title: "Beğendiğim CV'ler",
-      subtitle: "Beğendiğin CV'ler, kendi CV'n üzerinde çalışırken dönebilmen için burada.",
+      subtitle: "Beğendiğin CV'ler; tekrar bulabilmen için burada.",
       empty: "Henüz hiçbir CV'yi beğenmedin.",
       signInPrompt: "Beğendiğin CV'leri görmek için giriş yap.",
     },
@@ -611,7 +604,7 @@ export const tr = {
     report: "Bildir",
     close: "Kapat",
     previewError: "CV burada gösterilemedi — yeni sekmede aç veya indir.",
-    disclaimer: "CV'ler sahipleri tarafından paylaşılır ve Resource Base tarafından doğrulanmaz. İlham almak için kullan — birinin CV'sini kopyalamak veya sahiplerine spam amaçlı ulaşmak yasaktır.",
+    disclaimer: "CV'ler sahipleri tarafından paylaşılır ve Resource Base tarafından doğrulanmaz. Örnek olarak kullan; birinin CV'sini kopyalamak veya sahibine spam amaçlı ulaşmak yasaktır.",
   },
 
   myCv: {

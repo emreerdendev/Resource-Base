@@ -26,7 +26,7 @@ export const en = {
 
   categories: {
     title: "Categories",
-    subtitle: "Explore the full directory by category — resources for anything and everything.",
+    subtitle: "All resource categories, grouped by area. Open one to see its resources.",
     count: "{{count}} resources",
     domain: { developer: "Development", designer: "Design", general: "General" },
   },
@@ -60,20 +60,18 @@ export const en = {
   },
 
   home: {
-    onboardBadge: "Free & community-curated",
-    onboardTitleLead: "Find where to apply —",
-    onboardTitleHighlight: "and what to learn.",
-    onboardSubtitle: "Resource Base brings together a directory of companies with exactly how to apply to each, hand-picked resources for development, design and more, and CVs shared by the community.",
+    onboardBadge: "Free and community-maintained",
+    onboardTitleLead: "Resources, companies and CVs",
+    onboardTitleHighlight: "in one directory.",
+    onboardSubtitle: "Resource Base lists hand-picked resources for development, design and more, companies with how to apply to each, and CVs shared by the community. Everything is free to browse.",
     companiesStat: "{{count}} companies",
-    companiesBody: "Application emails, career pages and LinkedIn for every company. Save them and track each application from “saved” to “offer”.",
+    companiesBody: "Each company’s application emails, career page and LinkedIn. Save companies and track each application from “saved” to “offer”.",
     resourcesStat: "{{count}}+ resources · {{categories}} categories",
-    resourcesBody: "Tools, libraries, courses and references worth knowing — searchable, filterable and saved to your favorites.",
-    badge: "{{count}}+ hand-picked resources",
-    titleLead: "Find your next",
-    titleHighlight: "resource.",
-    subtitle: "Hand-picked tools, courses and references for development, design and more — searchable and filterable in one place.",
+    resourcesBody: "Tools, libraries, courses and references, organized by category and tag. Search, filter and favorite the ones you use.",
+    badge: "{{count}}+ resources",
+    subtitle: "Tools, libraries, courses and references for development, design and more. Search by name or tag, or filter by category, pricing and language.",
     cvsStat: "Shared by the community",
-    cvsBody: "Real CVs by field, seniority and technology — see how others present their experience, and share yours.",
+    cvsBody: "CVs shared by the community, filterable by field, seniority and technology. Use them as examples, or share your own.",
   },
 
   browse: {
@@ -158,29 +156,29 @@ export const en = {
   cta: {
     company: {
       title: "Know a company we're missing?",
-      subtitle: "Suggest it with how to apply — every suggestion is reviewed before going live.",
+      subtitle: "Suggest it with how to apply. Every suggestion is reviewed before it’s published.",
       submit: "Suggest a Company",
-      emptyPrompt: "Can't find it? Suggest it and help others.",
+      emptyPrompt: "Can’t find it? Suggest it so others can find it too.",
     },
     title: "Know a resource we're missing?",
-    subtitle:
-      "Add it to the directory — every submission is reviewed before going live.",
+    subtitle: "Add it to the directory. Every submission is reviewed before it’s published.",
     submit: "Add a Resource",
-    emptyPrompt: "Can't find it? Add it and help others.",
+    emptyPrompt: "Can’t find it? Add it so others can find it too.",
   },
 
   command: {
     companies: "Companies",
     browseCompanies: "Browse All Companies",
     title: "Search",
-    description: "Search companies, resources, categories and tags.",
-    placeholder: "Search companies, resources, tags…",
+    description: "Search resources, companies, CVs, categories and tags.",
+    placeholder: "Search resources, companies, CVs…",
     empty: "No matches.",
     loading: "Loading…",
     featured: "Featured",
     results: "Resources",
     goTo: "Go To",
     browseAll: "Browse All Resources",
+    browseCvs: "Browse All CVs",
   },
 
   category: { home: "Resources", resources: "{{count}} resources" },
@@ -191,7 +189,7 @@ export const en = {
     title: "Your Favorites",
     empty: "You haven’t favorited any resources yet.",
     browse: "Browse Resources",
-    subtitle: "Resources you’ve starred, all in one place. Tap the star on any resource to add it here.",
+    subtitle: "Resources you’ve starred. Use the star on any resource to add it here.",
   },
 
   notifications: {
@@ -221,13 +219,12 @@ export const en = {
       other: "You can edit and resubmit it.",
       cv: "You can upload an updated CV.",
     },
-    subtitle: "Review results for the companies and resources you’ve suggested — what was approved, which fixes went live and what needs another look.",
+    subtitle: "Review results for what you’ve shared: which resources, companies and CVs were approved, which fixes were applied and what needs changes.",
   },
 
   submit: {
     title: "Add a Resource",
-    subtitle:
-      "Know a great resource that’s missing? Add it — we review every submission before it goes live.",
+    subtitle: "Suggest a resource that’s missing from the directory. Every submission is reviewed before it’s published.",
     name: "Name",
     url: "URL",
     category: "Category",
@@ -260,7 +257,7 @@ export const en = {
     resubmit: "Resubmit",
     resubmitSuccess: "Resubmitted! It's back in the review queue.",
     resubmitError: "Couldn't resubmit. Please try again.",
-    subtitle: "Companies and resources you’ve suggested, and where each review stands.",
+    subtitle: "Resources and companies you’ve suggested, and the review status of each.",
     suggestAgain: "Suggest Again",
   },
 
@@ -268,8 +265,7 @@ export const en = {
     title: "Welcome 👋",
     requiredTitle: "Sign In Required",
     requiredBody: "You need to be signed in to view this page.",
-    subtitle:
-      "Join to track your applications, save favorites and help the directory grow.",
+    subtitle: "Sign in to favorite resources, track your applications, share your CV and suggest additions.",
     google: "Continue with Google",
     github: "Continue with GitHub",
     gitlab: "Continue with GitLab",
@@ -345,8 +341,7 @@ export const en = {
   },
 
   footer: {
-    tagline:
-      "Companies to apply to and resources for everything — all in one place!",
+    tagline: "A free directory of resources, companies and CVs, maintained by the community.",
     source: "Star on GitHub",
     reportIssue: "Report an Issue",
     sponsor: "Sponsor",
@@ -386,10 +381,8 @@ export const en = {
   companies: {
     otherLocations: "Other Locations",
     removeFilter: "Remove filter: {{filter}}",
-    badge: "{{count}} companies and how to apply",
-    titleLead: "Find your next",
-    titleHighlight: "company.",
-    subtitle: "A free, community-curated list of companies with their application emails, career pages and LinkedIn — save them and track every application in one place.",
+    badge: "{{count}} companies",
+    subtitle: "Companies with their application emails, career pages and LinkedIn, compiled by the community. Save the ones you’re interested in and track each application in your list.",
     searchPlaceholder: "Search companies, emails, clients…",
     shuffle: "Shuffle the list",
     empty: "No companies match your filters.",
@@ -529,7 +522,7 @@ export const en = {
     tooManyLocations: "You can add up to {{count}} other locations.",
     removeLocation: "Remove {{place}}",
     title: "Suggest a Company",
-    subtitle: "Know a company that belongs here? Share how to apply — we review every suggestion before it goes live.",
+    subtitle: "Suggest a company that’s missing, with how to apply to it. Every suggestion is reviewed before it’s published.",
     name: "Company Name",
     waysHint: "Add at least one: an application email, career page, LinkedIn or website.",
     emails: "Application Emails",
@@ -549,7 +542,7 @@ export const en = {
 
   cvs: {
     title: "CVs",
-    subtitle: "Real CVs shared by the community, by field, seniority and technology — see how others present their experience and get ideas for your own.",
+    subtitle: "CVs shared by the community. Filter by field, seniority, language or technology to find examples close to the role you’re applying for.",
     searchPlaceholder: "Search by role or technology…",
     filter: {
       field: "Field",
@@ -603,7 +596,7 @@ export const en = {
     },
     liked: {
       title: "Liked CVs",
-      subtitle: "CVs you’ve liked, saved here to come back to when you work on your own.",
+      subtitle: "CVs you’ve liked, so you can find them again.",
       empty: "You haven’t liked any CVs yet.",
       signInPrompt: "Sign in to see the CVs you’ve liked.",
     },
@@ -613,7 +606,7 @@ export const en = {
     report: "Report",
     close: "Close",
     previewError: "Couldn’t show this CV here — open it in a new tab or download it.",
-    disclaimer: "CVs are shared by their owners and aren’t verified by Resource Base. Use them for inspiration — copying someone’s CV or contacting owners for spam isn’t allowed.",
+    disclaimer: "CVs are shared by their owners and aren’t verified by Resource Base. Use them as examples; copying someone’s CV or contacting its owner for spam isn’t allowed.",
   },
 
   myCv: {

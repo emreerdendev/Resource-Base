@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ArrowUpRight, Boxes, Building2, Hash, Search } from "lucide-react";
+import { ArrowUpRight, Boxes, Building2, FileText, Hash, Search } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -14,8 +14,10 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { createCompanySearch } from "@/lib/company-search";
+import { loadCvListing } from "@/lib/cv-listing";
 import { createResourceSearch } from "@/lib/resource-search";
-import type { SearchIndex } from "@/lib/types";
+import { createSearch } from "@/lib/search";
+import type { CvListing, SearchIndex } from "@/lib/types";
 
 /** Fired by the header search button to open the palette from anywhere. */
 export const OPEN_COMMAND_EVENT = "open-command-palette";
@@ -35,7 +37,7 @@ function loadIndex(): Promise<SearchIndex> {
 }
 
 /**
- * ⌘K search over every resource and company. The dataset is fetched the first
+ * ⌘K search over every resource, company and CV. The dataset is fetched the first
  * time the palette opens rather than shipped with each page.
  */
 export function CommandPalette() {
@@ -44,6 +46,7 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState<SearchIndex | null>(null);
+  const [cvs, setCvs] = useState<CvListing[]>([]);
   const { resources, companies } = index ?? EMPTY;
 
   useEffect(() => {
@@ -51,6 +54,10 @@ export function CommandPalette() {
     let active = true;
     loadIndex()
       .then((data) => active && setIndex(data))
+      .catch(() => {});
+    // CVs come from their own edge-cached listing (shared with /cvs).
+    loadCvListing()
+      .then((rows) => active && setCvs(rows))
       .catch(() => {});
     return () => {
       active = false;
@@ -61,6 +68,14 @@ export function CommandPalette() {
   const searchResources = useMemo(() => createResourceSearch(resources), [resources]);
 
   const searchCompanies = useMemo(() => createCompanySearch(companies), [companies]);
+  const searchCvs = useMemo(
+    () =>
+      createSearch(cvs, (cv) => cv.title, [
+        { get: (cv) => cv.technologies },
+        { get: (cv) => [t(`cvs.field.${cv.field}`)] },
+      ]),
+    [cvs, t],
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -90,6 +105,11 @@ export function CommandPalette() {
     [query, searchCompanies],
   );
 
+  const cvResults = useMemo(
+    () => (query.trim() ? searchCvs(query).slice(0, 5) : []),
+    [query, searchCvs],
+  );
+
   const go = (href: string, external = false) => {
     setOpen(false);
     setQuery("");
@@ -112,21 +132,6 @@ export function CommandPalette() {
         />
         <CommandList>
         <CommandEmpty>{index ? t("command.empty") : t("command.loading")}</CommandEmpty>
-        {companyResults.length > 0 && (
-          <CommandGroup heading={t("command.companies")}>
-            {companyResults.map((c) => (
-              <CommandItem
-                key={c._id}
-                value={c._id}
-                onSelect={() => go(`/company/${c.slug}`)}
-                className="flex items-center gap-2"
-              >
-                <Building2 className="size-4 shrink-0 opacity-60" />
-                <span className="flex-1 truncate">{c.name}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
         {results.length > 0 && (
         <CommandGroup heading={query ? t("command.results") : t("command.featured")}>
           {results.map((r) => (
@@ -148,11 +153,38 @@ export function CommandPalette() {
           ))}
         </CommandGroup>
         )}
+        {companyResults.length > 0 && (
+          <CommandGroup heading={t("command.companies")}>
+            {companyResults.map((c) => (
+              <CommandItem
+                key={c._id}
+                value={c._id}
+                onSelect={() => go(`/company/${c.slug}`)}
+                className="flex items-center gap-2"
+              >
+                <Building2 className="size-4 shrink-0 opacity-60" />
+                <span className="flex-1 truncate">{c.name}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+        {cvResults.length > 0 && (
+          <CommandGroup heading={t("nav.cvs")}>
+            {cvResults.map((cv) => (
+              <CommandItem
+                key={cv.id}
+                value={cv.id}
+                onSelect={() => go(`/cvs?q=${encodeURIComponent(cv.title)}`)}
+                className="flex items-center gap-2"
+              >
+                <FileText className="size-4 shrink-0 opacity-60" />
+                <span className="flex-1 truncate">{cv.title}</span>
+                <span className="text-muted-foreground text-xs">{t(`cvs.field.${cv.field}`)}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
         <CommandGroup heading={t("command.goTo")}>
-          <CommandItem value="browse-companies" onSelect={() => go("/companies")}>
-            <Building2 className="size-4 opacity-60" />
-            {t("command.browseCompanies")}
-          </CommandItem>
           <CommandItem value="browse-all" onSelect={() => go("/resources")}>
             <Boxes className="size-4 opacity-60" />
             {t("command.browseAll")}
@@ -160,6 +192,14 @@ export function CommandPalette() {
           <CommandItem value="categories" onSelect={() => go("/categories")}>
             <Hash className="size-4 opacity-60" />
             {t("nav.categories")}
+          </CommandItem>
+          <CommandItem value="browse-companies" onSelect={() => go("/companies")}>
+            <Building2 className="size-4 opacity-60" />
+            {t("command.browseCompanies")}
+          </CommandItem>
+          <CommandItem value="browse-cvs" onSelect={() => go("/cvs")}>
+            <FileText className="size-4 opacity-60" />
+            {t("command.browseCvs")}
           </CommandItem>
         </CommandGroup>
         </CommandList>

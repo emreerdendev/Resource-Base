@@ -17,8 +17,7 @@ export function CompaniesIntro({ count }: { count: number }) {
         {t("companies.badge", { count })}
       </div>
       <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
-        {t("companies.titleLead")}{" "}
-        <span className="text-primary">{t("companies.titleHighlight")}</span>
+        {t("nav.companies")}
       </h1>
       <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
         {t("companies.subtitle")}

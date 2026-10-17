@@ -5,12 +5,12 @@ import { Boxes, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-/** Switch between suggesting a company and adding a resource. */
+/** Switch between adding a resource and suggesting a company. */
 export function SubmitTabs({ active }: { active: "company" | "resource" }) {
   const { t } = useTranslation();
   const tabs = [
-    { key: "company", href: "/submit?type=company", label: t("nav.suggestCompany"), icon: Building2 },
     { key: "resource", href: "/submit", label: t("nav.submit"), icon: Boxes },
+    { key: "company", href: "/submit?type=company", label: t("nav.suggestCompany"), icon: Building2 },
   ] as const;
   return (
     <div className="mb-8 grid grid-cols-2 gap-1 rounded-xl border border-border bg-muted/40 p-1">

@@ -26,7 +26,7 @@ export const de = {
 
   categories: {
     title: "Kategorien",
-    subtitle: "Durchstöbere das gesamte Verzeichnis nach Kategorie — Ressourcen für alles.",
+    subtitle: "Alle Ressourcenkategorien, nach Bereich gruppiert. Öffne eine, um ihre Ressourcen zu sehen.",
     count: "{{count}} Ressourcen",
     domain: { developer: "Entwicklung", designer: "Design", general: "Allgemein" },
   },
@@ -60,21 +60,18 @@ export const de = {
   },
 
   home: {
-    onboardBadge: "Kostenlos & von der Community gepflegt",
-    onboardTitleLead: "Finde, wo du dich bewirbst —",
-    onboardTitleHighlight: "und was du lernst.",
-    onboardSubtitle: "Resource Base vereint ein Unternehmensverzeichnis mit genau dem richtigen Bewerbungsweg für jedes Unternehmen, handverlesene Ressourcen für Entwicklung, Design und mehr sowie Lebensläufe aus der Community.",
+    onboardBadge: "Kostenlos und von der Community gepflegt",
+    onboardTitleLead: "Ressourcen, Unternehmen und Lebensläufe",
+    onboardTitleHighlight: "in einem Verzeichnis.",
+    onboardSubtitle: "Resource Base listet handverlesene Ressourcen für Entwicklung, Design und mehr, Unternehmen mit dem Bewerbungsweg für jedes einzelne und Lebensläufe aus der Community. Alles ist kostenlos einsehbar.",
     companiesStat: "{{count}} Unternehmen",
-    companiesBody: "Bewerbungs-E-Mails, Karriereseiten und LinkedIn für jedes Unternehmen. Speichere sie und verfolge jede Bewerbung von „gespeichert“ bis „Angebot“.",
+    companiesBody: "Bewerbungs-E-Mails, Karriereseite und LinkedIn jedes Unternehmens. Speichere Unternehmen und verfolge jede Bewerbung von „gespeichert“ bis „Angebot“.",
     resourcesStat: "{{count}}+ Ressourcen · {{categories}} Kategorien",
-    resourcesBody: "Tools, Bibliotheken, Kurse und Referenzen, die man kennen sollte — durchsuchbar, filterbar und als Favoriten speicherbar.",
-    badge: "{{count}}+ handverlesene Ressourcen",
-    titleLead: "Finde deine nächste",
-    titleHighlight: "Ressource.",
-    subtitle:
-      "Jede Ressource, die du je brauchst — für alles, an einem Ort!",
+    resourcesBody: "Tools, Bibliotheken, Kurse und Referenzen, nach Kategorie und Tag geordnet. Suche, filtere und markiere die, die du nutzt, als Favoriten.",
+    badge: "{{count}}+ Ressourcen",
+    subtitle: "Tools, Bibliotheken, Kurse und Referenzen für Entwicklung, Design und mehr. Suche nach Name oder Tag oder filtere nach Kategorie, Preis und Sprache.",
     cvsStat: "Von der Community geteilt",
-    cvsBody: "Echte Lebensläufe nach Bereich, Erfahrungsstufe und Technologie – sieh, wie andere ihre Erfahrung präsentieren, und teile deinen.",
+    cvsBody: "Lebensläufe aus der Community, filterbar nach Bereich, Erfahrungsstufe und Technologie. Nutze sie als Beispiele oder teile deinen eigenen.",
   },
 
   browse: {
@@ -159,29 +156,29 @@ export const de = {
   cta: {
     company: {
       title: "Kennst du ein Unternehmen, das fehlt?",
-      subtitle: "Schlag es mit Bewerbungsweg vor — jeder Vorschlag wird vor der Veröffentlichung geprüft.",
+      subtitle: "Schlage es mit dem Bewerbungsweg vor. Jeder Vorschlag wird vor der Veröffentlichung geprüft.",
       submit: "Unternehmen vorschlagen",
-      emptyPrompt: "Nicht gefunden? Schlag es vor und hilf anderen.",
+      emptyPrompt: "Nicht gefunden? Schlage es vor, damit andere es auch finden.",
     },
     title: "Kennst du eine fehlende Ressource?",
-    subtitle:
-      "Füge sie zum Verzeichnis hinzu — jeder Vorschlag wird vor der Veröffentlichung geprüft.",
+    subtitle: "Füge sie dem Verzeichnis hinzu. Jede Einreichung wird vor der Veröffentlichung geprüft.",
     submit: "Ressource hinzufügen",
-    emptyPrompt: "Nicht gefunden? Füge sie hinzu und hilf anderen.",
+    emptyPrompt: "Nicht gefunden? Füge es hinzu, damit andere es auch finden.",
   },
 
   command: {
     companies: "Unternehmen",
     browseCompanies: "Alle Unternehmen durchsuchen",
     title: "Suchen",
-    description: "Durchsuche Unternehmen, Ressourcen, Kategorien und Tags.",
-    placeholder: "Unternehmen, Ressourcen, Tags suchen…",
+    description: "Ressourcen, Unternehmen, Lebensläufe, Kategorien und Tags durchsuchen.",
+    placeholder: "Ressourcen, Unternehmen, Lebensläufe suchen…",
     empty: "Keine Treffer.",
     loading: "Wird geladen…",
     featured: "Empfohlen",
     results: "Ressourcen",
     goTo: "Gehe zu",
     browseAll: "Alle Ressourcen durchsuchen",
+    browseCvs: "Alle Lebensläufe ansehen",
   },
 
   category: { home: "Ressourcen", resources: "{{count}} Ressourcen" },
@@ -192,7 +189,7 @@ export const de = {
     title: "Deine Favoriten",
     empty: "Du hast noch keine Ressourcen gespeichert.",
     browse: "Ressourcen durchsuchen",
-    subtitle: "Deine mit Stern markierten Ressourcen an einem Ort. Tippe bei einer Ressource auf den Stern, um sie hier hinzuzufügen.",
+    subtitle: "Ressourcen, die du mit einem Stern markiert hast. Nutze den Stern bei einer Ressource, um sie hier hinzuzufügen.",
   },
 
   notifications: {
@@ -222,13 +219,12 @@ export const de = {
       other: "Du kannst es bearbeiten und erneut einreichen.",
       cv: "Du kannst einen aktualisierten Lebenslauf hochladen.",
     },
-    subtitle: "Ergebnisse zu den Unternehmen und Ressourcen, die du vorgeschlagen hast – was angenommen wurde, welche Korrekturen live sind und was noch Änderungen braucht.",
+    subtitle: "Prüfergebnisse zu dem, was du geteilt hast: welche Ressourcen, Unternehmen und Lebensläufe angenommen wurden, welche Korrekturen übernommen wurden und was Änderungen braucht.",
   },
 
   submit: {
     title: "Ressource hinzufügen",
-    subtitle:
-      "Kennst du eine großartige Ressource, die fehlt? Füge sie hinzu — wir prüfen jede Einreichung, bevor sie live geht.",
+    subtitle: "Schlage eine Ressource vor, die im Verzeichnis fehlt. Jede Einreichung wird vor der Veröffentlichung geprüft.",
     name: "Name",
     url: "URL",
     category: "Kategorie",
@@ -261,7 +257,7 @@ export const de = {
     resubmit: "Erneut senden",
     resubmitSuccess: "Erneut gesendet! Wieder in der Prüfung.",
     resubmitError: "Erneutes Senden fehlgeschlagen. Bitte erneut versuchen.",
-    subtitle: "Unternehmen und Ressourcen, die du vorgeschlagen hast, und der Stand jeder Prüfung.",
+    subtitle: "Ressourcen und Unternehmen, die du vorgeschlagen hast, und der Prüfstatus jedes Vorschlags.",
     suggestAgain: "Erneut vorschlagen",
   },
 
@@ -269,8 +265,7 @@ export const de = {
     title: "Willkommen 👋",
     requiredTitle: "Anmeldung erforderlich",
     requiredBody: "Du musst angemeldet sein, um diese Seite zu sehen.",
-    subtitle:
-      "Mach mit, um deine Bewerbungen zu verfolgen, Favoriten zu speichern und das Verzeichnis wachsen zu lassen.",
+    subtitle: "Melde dich an, um Ressourcen zu favorisieren, Bewerbungen zu verfolgen, deinen Lebenslauf zu teilen und Ergänzungen vorzuschlagen.",
     google: "Mit Google fortfahren",
     github: "Mit GitHub fortfahren",
     gitlab: "Mit GitLab fortfahren",
@@ -346,8 +341,7 @@ export const de = {
   },
 
   footer: {
-    tagline:
-      "Unternehmen zum Bewerben und Ressourcen für alles — alles an einem Ort!",
+    tagline: "Ein kostenloses, von der Community gepflegtes Verzeichnis für Ressourcen, Unternehmen und Lebensläufe.",
     source: "Auf GitHub bewerten",
     reportIssue: "Problem melden",
     sponsor: "Sponsor werden",
@@ -387,10 +381,8 @@ export const de = {
   companies: {
     otherLocations: "Andere Standorte",
     removeFilter: "Filter entfernen: {{filter}}",
-    badge: "{{count}} Unternehmen und wie man sich bewirbt",
-    titleLead: "Finde dein nächstes",
-    titleHighlight: "Unternehmen.",
-    subtitle: "Eine kostenlose, von der Community gepflegte Liste von Unternehmen mit Bewerbungs-E-Mails, Karriereseiten und LinkedIn — speichere sie und verfolge jede Bewerbung an einem Ort.",
+    badge: "{{count}} Unternehmen",
+    subtitle: "Unternehmen mit Bewerbungs-E-Mails, Karriereseiten und LinkedIn, von der Community zusammengestellt. Speichere die, die dich interessieren, und verfolge jede Bewerbung in deiner Liste.",
     searchPlaceholder: "Unternehmen, E-Mails, Kunden suchen…",
     shuffle: "Liste mischen",
     empty: "Keine Unternehmen entsprechen deinen Filtern.",
@@ -530,7 +522,7 @@ export const de = {
     tooManyLocations: "Du kannst bis zu {{count}} weitere Standorte hinzufügen.",
     removeLocation: "{{place}} entfernen",
     title: "Unternehmen vorschlagen",
-    subtitle: "Kennst du ein Unternehmen, das hierher gehört? Teile, wie man sich bewirbt — wir prüfen jeden Vorschlag.",
+    subtitle: "Schlage ein fehlendes Unternehmen mit seinem Bewerbungsweg vor. Jeder Vorschlag wird vor der Veröffentlichung geprüft.",
     name: "Name des Unternehmens",
     waysHint: "Mindestens eins: Bewerbungs-E-Mail, Karriereseite, LinkedIn oder Website.",
     emails: "Bewerbungs-E-Mails",
@@ -550,7 +542,7 @@ export const de = {
 
   cvs: {
     title: "Lebensläufe",
-    subtitle: "Echte Lebensläufe aus der Community, nach Bereich, Erfahrungsstufe und Technologie – sieh, wie andere ihre Erfahrung präsentieren, und hol dir Ideen für deinen eigenen.",
+    subtitle: "Lebensläufe aus der Community. Filtere nach Bereich, Erfahrung, Sprache oder Technologie, um Beispiele für die Rolle zu finden, auf die du dich bewirbst.",
     searchPlaceholder: "Nach Rolle oder Technologie suchen…",
     filter: {
       field: "Bereich",
@@ -604,7 +596,7 @@ export const de = {
     },
     liked: {
       title: "Gelikte Lebensläufe",
-      subtitle: "Lebensläufe, die dir gefallen haben – hier gespeichert, damit du beim Arbeiten an deinem eigenen darauf zurückgreifen kannst.",
+      subtitle: "Lebensläufe, die dir gefallen haben – damit du sie wiederfindest.",
       empty: "Du hast noch keine Lebensläufe geliked.",
       signInPrompt: "Melde dich an, um deine gelikten Lebensläufe zu sehen.",
     },
@@ -614,7 +606,7 @@ export const de = {
     report: "Melden",
     close: "Schließen",
     previewError: "Der Lebenslauf kann hier nicht angezeigt werden – öffne ihn in einem neuen Tab oder lade ihn herunter.",
-    disclaimer: "Lebensläufe werden von ihren Inhaber:innen geteilt und von Resource Base nicht geprüft. Nutze sie zur Inspiration – Kopieren oder Spam an die Inhaber:innen ist nicht erlaubt.",
+    disclaimer: "Lebensläufe werden von ihren Inhaber:innen geteilt und von Resource Base nicht geprüft. Nutze sie als Beispiele; Kopieren oder Spam an die Inhaber:innen ist nicht erlaubt.",
   },
 
   myCv: {

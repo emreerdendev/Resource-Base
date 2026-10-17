@@ -24,7 +24,7 @@ const privacyEn: LegalDoc = {
     {
       heading: "Who we are",
       body: [
-        `Resource Base is a curated directory of companies (with how to apply to them) and resources. For privacy questions, contact us at ${CONTACT}.`,
+        `Resource Base is a curated directory of resources, companies (with how to apply to them) and CVs shared by users. For privacy questions, contact us at ${CONTACT}.`,
       ],
     },
     {
@@ -100,7 +100,7 @@ const privacyTr: LegalDoc = {
     {
       heading: "Biz kimiz",
       body: [
-        `Resource Base, özenle seçilmiş bir şirket (başvuru bilgileriyle birlikte) ve kaynak dizinidir. Gizlilik soruları için ${CONTACT} adresinden bize ulaşın.`,
+        `Resource Base; özenle seçilmiş kaynakları, şirketleri (başvuru bilgileriyle birlikte) ve kullanıcıların paylaştığı CV'leri içeren bir dizindir. Gizlilik soruları için ${CONTACT} adresinden bize ulaşın.`,
       ],
     },
     {

@@ -43,7 +43,7 @@ export default function OgImage() {
           <div style={{ fontSize: 40, fontWeight: 700 }}>{siteName}</div>
         </div>
         <div style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, maxWidth: 900 }}>
-          Find companies to apply to — and resources for everything.
+          Resources, companies and CVs in one free directory.
         </div>
         <div style={{ fontSize: 30, color: "#b7b3c7", maxWidth: 900 }}>
           {siteDescription}

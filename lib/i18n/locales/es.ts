@@ -26,7 +26,7 @@ export const es = {
 
   categories: {
     title: "Categorías",
-    subtitle: "Explora todo el directorio por categoría — recursos para todo.",
+    subtitle: "Todas las categorías de recursos, agrupadas por área. Abre una para ver sus recursos.",
     count: "{{count}} recursos",
     domain: { developer: "Desarrollo", designer: "Diseño", general: "General" },
   },
@@ -60,21 +60,18 @@ export const es = {
   },
 
   home: {
-    onboardBadge: "Gratis y curado por la comunidad",
-    onboardTitleLead: "Encuentra dónde postular —",
-    onboardTitleHighlight: "y qué aprender.",
-    onboardSubtitle: "Resource Base reúne un directorio de empresas con exactamente cómo postular a cada una, recursos seleccionados para desarrollo, diseño y más, y CV compartidos por la comunidad.",
+    onboardBadge: "Gratis y mantenido por la comunidad",
+    onboardTitleLead: "Recursos, empresas y CV",
+    onboardTitleHighlight: "en un solo directorio.",
+    onboardSubtitle: "Resource Base reúne recursos seleccionados para desarrollo, diseño y más, empresas con cómo postular a cada una y CV compartidos por la comunidad. Todo se puede consultar gratis.",
     companiesStat: "{{count}} empresas",
-    companiesBody: "Correos de postulación, páginas de empleo y LinkedIn de cada empresa. Guárdalas y sigue cada postulación de “guardada” a “oferta”.",
+    companiesBody: "Los correos de postulación, la página de empleo y el LinkedIn de cada empresa. Guarda empresas y sigue cada postulación de “guardada” a “oferta”.",
     resourcesStat: "{{count}}+ recursos · {{categories}} categorías",
-    resourcesBody: "Herramientas, librerías, cursos y referencias que vale la pena conocer — con búsqueda, filtros y favoritos.",
-    badge: "{{count}}+ recursos seleccionados",
-    titleLead: "Encuentra tu próximo",
-    titleHighlight: "recurso.",
-    subtitle:
-      "Todos los recursos que necesitarás — para todo, en un solo lugar!",
+    resourcesBody: "Herramientas, librerías, cursos y referencias, ordenados por categoría y etiqueta. Busca, filtra y guarda en favoritos los que uses.",
+    badge: "{{count}}+ recursos",
+    subtitle: "Herramientas, librerías, cursos y referencias para desarrollo, diseño y más. Busca por nombre o etiqueta, o filtra por categoría, precio e idioma.",
     cvsStat: "Compartidos por la comunidad",
-    cvsBody: "CV reales por área, nivel y tecnología: mira cómo otros presentan su experiencia y comparte el tuyo.",
+    cvsBody: "CV compartidos por la comunidad, filtrables por área, nivel y tecnología. Úsalos como ejemplo o comparte el tuyo.",
   },
 
   browse: {
@@ -159,29 +156,29 @@ export const es = {
   cta: {
     company: {
       title: "¿Conoces una empresa que falta?",
-      subtitle: "Sugiérela con cómo postular — cada sugerencia se revisa antes de publicarse.",
+      subtitle: "Sugiérela con cómo postular. Cada sugerencia se revisa antes de publicarse.",
       submit: "Sugerir una empresa",
-      emptyPrompt: "¿No la encuentras? Sugiérela y ayuda a otros.",
+      emptyPrompt: "¿No la encuentras? Sugiérela para que otros también la encuentren.",
     },
     title: "¿Conoces un recurso que falta?",
-    subtitle:
-      "Añádelo al directorio — cada sugerencia se revisa antes de publicarse.",
+    subtitle: "Añádelo al directorio. Cada envío se revisa antes de publicarse.",
     submit: "Añadir un recurso",
-    emptyPrompt: "¿No lo encuentras? Añádelo y ayuda a los demás.",
+    emptyPrompt: "¿No lo encuentras? Añádelo para que otros también lo encuentren.",
   },
 
   command: {
     companies: "Empresas",
     browseCompanies: "Ver todas las empresas",
     title: "Buscar",
-    description: "Busca entre empresas, recursos, categorías y etiquetas.",
-    placeholder: "Buscar empresas, recursos, etiquetas…",
+    description: "Busca recursos, empresas, CV, categorías y etiquetas.",
+    placeholder: "Buscar recursos, empresas, CV…",
     empty: "Sin resultados.",
     loading: "Cargando…",
     featured: "Destacados",
     results: "Recursos",
     goTo: "Ir a",
     browseAll: "Explorar todos los recursos",
+    browseCvs: "Ver todos los CV",
   },
 
   category: { home: "Recursos", resources: "{{count}} recursos" },
@@ -192,7 +189,7 @@ export const es = {
     title: "Tus favoritos",
     empty: "Aún no has guardado ningún recurso.",
     browse: "Explorar recursos",
-    subtitle: "Los recursos que marcaste con estrella, en un solo lugar. Toca la estrella de cualquier recurso para añadirlo aquí.",
+    subtitle: "Los recursos que marcaste con estrella. Usa la estrella de cualquier recurso para añadirlo aquí.",
   },
 
   notifications: {
@@ -222,13 +219,12 @@ export const es = {
       other: "Puedes editarla y volver a enviarla.",
       cv: "Puedes subir una versión actualizada de tu CV.",
     },
-    subtitle: "Resultados de las empresas y recursos que sugeriste: qué se aprobó, qué correcciones se publicaron y qué necesita cambios.",
+    subtitle: "Resultados de revisión de lo que compartiste: qué recursos, empresas y CV se aprobaron, qué correcciones se aplicaron y qué necesita cambios.",
   },
 
   submit: {
     title: "Añadir un recurso",
-    subtitle:
-      "¿Conoces un gran recurso que falta? Añádelo — revisamos cada envío antes de publicarlo.",
+    subtitle: "Sugiere un recurso que falte en el directorio. Cada envío se revisa antes de publicarse.",
     name: "Nombre",
     url: "URL",
     category: "Categoría",
@@ -261,7 +257,7 @@ export const es = {
     resubmit: "Reenviar",
     resubmitSuccess: "¡Reenviada! Está de nuevo en revisión.",
     resubmitError: "No se pudo reenviar. Inténtalo de nuevo.",
-    subtitle: "Las empresas y recursos que sugeriste y el estado de cada revisión.",
+    subtitle: "Los recursos y empresas que sugeriste y el estado de revisión de cada uno.",
     suggestAgain: "Sugerir de nuevo",
   },
 
@@ -269,8 +265,7 @@ export const es = {
     title: "Bienvenido 👋",
     requiredTitle: "Inicio de sesión requerido",
     requiredBody: "Debes iniciar sesión para ver esta página.",
-    subtitle:
-      "Únete para seguir tus postulaciones, guardar favoritos y ayudar a crecer el directorio.",
+    subtitle: "Inicia sesión para guardar recursos en favoritos, seguir tus postulaciones, compartir tu CV y sugerir novedades.",
     google: "Continuar con Google",
     github: "Continuar con GitHub",
     gitlab: "Continuar con GitLab",
@@ -346,8 +341,7 @@ export const es = {
   },
 
   footer: {
-    tagline:
-      "Empresas a las que postular y recursos para todo — ¡todo en un solo lugar!",
+    tagline: "Un directorio gratuito de recursos, empresas y CV, mantenido por la comunidad.",
     source: "Dar estrella en GitHub",
     reportIssue: "Reportar un problema",
     sponsor: "Patrocinar",
@@ -387,10 +381,8 @@ export const es = {
   companies: {
     otherLocations: "Otras ubicaciones",
     removeFilter: "Quitar filtro: {{filter}}",
-    badge: "{{count}} empresas y cómo postular",
-    titleLead: "Encuentra tu próxima",
-    titleHighlight: "empresa.",
-    subtitle: "Una lista gratuita de empresas, curada por la comunidad, con sus correos de postulación, páginas de empleo y LinkedIn — guárdalas y sigue cada postulación en un solo lugar.",
+    badge: "{{count}} empresas",
+    subtitle: "Empresas con sus correos de postulación, páginas de empleo y LinkedIn, recopiladas por la comunidad. Guarda las que te interesen y sigue cada postulación en tu lista.",
     searchPlaceholder: "Buscar empresas, correos, clientes…",
     shuffle: "Mezclar la lista",
     empty: "Ninguna empresa coincide con tus filtros.",
@@ -530,7 +522,7 @@ export const es = {
     tooManyLocations: "Puedes añadir hasta {{count}} ubicaciones más.",
     removeLocation: "Quitar {{place}}",
     title: "Sugerir una empresa",
-    subtitle: "¿Conoces una empresa que debería estar aquí? Comparte cómo postular — revisamos cada sugerencia.",
+    subtitle: "Sugiere una empresa que falte, con cómo postular a ella. Cada sugerencia se revisa antes de publicarse.",
     name: "Nombre de la empresa",
     waysHint: "Añade al menos uno: correo de postulación, página de empleo, LinkedIn o sitio web.",
     emails: "Correos de postulación",
@@ -550,7 +542,7 @@ export const es = {
 
   cvs: {
     title: "CV",
-    subtitle: "CV reales compartidos por la comunidad, por área, nivel y tecnología: mira cómo otros presentan su experiencia y saca ideas para el tuyo.",
+    subtitle: "CV compartidos por la comunidad. Filtra por área, nivel, idioma o tecnología para encontrar ejemplos cercanos al puesto al que postulas.",
     searchPlaceholder: "Buscar por puesto o tecnología…",
     filter: {
       field: "Área",
@@ -604,7 +596,7 @@ export const es = {
     },
     liked: {
       title: "CV que me gustan",
-      subtitle: "Los CV que te gustaron, guardados aquí para volver a ellos cuando trabajes en el tuyo.",
+      subtitle: "Los CV que te gustaron, para volver a encontrarlos.",
       empty: "Aún no te ha gustado ningún CV.",
       signInPrompt: "Inicia sesión para ver los CV que te gustaron.",
     },
@@ -614,7 +606,7 @@ export const es = {
     report: "Denunciar",
     close: "Cerrar",
     previewError: "No se pudo mostrar este CV aquí: ábrelo en una pestaña nueva o descárgalo.",
-    disclaimer: "Los CV los comparten sus dueños y Resource Base no los verifica. Úsalos como inspiración: copiar el CV de otra persona o contactar a sus dueños con spam no está permitido.",
+    disclaimer: "Los CV los comparten sus dueños y Resource Base no los verifica. Úsalos como ejemplo; copiar el CV de otra persona o contactar a su dueño con spam no está permitido.",
   },
 
   myCv: {

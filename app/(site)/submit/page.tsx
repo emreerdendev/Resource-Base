@@ -8,7 +8,7 @@ import { allCategoriesQuery } from "@/sanity/lib/queries";
 
 export const metadata: Metadata = {
   title: "Contribute",
-  description: "Suggest a company or a resource to add to the directory.",
+  description: "Suggest a resource or a company to add to the directory.",
 };
 
 // Auth enforced in middleware (PROTECTED_PAGES → redirects signed-out visitors),

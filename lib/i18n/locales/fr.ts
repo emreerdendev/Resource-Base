@@ -26,7 +26,7 @@ export const fr = {
 
   categories: {
     title: "Catégories",
-    subtitle: "Explorez tout le répertoire par catégorie — des ressources pour tout.",
+    subtitle: "Toutes les catégories de ressources, regroupées par domaine. Ouvre-en une pour voir ses ressources.",
     count: "{{count}} ressources",
     domain: { developer: "Développement", designer: "Design", general: "Général" },
   },
@@ -60,21 +60,18 @@ export const fr = {
   },
 
   home: {
-    onboardBadge: "Gratuit et enrichi par la communauté",
-    onboardTitleLead: "Trouvez où postuler —",
-    onboardTitleHighlight: "et quoi apprendre.",
-    onboardSubtitle: "Resource Base réunit un annuaire d’entreprises avec la façon exacte de postuler chez chacune, des ressources choisies pour le développement, le design et plus encore, et des CV partagés par la communauté.",
+    onboardBadge: "Gratuit et maintenu par la communauté",
+    onboardTitleLead: "Ressources, entreprises et CV",
+    onboardTitleHighlight: "dans un seul annuaire.",
+    onboardSubtitle: "Resource Base recense des ressources choisies pour le développement, le design et plus encore, des entreprises avec la façon de postuler chez chacune, et des CV partagés par la communauté. Tout est consultable gratuitement.",
     companiesStat: "{{count}} entreprises",
-    companiesBody: "E-mails de candidature, pages carrières et LinkedIn pour chaque entreprise. Enregistrez-les et suivez chaque candidature de « enregistrée » à « offre ».",
+    companiesBody: "Les e-mails de candidature, la page carrières et le LinkedIn de chaque entreprise. Enregistre des entreprises et suis chaque candidature de « enregistrée » à « offre ».",
     resourcesStat: "{{count}}+ ressources · {{categories}} catégories",
-    resourcesBody: "Outils, bibliothèques, cours et références à connaître — consultables, filtrables et à garder en favoris.",
-    badge: "{{count}}+ ressources triées sur le volet",
-    titleLead: "Trouvez votre prochaine",
-    titleHighlight: "ressource.",
-    subtitle:
-      "Toutes les ressources dont vous aurez besoin — pour tout, au même endroit !",
+    resourcesBody: "Outils, bibliothèques, cours et références, classés par catégorie et par tag. Recherche, filtre et mets en favori ceux que tu utilises.",
+    badge: "{{count}}+ ressources",
+    subtitle: "Outils, bibliothèques, cours et références pour le développement, le design et plus encore. Recherche par nom ou tag, ou filtre par catégorie, prix et langue.",
     cvsStat: "Partagés par la communauté",
-    cvsBody: "De vrais CV par domaine, niveau et technologie — vois comment les autres présentent leur expérience, et partage le tien.",
+    cvsBody: "Des CV partagés par la communauté, filtrables par domaine, niveau et technologie. Sers-t’en comme exemples ou partage le tien.",
   },
 
   browse: {
@@ -159,29 +156,29 @@ export const fr = {
   cta: {
     company: {
       title: "Vous connaissez une entreprise manquante ?",
-      subtitle: "Suggérez-la avec la façon de postuler — chaque suggestion est vérifiée avant publication.",
+      subtitle: "Suggère-la avec la façon d’y postuler. Chaque suggestion est vérifiée avant publication.",
       submit: "Suggérer une entreprise",
-      emptyPrompt: "Introuvable ? Suggérez-la et aidez les autres.",
+      emptyPrompt: "Introuvable ? Suggère-la pour que d’autres la trouvent aussi.",
     },
     title: "Vous connaissez une ressource manquante ?",
-    subtitle:
-      "Ajoutez-la au répertoire — chaque proposition est examinée avant publication.",
+    subtitle: "Ajoute-la à l’annuaire. Chaque envoi est vérifié avant publication.",
     submit: "Ajouter une ressource",
-    emptyPrompt: "Vous ne la trouvez pas ? Ajoutez-la et aidez les autres.",
+    emptyPrompt: "Introuvable ? Ajoute-le pour que d’autres le trouvent aussi.",
   },
 
   command: {
     companies: "Entreprises",
     browseCompanies: "Parcourir toutes les entreprises",
     title: "Rechercher",
-    description: "Recherchez parmi les entreprises, ressources, catégories et tags.",
-    placeholder: "Rechercher entreprises, ressources, tags…",
+    description: "Rechercher des ressources, entreprises, CV, catégories et tags.",
+    placeholder: "Rechercher ressources, entreprises, CV…",
     empty: "Aucun résultat.",
     loading: "Chargement…",
     featured: "En vedette",
     results: "Ressources",
     goTo: "Aller à",
     browseAll: "Parcourir toutes les ressources",
+    browseCvs: "Parcourir tous les CV",
   },
 
   category: { home: "Ressources", resources: "{{count}} ressources" },
@@ -192,7 +189,7 @@ export const fr = {
     title: "Vos favoris",
     empty: "Vous n'avez encore enregistré aucune ressource.",
     browse: "Parcourir les ressources",
-    subtitle: "Les ressources que tu as mises en favori, réunies au même endroit. Touche l’étoile d’une ressource pour l’ajouter ici.",
+    subtitle: "Les ressources que tu as mises en favori. Utilise l’étoile d’une ressource pour l’ajouter ici.",
   },
 
   notifications: {
@@ -222,13 +219,12 @@ export const fr = {
       other: "Tu peux la modifier et la renvoyer.",
       cv: "Tu peux envoyer une version mise à jour de ton CV.",
     },
-    subtitle: "Les résultats pour les entreprises et ressources que tu as suggérées : ce qui a été accepté, les corrections publiées et ce qui doit être revu.",
+    subtitle: "Les résultats d’examen de ce que tu as partagé : quelles ressources, entreprises et CV ont été acceptés, quelles corrections ont été appliquées et ce qui doit être modifié.",
   },
 
   submit: {
     title: "Ajouter une ressource",
-    subtitle:
-      "Vous connaissez une superbe ressource qui manque ? Ajoutez-la — nous examinons chaque ajout avant publication.",
+    subtitle: "Suggère une ressource qui manque à l’annuaire. Chaque envoi est vérifié avant publication.",
     name: "Nom",
     url: "URL",
     category: "Catégorie",
@@ -261,7 +257,7 @@ export const fr = {
     resubmit: "Renvoyer",
     resubmitSuccess: "Renvoyée ! Elle est de nouveau en cours d'examen.",
     resubmitError: "Échec du renvoi. Veuillez réessayer.",
-    subtitle: "Les entreprises et ressources que tu as suggérées, et l’état de chaque examen.",
+    subtitle: "Les ressources et entreprises que tu as suggérées, et l’état d’examen de chacune.",
     suggestAgain: "Suggérer à nouveau",
   },
 
@@ -269,8 +265,7 @@ export const fr = {
     title: "Bienvenue 👋",
     requiredTitle: "Connexion requise",
     requiredBody: "Vous devez être connecté pour voir cette page.",
-    subtitle:
-      "Rejoignez-nous pour suivre vos candidatures, enregistrer des favoris et faire grandir l'annuaire.",
+    subtitle: "Connecte-toi pour mettre des ressources en favori, suivre tes candidatures, partager ton CV et proposer des ajouts.",
     google: "Continuer avec Google",
     github: "Continuer avec GitHub",
     gitlab: "Continuer avec GitLab",
@@ -346,8 +341,7 @@ export const fr = {
   },
 
   footer: {
-    tagline:
-      "Des entreprises où postuler et des ressources pour tout — au même endroit !",
+    tagline: "Un annuaire gratuit de ressources, d’entreprises et de CV, maintenu par la communauté.",
     source: "Star sur GitHub",
     reportIssue: "Signaler un problème",
     sponsor: "Devenir sponsor",
@@ -387,10 +381,8 @@ export const fr = {
   companies: {
     otherLocations: "Autres lieux",
     removeFilter: "Retirer le filtre : {{filter}}",
-    badge: "{{count}} entreprises et comment y postuler",
-    titleLead: "Trouvez votre prochaine",
-    titleHighlight: "entreprise.",
-    subtitle: "Une liste gratuite d'entreprises, enrichie par la communauté, avec leurs e-mails de candidature, pages carrières et LinkedIn — enregistrez-les et suivez chaque candidature au même endroit.",
+    badge: "{{count}} entreprises",
+    subtitle: "Des entreprises avec leurs e-mails de candidature, pages carrières et LinkedIn, rassemblées par la communauté. Enregistre celles qui t’intéressent et suis chaque candidature dans ta liste.",
     searchPlaceholder: "Rechercher entreprises, e-mails, clients…",
     shuffle: "Mélanger la liste",
     empty: "Aucune entreprise ne correspond à vos filtres.",
@@ -530,7 +522,7 @@ export const fr = {
     tooManyLocations: "Vous pouvez ajouter jusqu’à {{count}} autres lieux.",
     removeLocation: "Retirer {{place}}",
     title: "Suggérer une entreprise",
-    subtitle: "Vous connaissez une entreprise qui a sa place ici ? Indiquez comment postuler — chaque suggestion est vérifiée.",
+    subtitle: "Suggère une entreprise manquante, avec la façon d’y postuler. Chaque suggestion est vérifiée avant publication.",
     name: "Nom de l’entreprise",
     waysHint: "Ajoutez-en au moins un : e-mail de candidature, page carrières, LinkedIn ou site web.",
     emails: "E-mails de candidature",
@@ -550,7 +542,7 @@ export const fr = {
 
   cvs: {
     title: "CV",
-    subtitle: "De vrais CV partagés par la communauté, par domaine, niveau et technologie — vois comment les autres présentent leur expérience et trouve des idées pour le tien.",
+    subtitle: "Des CV partagés par la communauté. Filtre par domaine, niveau, langue ou technologie pour trouver des exemples proches du poste visé.",
     searchPlaceholder: "Rechercher par poste ou technologie…",
     filter: {
       field: "Domaine",
@@ -604,7 +596,7 @@ export const fr = {
     },
     liked: {
       title: "CV aimés",
-      subtitle: "Les CV que tu as aimés, gardés ici pour y revenir quand tu travailles sur le tien.",
+      subtitle: "Les CV que tu as aimés, pour les retrouver facilement.",
       empty: "Tu n’as encore aimé aucun CV.",
       signInPrompt: "Connecte-toi pour voir les CV que tu as aimés.",
     },
@@ -614,7 +606,7 @@ export const fr = {
     report: "Signaler",
     close: "Fermer",
     previewError: "Impossible d’afficher ce CV ici — ouvre-le dans un nouvel onglet ou télécharge-le.",
-    disclaimer: "Les CV sont partagés par leurs auteurs et ne sont pas vérifiés par Resource Base. Inspire-t’en — copier le CV de quelqu’un ou contacter les auteurs pour du spam est interdit.",
+    disclaimer: "Les CV sont partagés par leurs auteurs et ne sont pas vérifiés par Resource Base. Sers-t’en comme exemples ; copier le CV de quelqu’un ou contacter son auteur pour du spam est interdit.",
   },
 
   myCv: {

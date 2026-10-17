@@ -27,20 +27,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Resource Base — Companies & resources for everything",
+    default: "Resource Base — Resources, companies & CVs",
     template: "%s · Resource Base",
   },
   description: siteDescription,
   openGraph: {
     type: "website",
     siteName,
-    title: "Resource Base — Companies & resources for everything",
+    title: "Resource Base — Resources, companies & CVs",
     description: siteDescription,
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Resource Base — Companies & resources for everything",
+    title: "Resource Base — Resources, companies & CVs",
     description: siteDescription,
   },
 };

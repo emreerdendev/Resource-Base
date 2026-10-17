@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FileText, Heart, Search, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -33,7 +34,9 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
   const likes = useCvLikes();
   const [all, setAll] = useState<CvListing[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const [q, setQ] = useState("");
+  // ?q= pre-fills the search (the ⌘K palette links CVs this way).
+  const params = useSearchParams();
+  const [q, setQ] = useState(() => params.get("q")?.slice(0, 100) ?? "");
   const [field, setField] = useState("");
   const [seniority, setSeniority] = useState("");
   const [language, setLanguage] = useState("");

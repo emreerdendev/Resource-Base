@@ -5,7 +5,7 @@ export const siteUrl =
 
 export const siteName = "Resource Base";
 export const siteDescription =
-  "A free, searchable directory of companies — with how to apply to each — plus curated resources for anything and everything.";
+  "A free, community-maintained directory of resources for development, design and more, companies with how to apply to each, and CVs.";
 
 /** Where people reach us — also the address for content reports. */
 export const contactEmail = "emreerden@pm.me";
