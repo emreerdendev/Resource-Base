@@ -150,7 +150,7 @@ export const en = {
     track: "Track it in My Submissions",
   },
 
-  resource: { share: "Share", related: "Suggested Resources" },
+  resource: { share: "Share", related: "Suggested Resources", linkCopied: "Link Copied" },
 
   contributor: {
     count_one: "{{count}} contribution",

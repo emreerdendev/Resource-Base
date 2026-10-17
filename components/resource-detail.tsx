@@ -16,16 +16,18 @@ import { useSubmissions } from "@/lib/submissions";
 import type { ResourceWithRelated } from "@/lib/types";
 import { cn, favicon } from "@/lib/utils";
 import {
-  ArrowUpRight,
+  ArrowRight,
   Check,
   ChevronRight,
   Clock,
+  ExternalLink,
   Loader2,
   PencilLine,
   Share2,
   Star,
   TrendingUp,
   TriangleAlert,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -152,7 +154,23 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
           ) : null}
         </span>
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">{resource.name}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {/* Name and "Open Page" are one link, sitting on one baseline. */}
+            <a
+              href={resource.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={registerClick}
+              onAuxClick={registerClick}
+              className="group underline-offset-4"
+            >
+              <span className="group-hover:underline">{resource.name}</span>{" "}
+              <span className="ml-1 inline-flex items-baseline gap-1 text-sm font-normal tracking-normal whitespace-nowrap text-muted-foreground transition-colors group-hover:text-foreground group-hover:underline">
+                {t("company.openPage")}
+                <ExternalLink className="size-3.5 self-center" />
+              </span>
+            </a>
+          </h1>
           {resource.author && (
             <p className="mt-0.5 text-sm text-muted-foreground">
               {t("card.by", { author: resource.author })}
@@ -191,7 +209,16 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
         <div className="mt-5 flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
           <div className="flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400">
             <Clock className="size-3.5" />
-            {t("taxonomy.yourSuggestion")}
+            <span className="flex-1">{t("taxonomy.yourSuggestion")}</span>
+            <button
+              type="button"
+              onClick={() => setTaxViewOpen(false)}
+              aria-label={t("taxonomy.close")}
+              title={t("taxonomy.close")}
+              className="-m-1 grid size-6 cursor-pointer place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <X className="size-3.5" />
+            </button>
           </div>
           <TaxonomyProposal
             categoriesLabel={t("modal.categories")}
@@ -203,18 +230,22 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
             originalCategories={pendingTaxFix.original_categories}
             originalTags={pendingTaxFix.original_tags}
             originalDescription={pendingTaxFix.original_description}
+            originalName={pendingTaxFix.name}
+            originalUrl={pendingTaxFix.url}
+            proposedName={pendingTaxFix.proposed_name}
+            proposedUrl={pendingTaxFix.proposed_url}
+            proposeRemoval={pendingTaxFix.propose_removal}
+            removalNote={pendingTaxFix.note}
             resolveCategory={titleForCat}
             resolveTag={titleForTag}
           />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="self-start"
-            onClick={() => setTaxViewOpen(false)}
+          {/* Where the user follows this suggestion's review. */}
+          <Link
+            href="/submissions"
+            className="inline-flex items-center gap-1 self-end text-xs font-medium text-amber-700 underline-offset-4 hover:underline dark:text-amber-400"
           >
-            {t("taxonomy.close")}
-          </Button>
+            {t("taxonomy.track")} <ArrowRight className="size-3" />
+          </Link>
         </div>
       ) : (
         <>
@@ -291,78 +322,52 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
         )}
       </div>
 
-      {/* Actions */}
-      <div className="mt-6 flex items-center gap-2">
+      {/* Actions — suggest edit · share · favorite. The editor / read-only
+          suggestion view render above. */}
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        {user && submissionsLoading ? (
+          <Button variant="outline" size="lg" disabled>
+            <Loader2 className="animate-spin" />
+            {t("taxonomy.editShort")}
+          </Button>
+        ) : pendingTaxFix ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={() => setTaxViewOpen((o) => !o)}
+            aria-pressed={taxViewOpen}
+            title={t("taxonomy.pendingSuggestion")}
+            className="text-amber-600 dark:text-amber-400"
+          >
+            <Clock />
+            {t("taxonomy.pending")}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={() => (user ? setTaxOpen((o) => !o) : openAuth())}
+            aria-pressed={taxOpen}
+          >
+            <PencilLine />
+            {t("taxonomy.editShort")}
+          </Button>
+        )}
+        <Button variant="outline" size="lg" onClick={share}>
+          {copied ? <Check className="text-emerald-500" /> : <Share2 />}
+          {copied ? t("resource.linkCopied") : t("resource.share")}
+        </Button>
         <Button
           variant="outline"
-          size="icon-lg"
+          size="lg"
           onClick={() => (user ? toggle(resource._id) : openAuth())}
-          aria-label={
-            !user
-              ? t("card.signInToSave")
-              : fav
-                ? t("card.removeFavorite")
-                : t("card.addFavorite")
-          }
+          aria-pressed={fav}
+          className={cn(fav && "border-primary/50 text-primary")}
         >
           <Star className={cn(fav && "fill-primary text-primary")} />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon-lg"
-          onClick={share}
-          aria-label={t("resource.share")}
-          title={t("resource.share")}
-        >
-          {copied ? <Check className="text-emerald-500" /> : <Share2 />}
-        </Button>
-
-        {/* Suggest edit (categories / tags / description) — icon-only, matching
-            the modal, so a long "pending" label can't break the action row.
-            Hidden while the editor or read-only view is already open above. */}
-        {!taxOpen &&
-          !taxViewOpen &&
-          (resource.categories?.length > 0 || resource.tags?.length > 0) &&
-          (user && submissionsLoading ? (
-            <Button variant="outline" size="icon-lg" disabled>
-              <Loader2 className="animate-spin" />
-            </Button>
-          ) : pendingTaxFix ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-lg"
-              onClick={() => setTaxViewOpen(true)}
-              title={t("taxonomy.pendingSuggestion")}
-              aria-label={t("taxonomy.pendingSuggestion")}
-              className="text-amber-600 dark:text-amber-400"
-            >
-              <Clock />
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-lg"
-              onClick={() => (user ? setTaxOpen(true) : openAuth())}
-              title={t("taxonomy.editCta")}
-              aria-label={t("taxonomy.editCta")}
-            >
-              <PencilLine />
-            </Button>
-          ))}
-
-        <Button asChild size="lg" className="flex-1">
-          <a
-            href={resource.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={registerClick}
-            onAuxClick={registerClick}
-          >
-            {t("modal.open")}
-            <ArrowUpRight />
-          </a>
+          {t(fav ? "card.favorited" : "card.favorite")}
         </Button>
       </div>
 

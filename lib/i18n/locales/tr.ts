@@ -150,7 +150,7 @@ export const tr = {
     track: "Önerilerimde takip et",
   },
 
-  resource: { share: "Paylaş", related: "Önerilen Kaynaklar" },
+  resource: { share: "Paylaş", related: "Önerilen Kaynaklar", linkCopied: "Link Kopyalandı" },
 
   contributor: {
     count_one: "{{count}} katkı",

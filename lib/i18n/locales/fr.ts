@@ -150,7 +150,7 @@ export const fr = {
     track: "Suivre dans mes suggestions",
   },
 
-  resource: { share: "Partager", related: "Ressources suggérées" },
+  resource: { share: "Partager", related: "Ressources suggérées", linkCopied: "Lien copié" },
 
   contributor: {
     count_one: "{{count}} contribution",
