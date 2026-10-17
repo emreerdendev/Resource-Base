@@ -27,7 +27,7 @@ export default async function CompaniesPage({
   await connection();
   const companies = await sanityFetch<Company[]>({
     query: allCompaniesQuery,
-    tags: ["company"],
+    tags: ["company-list"],
   });
 
   return (

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 import { getAuth } from "@/lib/auth";
 
@@ -10,10 +11,19 @@ export type SessionUser = {
   [key: string]: unknown;
 };
 
+/**
+ * The current session (or null), read once per request: getViewerState and
+ * pages call several helpers that each need it, and building Better Auth and
+ * checking the cookie each time was wasted CPU.
+ */
+const currentSession = cache(async () => {
+  const auth = await getAuth();
+  return auth.api.getSession({ headers: await headers() });
+});
+
 /** Current session user, or null. Use in public / optional-auth paths. */
 export async function getSessionUser(): Promise<SessionUser | null> {
-  const auth = await getAuth();
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await currentSession();
   return (session?.user as SessionUser) ?? null;
 }
 
@@ -38,8 +48,7 @@ const FRESH_SESSION_MS = 15 * 60 * 1000;
  * Returns "stale" when signed in earlier; the UI asks to sign in again.
  */
 export async function requireFreshUser(): Promise<SessionUser | "stale"> {
-  const auth = await getAuth();
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await currentSession();
   if (!session) throw new Response("Unauthorized", { status: 401 });
   const signedInAt = new Date(session.session.createdAt).getTime();
   if (Date.now() - signedInAt > FRESH_SESSION_MS) return "stale";

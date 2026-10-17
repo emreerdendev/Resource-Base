@@ -12,7 +12,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { contributorTier } from "@/lib/contributor-tier";
 import { initial } from "@/lib/initial";
 import { socialEntries } from "@/lib/social-links";
-import { fetchPublicEmail } from "@/lib/profile";
 import { useSubmissions } from "@/lib/submissions";
 import type { PublicProfile, Resource } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -30,7 +29,6 @@ import {
   Star,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function SocialLink({
@@ -60,11 +58,14 @@ export function PublicProfileView({
   profile,
   resources,
   companiesAdded,
+  publicEmail,
 }: {
   profile: PublicProfile;
   resources: Resource[];
   /** Approved company suggestions — contributions without a resource card. */
   companiesAdded: number;
+  /** The owner's email, only when they made it public. */
+  publicEmail: string | null;
 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -76,13 +77,7 @@ export function PublicProfileView({
 
   // Email display: the owner always sees their own (from the session) with an
   // eye/eye-off marking whether it's public; other visitors see it only if the
-  // owner opted in (fetched via the public_email RPC, never the raw column).
-  const [publicEmail, setPublicEmail] = useState<string | null>(null);
-  useEffect(() => {
-    if (!isOwner && profile.show_email) {
-      fetchPublicEmail(profile.id).then(setPublicEmail);
-    }
-  }, [isOwner, profile.show_email, profile.id]);
+  // owner opted in (read on the server, never sent otherwise).
   const email = isOwner ? (user?.email ?? null) : publicEmail;
 
   return (

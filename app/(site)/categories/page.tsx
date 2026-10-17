@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function CategoriesPage() {
   const categories = await sanityFetch<Category[]>({
     query: allCategoriesQuery,
-    tags: ["category"],
+    tags: ["taxonomy", "resource-list"],
   });
 
   return <CategoriesClient categories={categories} />;

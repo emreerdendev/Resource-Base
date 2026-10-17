@@ -16,35 +16,27 @@ import { TaxonomyProvider } from "@/components/taxonomy-provider";
 import { ProfileProvider } from "@/lib/profile";
 import { NotificationsProvider } from "@/lib/notifications";
 import { SubmissionsProvider } from "@/lib/submissions";
-import type { Category, Tag } from "@/lib/types";
-import { sanityFetch } from "@/sanity/lib/fetch";
-import { allCategoriesQuery, allTagsQuery } from "@/sanity/lib/queries";
 import { Suspense } from "react";
 
 /**
  * Public site chrome. AuthProvider + ClickCountsProvider wrap everything so the
  * header, cards and favorites share auth state and click counts. The command
- * palette loads its own dataset on first open (/api/search-index).
+ * palette loads its own dataset on first open (/api/search-index), and the
+ * taxonomy loads where it's used (/api/taxonomy) — the layout fetches nothing,
+ * so pages carry only their own data and their own cache tags.
  */
-export default async function SiteLayout({
+export default function SiteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Same queries + tags as the pages so Next.js dedupes within a request.
-  // Categories/tags also feed the taxonomy-fix editor in resource modals.
-  const [categories, tags] = await Promise.all([
-    sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["category"] }),
-    sanityFetch<Tag[]>({ query: allTagsQuery, tags: ["tag"] }),
-  ]);
-
   return (
     <I18nProvider>
       <AuthProvider>
         <ProfileProvider>
           <SubmissionsProvider>
             <NotificationsProvider>
-              <TaxonomyProvider categories={categories} tags={tags}>
+              <TaxonomyProvider>
                 <FavoriteCountsProvider>
                   <FavoritesProvider>
                     <CompanyTrackerProvider>

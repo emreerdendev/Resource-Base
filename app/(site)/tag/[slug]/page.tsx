@@ -2,15 +2,20 @@ import { ResourceGrid } from "@/components/resource-grid";
 import type { TagWithResources } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { tagBySlugQuery } from "@/sanity/lib/queries";
-import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
+import { hasSlug } from "@/sanity/lib/slugs";
 import { ChevronRight, Hash } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+/**
+ * Nothing is prerendered at build: each page renders on its first visit and
+ * is then served from the cache until its document changes. (Prerendered pages
+ * weren't loaded into the deployed cache anyway, so the build only spent
+ * Sanity requests.) Returning [] keeps the route cacheable.
+ */
 export async function generateStaticParams() {
-  const slugs = await listSlugs("tag");
-  return slugs.map((slug) => ({ slug }));
+  return [];
 }
 
 async function load(slug: string) {
@@ -18,7 +23,7 @@ async function load(slug: string) {
   return sanityFetch<TagWithResources | null>({
     query: tagBySlugQuery,
     params: { slug },
-    tags: ["tag", "resource"],
+    tags: ["taxonomy", "resource-list"],
   });
 }
 

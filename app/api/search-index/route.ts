@@ -11,7 +11,7 @@ export const dynamic = "force-static";
 export async function GET() {
   const index = await sanityFetch<SearchIndex>({
     query: searchIndexQuery,
-    tags: ["resource", "company"],
+    tags: ["resource-list", "company-list"],
   });
   // Only the start of a description matters for search; keep the payload small.
   const resources = index.resources.map((r) => ({

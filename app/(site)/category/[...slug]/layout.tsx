@@ -21,7 +21,7 @@ export default async function Layout({
   const parts = (await params).slug;
   if (parts.length === 1 && (await hasSlug("category", parts[0]))) return children;
   if (parts.length === 2) {
-    const all = await sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["category"] });
+    const all = await sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["taxonomy"] });
     if (all.some((c) => c.slug === parts[1] && c.parentSlug === parts[0]))
       permanentRedirect(`/category/${parts[1]}`);
   }

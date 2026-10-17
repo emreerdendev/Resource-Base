@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default async function SubmissionsPage() {
   const categories = await sanityFetch<Category[]>({
     query: allCategoriesQuery,
-    tags: ["category"],
+    tags: ["taxonomy"],
   });
   return <SubmissionsPageView categories={categories} />;
 }

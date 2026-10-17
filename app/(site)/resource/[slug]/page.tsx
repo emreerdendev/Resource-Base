@@ -3,14 +3,19 @@ import type { Metadata } from "next";
 import { ResourceDetail } from "@/components/resource-detail";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { resourceBySlugQuery } from "@/sanity/lib/queries";
-import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
+import { hasSlug } from "@/sanity/lib/slugs";
 import type { ResourceWithRelated } from "@/lib/types";
 import { siteUrl, siteName } from "@/lib/site";
 import { jsonLd } from "@/lib/json-ld";
 
+/**
+ * Nothing is prerendered at build: each page renders on its first visit and
+ * is then served from the cache until its document changes. (Prerendered pages
+ * weren't loaded into the deployed cache anyway, so the build only spent
+ * Sanity requests.) Returning [] keeps the route cacheable.
+ */
 export async function generateStaticParams() {
-  const slugs = await listSlugs("resource");
-  return slugs.map((slug) => ({ slug }));
+  return [];
 }
 
 async function load(slug: string) {
@@ -18,7 +23,9 @@ async function load(slug: string) {
   return sanityFetch<ResourceWithRelated | null>({
     query: resourceBySlugQuery,
     params: { slug },
-    tags: ["resource"],
+    // Only this resource's tag: other edits don't touch this page.
+    tags: [`resource:${slug}`],
+    revalidate: 86400,
   });
 }
 

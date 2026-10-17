@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default async function FavoritesPage() {
   const resources = await sanityFetch<Resource[]>({
     query: allResourcesQuery,
-    tags: ["resource"],
+    tags: ["resource-list"],
   });
   return <FavoritesClient resources={resources} />;
 }

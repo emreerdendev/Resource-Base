@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { user } from "@/lib/db/schema";
 import { getAuth } from "@/lib/auth";
@@ -129,75 +129,4 @@ export async function updateProfile(
   patch.updatedAt = new Date();
   await getDb().update(user).set(patch).where(eq(user.id, me.id));
   return { error: null };
-}
-
-/* ---- public reads (no auth) — replace public_profiles view + public_email --- */
-
-// snake_case projection matching the app's PublicProfile / PublicProfileCompact.
-const PUBLIC_COLUMNS = {
-  id: user.id,
-  username: user.username,
-  full_name: user.fullName,
-  avatar_url: user.image,
-  bio: user.bio,
-  social_links: user.socialLinks,
-  show_email: user.showEmail,
-} as const;
-
-export async function fetchPublicProfile(username: string) {
-  if (typeof username !== "string" || username.length > 40) return null;
-  const db = getDb();
-  const [row] = await db
-    .select(PUBLIC_COLUMNS)
-    .from(user)
-    .where(
-      and(
-        sql`lower(${user.username}) = ${username.toLowerCase()}`,
-        isNotNull(user.username),
-      ),
-    )
-    .limit(1);
-  return row ?? null;
-}
-
-export async function fetchProfilesByIds(ids: string[]) {
-  // Public and called with ids from the page; D1 caps bound parameters at 100.
-  if (!Array.isArray(ids)) ids = [];
-  ids = ids.filter((id): id is string => typeof id === "string" && id.length <= 64).slice(0, 90);
-  if (ids.length === 0)
-    return {} as Record<
-      string,
-      { id: string; username: string | null; full_name: string | null; avatar_url: string | null }
-    >;
-  const db = getDb();
-  const rows = await db
-    .select({
-      id: user.id,
-      username: user.username,
-      full_name: user.fullName,
-      avatar_url: user.image,
-    })
-    .from(user)
-    .where(and(isNotNull(user.username), inArray(user.id, ids)));
-  const map: Record<string, (typeof rows)[number]> = {};
-  for (const r of rows) map[r.id] = r;
-  return map;
-}
-
-/** Email only if the user opted in (replaces public_email RPC). */
-export async function fetchPublicEmail(userId: string): Promise<string | null> {
-  if (typeof userId !== "string" || userId.length > 64) return null;
-  const db = getDb();
-  const [row] = await db
-    .select({ email: user.email })
-    .from(user)
-    .where(
-      and(
-        eq(user.id, userId),
-        eq(user.showEmail, true),
-        isNotNull(user.username),
-      ),
-    )
-    .limit(1);
-  return row?.email ?? null;
 }

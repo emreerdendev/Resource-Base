@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { and, count, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { submissions } from "@/lib/db/schema";
-import { getPublicProfile } from "@/lib/public-profile";
+import { fetchPublicEmail, getPublicProfile } from "@/lib/public-profile";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { resourcesBySubmitterQuery } from "@/sanity/lib/queries";
 import { PublicProfileView } from "@/components/public-profile";
@@ -26,11 +26,11 @@ export default async function PublicProfilePage({
 
   // Contributions: published resources (Sanity, tag-cached) plus approved
   // company suggestions (counted from the D1 submissions mirror).
-  const [resources, [{ companies }]] = await Promise.all([
+  const [resources, [{ companies }], publicEmail] = await Promise.all([
     sanityFetch<Resource[]>({
       query: resourcesBySubmitterQuery,
       params: { userId: profile.id },
-      tags: ["resource"],
+      tags: ["resource-list"],
     }),
     getDb()
       .select({ companies: count() })
@@ -42,9 +42,16 @@ export default async function PublicProfilePage({
           eq(submissions.status, "approved"),
         ),
       ),
+    // Only when the owner chose to show it.
+    profile.show_email ? fetchPublicEmail(profile.id) : null,
   ]);
 
   return (
-    <PublicProfileView profile={profile} resources={resources} companiesAdded={companies} />
+    <PublicProfileView
+      profile={profile}
+      resources={resources}
+      companiesAdded={companies}
+      publicEmail={publicEmail}
+    />
   );
 }

@@ -13,9 +13,9 @@ import {
  */
 export default async function HomePage() {
   const [companies, resources, categories] = await Promise.all([
-    sanityFetch<Company[]>({ query: allCompaniesQuery, tags: ["company"] }),
-    sanityFetch<Resource[]>({ query: allResourcesQuery, tags: ["resource"] }),
-    sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["category"] }),
+    sanityFetch<Company[]>({ query: allCompaniesQuery, tags: ["company-list"] }),
+    sanityFetch<Resource[]>({ query: allResourcesQuery, tags: ["resource-list"] }),
+    sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["taxonomy", "resource-list"] }),
   ]);
 
   return (

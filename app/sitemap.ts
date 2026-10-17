@@ -10,10 +10,10 @@ import { siteUrl } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, tags, resources, companies] = await Promise.all([
-    sanityFetch<string[]>({ query: categorySlugsQuery, tags: ["category"] }),
-    sanityFetch<string[]>({ query: tagSlugsQuery, tags: ["tag"] }),
-    sanityFetch<string[]>({ query: resourceSlugsQuery, tags: ["resource"] }),
-    sanityFetch<string[]>({ query: companySlugsQuery, tags: ["company"] }),
+    sanityFetch<string[]>({ query: categorySlugsQuery, tags: ["taxonomy"] }),
+    sanityFetch<string[]>({ query: tagSlugsQuery, tags: ["taxonomy"] }),
+    sanityFetch<string[]>({ query: resourceSlugsQuery, tags: ["resource-list"] }),
+    sanityFetch<string[]>({ query: companySlugsQuery, tags: ["company-list"] }),
   ]);
 
   const staticPaths = ["", "/companies", "/resources", "/categories", "/cvs", "/privacy", "/terms"];

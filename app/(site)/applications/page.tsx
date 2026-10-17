@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function ApplicationsPage() {
   const companies = await sanityFetch<Company[]>({
     query: allCompaniesQuery,
-    tags: ["company"],
+    tags: ["company-list"],
   });
   return <ApplicationsPageView companies={companies} />;
 }

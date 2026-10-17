@@ -19,9 +19,9 @@ export const metadata: Metadata = {
 
 export default async function ResourcesPage() {
   const [resources, categories, tags] = await Promise.all([
-    sanityFetch<Resource[]>({ query: allResourcesQuery, tags: ["resource"] }),
-    sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["category"] }),
-    sanityFetch<Tag[]>({ query: allTagsQuery, tags: ["tag"] }),
+    sanityFetch<Resource[]>({ query: allResourcesQuery, tags: ["resource-list"] }),
+    sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["taxonomy", "resource-list"] }),
+    sanityFetch<Tag[]>({ query: allTagsQuery, tags: ["taxonomy", "resource-list"] }),
   ]);
 
   return (

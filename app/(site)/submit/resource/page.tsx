@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function SubmitResourcePage() {
   const categories = await sanityFetch<Category[]>({
     query: allCategoriesQuery,
-    tags: ["category"],
+    tags: ["taxonomy"],
   });
   return (
     <div className="mx-auto max-w-2xl">

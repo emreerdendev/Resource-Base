@@ -1,28 +1,38 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Category, Tag } from "@/lib/types";
 
-type TaxonomyValue = { categories: Category[]; tags: Tag[] };
+type TaxonomyData = { categories: Category[]; tags: Tag[] };
+type TaxonomyValue = TaxonomyData & { load: () => void };
 
-const TaxonomyContext = createContext<TaxonomyValue>({
-  categories: [],
-  tags: [],
-});
+const EMPTY: TaxonomyData = { categories: [], tags: [] };
 
-/** All categories + tags, so taxonomy-fix editors can offer existing options. */
-export function useTaxonomy() {
-  return useContext(TaxonomyContext);
+const TaxonomyContext = createContext<TaxonomyValue>({ ...EMPTY, load: () => {} });
+
+/**
+ * All categories + tags, so taxonomy-fix editors can offer existing options.
+ * Loaded on first use from the edge-cached /api/taxonomy, not with every page.
+ */
+export function useTaxonomy(): TaxonomyData {
+  const { load, categories, tags } = useContext(TaxonomyContext);
+  useEffect(load, [load]);
+  return { categories, tags };
 }
 
-export function TaxonomyProvider({
-  categories,
-  tags,
-  children,
-}: TaxonomyValue & { children: React.ReactNode }) {
-  return (
-    <TaxonomyContext.Provider value={{ categories, tags }}>
-      {children}
-    </TaxonomyContext.Provider>
-  );
+export function TaxonomyProvider({ children }: { children: React.ReactNode }) {
+  const [data, setData] = useState<TaxonomyData>(EMPTY);
+  const started = useRef(false);
+  const load = useCallback(() => {
+    if (started.current) return;
+    started.current = true;
+    fetch("/api/taxonomy")
+      .then((r) => (r.ok ? (r.json() as Promise<TaxonomyData>) : EMPTY))
+      .then(setData)
+      .catch(() => {
+        started.current = false; // retry on next use
+      });
+  }, []);
+  const value = useMemo(() => ({ ...data, load }), [data, load]);
+  return <TaxonomyContext.Provider value={value}>{children}</TaxonomyContext.Provider>;
 }

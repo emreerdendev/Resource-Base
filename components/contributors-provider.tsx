@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { fetchProfilesByIds } from "@/lib/profile";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { PublicProfileCompact } from "@/lib/types";
 
 type ContributorsValue = {
@@ -31,9 +22,9 @@ export function useContributors() {
 }
 
 /**
- * Cards register their submittedBy id here; the provider batches all pending
- * ids into a single public_profiles query so attribution costs one request,
- * not one per card.
+ * Cards register their submittedBy id here. The first registration loads the
+ * whole (small, edge-cached) contributor list from /api/contributors once per
+ * page load; every card then reads from it — no per-card or per-id requests.
  */
 export function ContributorsProvider({
   children,
@@ -41,38 +32,17 @@ export function ContributorsProvider({
   children: React.ReactNode;
 }) {
   const [map, setMap] = useState<Record<string, PublicProfileCompact>>({});
-  const pending = useRef<Set<string>>(new Set());
-  const requested = useRef<Set<string>>(new Set());
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loading = useRef(false);
 
-  const flush = useCallback(async () => {
-    const ids = [...pending.current].filter((id) => !requested.current.has(id));
-    pending.current.clear();
-    if (ids.length === 0) return;
-    ids.forEach((id) => requested.current.add(id));
-    const fetched = (await fetchProfilesByIds(ids)) as Record<
-      string,
-      PublicProfileCompact
-    >;
-    if (Object.keys(fetched).length > 0) {
-      setMap((prev) => ({ ...prev, ...fetched }));
-    }
-  }, []);
-
-  const register = useCallback(
-    (id: string) => {
-      if (!id || requested.current.has(id) || pending.current.has(id)) return;
-      pending.current.add(id);
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(flush, 80);
-    },
-    [flush],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
+  const register = useCallback((id: string) => {
+    if (!id || loading.current) return;
+    loading.current = true;
+    fetch("/api/contributors")
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((data: Record<string, PublicProfileCompact>) => setMap(data))
+      .catch(() => {
+        loading.current = false; // try again on the next card
+      });
   }, []);
 
   const value = useMemo<ContributorsValue>(

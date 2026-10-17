@@ -144,10 +144,3 @@ export function useProfile(): ProfileValue {
   if (!ctx) throw new Error("useProfile must be used within <ProfileProvider>");
   return ctx;
 }
-
-// Public reads (server actions) — re-export so existing import sites keep working.
-export {
-  fetchPublicProfile,
-  fetchProfilesByIds,
-  fetchPublicEmail,
-} from "@/lib/profile-actions";

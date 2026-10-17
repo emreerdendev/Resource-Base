@@ -7,16 +7,21 @@ import {
   allCategoriesQuery,
   categoryBySlugQuery,
 } from "@/sanity/lib/queries";
-import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
+import { hasSlug } from "@/sanity/lib/slugs";
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { jsonLd } from "@/lib/json-ld";
 
+/**
+ * Nothing is prerendered at build: each page renders on its first visit and
+ * is then served from the cache until its document changes. (Prerendered pages
+ * weren't loaded into the deployed cache anyway, so the build only spent
+ * Sanity requests.) Returning [] keeps the route cacheable.
+ */
 export async function generateStaticParams() {
-  const slugs = await listSlugs("category");
-  return slugs.map((slug) => ({ slug: [slug] }));
+  return [];
 }
 
 /**
@@ -31,7 +36,7 @@ async function load(slugParts: string[]) {
   const category = await sanityFetch<CategoryWithResources | null>({
     query: categoryBySlugQuery,
     params: { slug },
-    tags: ["category", "resource"],
+    tags: ["taxonomy", "resource-list"],
   });
   return { slug, category };
 }
@@ -61,7 +66,7 @@ export default async function CategoryPage({
 
   const allCategories = await sanityFetch<Category[]>({
     query: allCategoriesQuery,
-    tags: ["category"],
+    tags: ["taxonomy"],
   });
   const meta = allCategories.find((c) => c.slug === slug);
   const parent = meta?.parentSlug
