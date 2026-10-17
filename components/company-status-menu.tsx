@@ -85,7 +85,7 @@ export function CompanyStatusMenu({
 
   const base = cn(
     "relative z-10 inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-    size === "sm" ? "h-7 px-2 text-[11px]" : size === "md" ? "h-9 px-3 text-sm" : "h-9 justify-center px-2.5 text-sm",
+    size === "sm" ? "h-7 px-2 text-[11px]" : size === "md" ? "h-9 px-2.5 text-sm" : "h-9 justify-center px-2.5 text-sm",
     className,
   );
 

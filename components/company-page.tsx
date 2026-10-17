@@ -15,7 +15,7 @@ import type { CompanyWithRelated } from "@/lib/types";
 
 /**
  * Deep-linkable company page — same body as the modal, plus related companies.
- * Share and the application status stay top right; meta and Suggest edit sit
+ * The application status stays top right; meta, Share and Suggest edit sit
  * under the details, like the resource page.
  */
 export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
@@ -63,13 +63,7 @@ export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
             <CompanyTitle company={company} url={url} large />
           </h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={share}>
-            {copied ? <Check className="size-3.5 text-emerald-500" /> : <Share2 className="size-3.5" />}
-            {copied ? t("resource.linkCopied") : t("resource.share")}
-          </Button>
-          <CompanyStatusMenu companyId={company._id} size="md" />
-        </div>
+        <CompanyStatusMenu companyId={company._id} size="md" />
       </div>
 
       <div className="mt-8 flex max-w-2xl flex-col gap-6">
@@ -84,8 +78,12 @@ export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
         <div className="flex flex-col gap-y-5">
           <Separator />
           <CompanyMeta company={company} />
-          {/* Suggest edit — the editor / pending suggestion open above. */}
-          <div>
+          {/* Share · suggest edit — the editor / pending suggestion open above. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="lg" onClick={share}>
+              {copied ? <Check className="text-emerald-500" /> : <Share2 />}
+              {copied ? t("resource.linkCopied") : t("resource.share")}
+            </Button>
             <SuggestButton
               company={company}
               editOpen={editOpen}
