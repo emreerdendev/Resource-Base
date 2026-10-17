@@ -8,6 +8,12 @@ import { CV_FIELDS, CV_LANGUAGES, CV_SENIORITIES, cvStudioOptions } from '../../
  * `company` so the public submit endpoint only needs create access on this one
  * type and can never touch live content. An editor reviews, then approves.
  */
+/** A suggestion for a new resource (older ones have no kind). */
+const isNewResource = (parent: unknown) => {
+  const kind = (parent as { kind?: string } | undefined)?.kind
+  return !kind || kind === 'new'
+}
+
 export const submission = defineType({
   name: 'submission',
   title: 'Submission',
@@ -250,7 +256,8 @@ export const submission = defineType({
     defineField({
       name: 'suggestedCategory',
       type: 'string',
-      hidden: ({ parent }) => parent?.kind === 'cv',
+      // Only a new resource suggests these three.
+      hidden: ({ parent }) => !isNewResource(parent),
     }),
     defineField({
       name: 'pricing',
@@ -264,15 +271,15 @@ export const submission = defineType({
         layout: 'radio',
       },
       description: 'Suggested pricing — the submitter’s hint for the editor.',
-      hidden: ({ parent }) => parent?.kind === 'cv',
+      hidden: ({ parent }) => !isNewResource(parent),
     }),
     defineField({
       name: 'tags',
       type: 'array',
       of: [{ type: 'string' }],
-      description: 'Free-text tag suggestions; editor maps them to real tags.',
+      description: 'Free-text tag suggestions; matched to existing tags on approval.',
       options: { layout: 'tags' },
-      hidden: ({ parent }) => parent?.kind === 'cv',
+      hidden: ({ parent }) => !isNewResource(parent),
     }),
     defineField({ name: 'note', type: 'text', rows: 3 }),
     defineField({ name: 'email', type: 'string' }),
@@ -302,9 +309,15 @@ export const submission = defineType({
       title: 'Rejection reason',
       type: 'text',
       rows: 2,
-      description:
-        'Shown to the submitter so they can fix and resubmit. Only fill this when rejecting.',
+      description: 'Shown to the submitter so they can fix and resubmit.',
       hidden: ({ parent }) => parent?.status !== 'rejected',
+      // A rejection without a reason leaves the submitter guessing.
+      validation: (rule) =>
+        rule.custom((value, ctx) =>
+          (ctx.parent as { status?: string })?.status === 'rejected' && !String(value ?? '').trim()
+            ? 'Add a reason when rejecting'
+            : true,
+        ),
     }),
     defineField({
       name: 'createdAt',

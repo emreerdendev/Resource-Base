@@ -1,8 +1,10 @@
 import type { StructureResolver } from 'sanity/structure'
 
 /**
- * Custom desk. The top two panes are the day-to-day maintenance workflow:
- * fix broken links and triage community submissions in a couple of clicks.
+ * Custom desk: the day-to-day maintenance workflow first — broken links, then
+ * each kind of pending submission in its own list — then what was hidden by
+ * removal reports (to undo), then everything by type. Approving a submission
+ * applies it automatically (see /api/notify).
  */
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -26,24 +28,33 @@ export const structure: StructureResolver = (S) =>
             .filter('_type == "resource" && linkStatus == "suspect"')
         ),
       S.listItem()
-        .title('⏳ Pending submissions')
+        .title('⏳ Pending: new resources')
         .child(
           S.documentList()
-            .title('Pending submissions')
-            .filter('_type == "submission" && status == "pending"')
+            .title('Pending new resources')
+            .filter('_type == "submission" && (!defined(kind) || kind == "new") && status == "pending"')
             .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
         ),
       S.listItem()
-        .title('🏢 Pending companies')
+        .title('🔧 Pending: fixes & edit suggestions')
         .child(
           S.documentList()
-            .title('Pending companies')
+            .title('Pending fixes, edits & removal reports')
+            .filter('_type == "submission" && kind in ["fix", "taxonomy"] && status == "pending"')
+            .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
+        ),
+      S.listItem()
+        .title('🏢 Pending: companies & company edits')
+        .child(
+          S.documentList()
+            .title('Pending companies & company edits')
             .filter(
               '(_type == "company" && status == "pending") || (_type == "submission" && kind in ["company", "companyEdit"] && status == "pending")'
             )
+            .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
         ),
       S.listItem()
-        .title('📄 Pending CVs')
+        .title('📄 Pending: CVs')
         .child(
           S.documentList()
             .title('Pending CVs')
@@ -51,9 +62,25 @@ export const structure: StructureResolver = (S) =>
             .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
         ),
       S.divider(),
-      S.documentTypeListItem('company').title('All companies'),
+      // Hidden by an approved removal report: set back to Published to undo.
+      S.listItem()
+        .title('🙈 Removed resources')
+        .child(
+          S.documentList()
+            .title('Removed resources')
+            .filter('_type == "resource" && submissionStatus == "removed"')
+        ),
+      S.listItem()
+        .title('🙈 Hidden companies')
+        .child(
+          S.documentList()
+            .title('Hidden companies')
+            .filter('_type == "company" && status == "hidden"')
+        ),
+      S.divider(),
       S.documentTypeListItem('resource').title('All resources'),
       S.documentTypeListItem('category').title('Categories'),
       S.documentTypeListItem('tag').title('Tags'),
+      S.documentTypeListItem('company').title('All companies'),
       S.documentTypeListItem('submission').title('All submissions'),
     ])

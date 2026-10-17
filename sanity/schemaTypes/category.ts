@@ -28,7 +28,17 @@ export const category = defineType({
       title: 'Parent category',
       type: 'reference',
       to: [{ type: 'category' }],
-      description: 'Leave empty for a top-level category.',
+      description: 'Leave empty for a top-level category. Only two levels are shown.',
+      options: {
+        // Top-level categories other than this one.
+        filter: ({ document }) => ({
+          filter: '!defined(parent) && _id != $id && _id != $draftId',
+          params: {
+            id: String(document._id).replace(/^drafts\./, ''),
+            draftId: `drafts.${String(document._id).replace(/^drafts\./, '')}`,
+          },
+        }),
+      },
     }),
     defineField({
       name: 'icon',
