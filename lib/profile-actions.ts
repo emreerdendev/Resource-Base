@@ -8,7 +8,7 @@ import { getAuth } from "@/lib/auth";
 import { getSessionUser, requireFreshUser, requireUser } from "@/lib/authz";
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
 import { cleanSocialLinks } from "@/lib/social-links";
-import { isValidUsername } from "@/lib/username";
+import { isReservedUsername, isValidUsername } from "@/lib/username";
 
 const PW_MIN = 8;
 const PW_MAX = 64;
@@ -58,6 +58,7 @@ export async function setUsername(
   // Case is kept as typed; it never makes a name distinct (see lib/username).
   const cleaned = next.trim();
   if (!isValidUsername(cleaned)) return { error: "invalid_username" };
+  if (isReservedUsername(cleaned)) return { error: "reserved_username" };
   // A human changes their handle rarely; cap at 5/hour to stop a script from
   // hammering the uniqueness query + write. Far above any real use.
   if (await isRateLimited(`username:${me.id}`, 5, 3600))

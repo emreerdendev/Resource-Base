@@ -12,7 +12,7 @@ import { IconInput } from "@/components/ui/icon-input";
 import { FormField } from "@/components/form-field";
 import { normalizeSocialLink, socialEntries, type SocialLinks, type SocialPlatformId } from "@/lib/social-links";
 import type { Profile } from "@/lib/types";
-import { isValidUsername } from "@/lib/username";
+import { isReservedUsername, isValidUsername } from "@/lib/username";
 import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { FormSkeleton } from "@/components/skeletons";
 import { cn } from "@/lib/utils";
@@ -77,9 +77,11 @@ export function ProfileEditForm() {
   const errors = {
     username: !fields?.username.trim()
       ? t("validation.required")
-      : isValidUsername(fields.username.trim())
-        ? null
-        : t("validation.username"),
+      : !isValidUsername(fields.username.trim())
+        ? t("validation.username")
+        : isReservedUsername(fields.username) && fields.username.trim().toLowerCase() !== baseline?.username.toLowerCase()
+          ? t("validation.usernameReserved")
+          : null,
   };
   const form = useFormErrors(errors);
   // Link rows show their error once left (or after a save attempt).
@@ -117,6 +119,8 @@ export function ProfileEditForm() {
               ? t("profile.usernameTaken")
               : error === "invalid_username"
                 ? t("auth.usernameInvalid")
+                : error === "reserved_username"
+                  ? t("validation.usernameReserved")
                 : error === "rate_limited"
                   ? t("profile.usernameRateLimited")
                   : error,

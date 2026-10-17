@@ -751,6 +751,7 @@ export const fr = {
     url: "Saisis une adresse web valide, ex. https://example.com",
     email: "Saisis une adresse e-mail valide.",
     username: "3 à 20 lettres ou chiffres, sans symboles. Emre et emre comptent comme le même nom.",
+    usernameReserved: "Ce nom d’utilisateur est réservé. Choisissez-en un autre.",
     password: "Utilise 8 à 64 caractères.",
     passwordMatch: "Les mots de passe ne correspondent pas.",
     fileRequired: "Choisis un fichier PDF.",

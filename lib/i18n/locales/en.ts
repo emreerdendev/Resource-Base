@@ -751,6 +751,7 @@ export const en = {
     url: "Enter a valid web address, e.g. https://example.com",
     email: "Enter a valid email address.",
     username: "3–20 letters or numbers, no symbols. Emre and emre count as the same name.",
+    usernameReserved: "This username is reserved. Please choose another one.",
     password: "Use 8–64 characters.",
     passwordMatch: "Passwords don’t match.",
     fileRequired: "Choose a PDF file.",

@@ -749,6 +749,7 @@ export const tr = {
     url: "Geçerli bir web adresi gir, örn. https://example.com",
     email: "Geçerli bir e-posta adresi gir.",
     username: "3–20 harf veya rakam, sembol yok. Emre ile emre aynı ad sayılır.",
+    usernameReserved: "Bu kullanıcı adı ayrılmış. Lütfen başka bir ad seç.",
     password: "8–64 karakter kullan.",
     passwordMatch: "Şifreler eşleşmiyor.",
     fileRequired: "Bir PDF dosyası seç.",
