@@ -628,7 +628,7 @@ export const es = {
     download: "Descargar",
     report: "Denunciar",
     close: "Cerrar",
-    mobileHint: "Tu navegador no puede mostrar el PDF dentro de la página: ábrelo en una pestaña nueva.",
+    previewError: "No se pudo mostrar este CV aquí: ábrelo en una pestaña nueva o descárgalo.",
     disclaimer: "Los CV los comparten sus dueños y Resource Base no los verifica. Úsalos como inspiración: copiar el CV de otra persona o contactar a sus dueños con spam no está permitido.",
   },
 

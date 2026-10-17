@@ -628,7 +628,7 @@ export const fr = {
     download: "Télécharger",
     report: "Signaler",
     close: "Fermer",
-    mobileHint: "Ton navigateur ne peut pas afficher le PDF dans la page — ouvre-le plutôt dans un nouvel onglet.",
+    previewError: "Impossible d’afficher ce CV ici — ouvre-le dans un nouvel onglet ou télécharge-le.",
     disclaimer: "Les CV sont partagés par leurs auteurs et ne sont pas vérifiés par Resource Base. Inspire-t’en — copier le CV de quelqu’un ou contacter les auteurs pour du spam est interdit.",
   },
 

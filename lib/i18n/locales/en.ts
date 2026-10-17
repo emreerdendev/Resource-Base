@@ -627,7 +627,7 @@ export const en = {
     download: "Download",
     report: "Report",
     close: "Close",
-    mobileHint: "Your browser can’t show PDFs inside the page — open it in a new tab instead.",
+    previewError: "Couldn’t show this CV here — open it in a new tab or download it.",
     disclaimer: "CVs are shared by their owners and aren’t verified by Resource Base. Use them for inspiration — copying someone’s CV or contacting owners for spam isn’t allowed.",
   },
 

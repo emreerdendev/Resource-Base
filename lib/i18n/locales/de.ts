@@ -628,7 +628,7 @@ export const de = {
     download: "Herunterladen",
     report: "Melden",
     close: "Schließen",
-    mobileHint: "Dein Browser kann PDFs nicht in der Seite anzeigen – öffne sie stattdessen in einem neuen Tab.",
+    previewError: "Der Lebenslauf kann hier nicht angezeigt werden – öffne ihn in einem neuen Tab oder lade ihn herunter.",
     disclaimer: "Lebensläufe werden von ihren Inhaber:innen geteilt und von Resource Base nicht geprüft. Nutze sie zur Inspiration – Kopieren oder Spam an die Inhaber:innen ist nicht erlaubt.",
   },
 

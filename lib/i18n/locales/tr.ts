@@ -625,7 +625,7 @@ export const tr = {
     download: "İndir",
     report: "Bildir",
     close: "Kapat",
-    mobileHint: "Tarayıcın PDF'yi sayfa içinde gösteremiyor — bunun yerine yeni sekmede aç.",
+    previewError: "CV burada gösterilemedi — yeni sekmede aç veya indir.",
     disclaimer: "CV'ler sahipleri tarafından paylaşılır ve Resource Base tarafından doğrulanmaz. İlham almak için kullan — birinin CV'sini kopyalamak veya sahiplerine spam amaçlı ulaşmak yasaktır.",
   },
 
