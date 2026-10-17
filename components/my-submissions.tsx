@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   ArrowRight,
   ArrowUpRight,
+  ExternalLink,
   FileText,
   Trash2,
   Building2,
@@ -417,10 +418,14 @@ function SubmissionDialog({
                     href={s.url!}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:underline"
+                    className="group underline-offset-4"
                   >
-                    {s.name}
-                    <ArrowUpRight className="ml-1 inline size-3.5 align-baseline opacity-60" />
+                    {/* Same as the resource modal: name + "Open Page" as one link. */}
+                    <span className="group-hover:underline">{s.name}</span>{" "}
+                    <span className="ml-1 inline-flex items-baseline gap-1 text-xs font-normal whitespace-nowrap text-muted-foreground transition-colors group-hover:text-foreground group-hover:underline">
+                      {t("company.openPage")}
+                      <ExternalLink className="size-3 self-center" />
+                    </span>
                   </a>
                 ) : (
                   s.name
