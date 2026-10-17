@@ -57,6 +57,13 @@
       "when": 1792256865355,
       "tag": "0007_edit_suggestions",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1792264393842,
+      "tag": "0008_company_edits",
+      "breakpoints": true
     }
   ]
 }

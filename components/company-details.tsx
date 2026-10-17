@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Briefcase,
@@ -91,7 +91,12 @@ function LinkRow({
   );
 }
 
-/** Private, per-user note on a company — saved to the user's tracker. */
+/**
+ * Private, per-user note on a company — saved to the user's tracker (writing
+ * one also saves the company to My Applications). Saved with the button, when
+ * the field loses focus, and when the modal/page closes with unsaved text, so
+ * a note is never lost by closing without clicking Save.
+ */
 function NoteEditor({ companyId }: { companyId: string }) {
   const { t } = useTranslation();
   const { get, setNote } = useCompanyTracker();
@@ -106,11 +111,25 @@ function NoteEditor({ companyId }: { companyId: string }) {
   }
   const dirty = value.trim() !== saved.trim();
 
-  async function save() {
+  // Latest values for the unmount flush below.
+  const latest = useRef({ value, dirty, setNote });
+  useEffect(() => {
+    latest.current = { value, dirty, setNote };
+  });
+  useEffect(
+    () => () => {
+      const { value: v, dirty: d, setNote: save } = latest.current;
+      if (d) void save(companyId, v);
+    },
+    [companyId],
+  );
+
+  async function save(quiet = false) {
+    if (!dirty || pending) return;
     setPending(true);
     const ok = await setNote(companyId, value);
     setPending(false);
-    if (ok) toast.success(t("tracker.noteSaved"));
+    if (ok && !quiet) toast.success(t("tracker.noteSaved"));
   }
 
   return (
@@ -124,14 +143,25 @@ function NoteEditor({ companyId }: { companyId: string }) {
         value={value}
         maxLength={1000}
         onChange={(e) => setValue(e.target.value)}
+        onBlur={() => void save(true)}
         placeholder={t("tracker.notePlaceholder")}
+        aria-label={t("tracker.note")}
         className="min-h-20 text-sm"
       />
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] text-muted-foreground">{t("tracker.notePrivate")}</p>
-        <Button size="sm" variant="outline" disabled={!dirty || pending} onClick={save}>
-          {pending && <Loader2 className="size-3.5 animate-spin" />}
-          {t("tracker.saveNote")}
+        <p className="text-[11px] text-muted-foreground">
+          {pending ? t("tracker.noteSaving") : !dirty && saved ? t("tracker.noteSavedHint") : t("tracker.notePrivate")}
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!dirty || pending}
+          // Save before the textarea's blur fires, so it doesn't save twice.
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => void save()}
+        >
+          {pending ? <Loader2 className="size-3.5 animate-spin" /> : !dirty && saved ? <Check className="size-3.5" /> : null}
+          {!dirty && saved ? t("tracker.noteSavedShort") : t("tracker.saveNote")}
         </Button>
       </div>
     </div>
@@ -247,10 +277,6 @@ export function CompanyDetails({
         </div>
       )}
 
-      {company.submittedBy && (
-        <AddedBy userId={company.submittedBy} onNavigate={onNavigate} />
-      )}
-
       {user ? (
         <NoteEditor companyId={company._id} />
       ) : (
@@ -264,7 +290,7 @@ export function CompanyDetails({
 }
 
 /** "Added by @username" for community-suggested companies, resolved live by user id. */
-function AddedBy({ userId, onNavigate }: { userId: string; onNavigate?: () => void }) {
+export function AddedByLink({ userId, onNavigate }: { userId: string; onNavigate?: () => void }) {
   const { t } = useTranslation();
   const { register, get } = useContributors();
   useEffect(() => register(userId), [register, userId]);

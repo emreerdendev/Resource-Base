@@ -214,6 +214,7 @@ export const en = {
     signInPrompt: "Sign in to see your notifications.",
     browse: "Browse Companies",
     approvedTitle: {
+      companyEdit: "Your fix was applied ✅",
       new: "Your resource was approved 🎉",
       fix: "Your fix was applied ✅",
       taxonomy: "Your fix was applied ✅",
@@ -222,6 +223,7 @@ export const en = {
       removal: "Your report was confirmed ✅",
     },
     approvedBody: {
+      companyEdit: "Thanks! Your suggested changes to “{{name}}” were applied.",
       new: "“{{name}}” is now live in the directory.",
       fix: "Thanks! “{{name}}” now points to the corrected link.",
       taxonomy: "Thanks! Your suggested changes to “{{name}}” were applied.",
@@ -237,7 +239,7 @@ export const en = {
       other: "You can edit and resubmit it.",
       cv: "You can upload an updated CV.",
     },
-    subtitle: "Review results for what you’ve shared: which resources, companies and CVs were approved, which fixes were applied and what needs changes.",
+    subtitle: "Review results for what you’ve shared: which Resources, Companies and CVs were approved, which fixes were applied and what needs changes.",
   },
 
   submit: {
@@ -271,11 +273,12 @@ export const en = {
     cancel: "Cancel",
     urlFix: "URL Fix",
     taxonomyFix: "Edit Suggestion",
+    companyEdit: "Company Edit",
     editResubmit: "Edit & Resubmit",
     resubmit: "Resubmit",
     resubmitSuccess: "Resubmitted! It's back in the review queue.",
     resubmitError: "Couldn't resubmit. Please try again.",
-    subtitle: "Everything you’ve sent for review — new resources, edit suggestions, companies and your CV — and the review status of each.",
+    subtitle: "Everything you’ve sent for review — New Resources, Suggestions, Companies and your CV — and the review status of each.",
     suggestAgain: "Suggest Again",
     removal: "Removal Report",
     groups: {
@@ -488,6 +491,27 @@ export const en = {
     related: "Similar Companies",
   },
 
+  companyEdit: {
+
+    removal: "This company no longer exists or should be removed",
+
+    clearHint: "Leave a field empty to ask for it to be removed.",
+
+    note: "Note (Optional)",
+
+    notePlaceholder: "Where did you see this? e.g. their careers page",
+
+    removalPlaceholder: "e.g. The company closed or was acquired…",
+
+    removalProposed: "Reported as gone — it will be removed from the directory if confirmed.",
+
+    cleared: "Remove this",
+
+    alreadyPending: "You already have a pending suggestion for this company.",
+
+  },
+
+
   tracker: {
     import: {
       button: "Import",
@@ -526,6 +550,9 @@ export const en = {
     notePrivate: "Private — only you can see your notes.",
     saveNote: "Save Note",
     noteSaved: "Note saved.",
+    noteSaving: "Saving…",
+    noteSavedHint: "Saved · only you can see your notes.",
+    noteSavedShort: "Saved",
     signInHint: "Sign in to save companies, track your application status and keep private notes.",
     signInPrompt: "Sign in to track your applications.",
     empty: "You haven't saved any companies yet.",

@@ -214,6 +214,7 @@ export const fr = {
     signInPrompt: "Connectez-vous pour voir vos notifications.",
     browse: "Parcourir les entreprises",
     approvedTitle: {
+      companyEdit: "Votre correction a été appliquée ✅",
       new: "Ta ressource a été acceptée 🎉",
       fix: "Ta correction a été appliquée ✅",
       taxonomy: "Ta correction a été appliquée ✅",
@@ -222,6 +223,7 @@ export const fr = {
       removal: "Ton signalement a été confirmé ✅",
     },
     approvedBody: {
+      companyEdit: "Merci ! Vos modifications de « {{name}} » ont été appliquées.",
       new: "« {{name}} » est maintenant dans l’annuaire.",
       fix: "Merci ! « {{name}} » pointe maintenant vers le lien corrigé.",
       taxonomy: "Merci ! Les modifications proposées pour « {{name}} » ont été appliquées.",
@@ -271,6 +273,7 @@ export const fr = {
     cancel: "Annuler",
     urlFix: "Correction d'URL",
     taxonomyFix: "Suggestion de modification",
+    companyEdit: "Correction d’entreprise",
     editResubmit: "Modifier et renvoyer",
     resubmit: "Renvoyer",
     resubmitSuccess: "Renvoyée ! Elle est de nouveau en cours d'examen.",
@@ -488,6 +491,27 @@ export const fr = {
     related: "Entreprises similaires",
   },
 
+  companyEdit: {
+
+    removal: "Cette entreprise n’existe plus ou devrait être retirée",
+
+    clearHint: "Laissez un champ vide pour demander sa suppression.",
+
+    note: "Note (facultatif)",
+
+    notePlaceholder: "Où l’avez-vous vu ? ex. leur page carrières",
+
+    removalPlaceholder: "ex. L’entreprise a fermé ou a été rachetée…",
+
+    removalProposed: "Signalée comme disparue — elle sera retirée de l’annuaire si c’est confirmé.",
+
+    cleared: "À supprimer",
+
+    alreadyPending: "Vous avez déjà une suggestion en attente pour cette entreprise.",
+
+  },
+
+
   tracker: {
     import: {
       button: "Importer",
@@ -526,6 +550,9 @@ export const fr = {
     notePrivate: "Privé — vous seul voyez vos notes.",
     saveNote: "Enregistrer la note",
     noteSaved: "Note enregistrée.",
+    noteSaving: "Enregistrement…",
+    noteSavedHint: "Enregistrée · vous seul voyez vos notes.",
+    noteSavedShort: "Enregistrée",
     signInHint: "Connectez-vous pour enregistrer des entreprises, suivre vos candidatures et garder des notes privées.",
     signInPrompt: "Connectez-vous pour suivre vos candidatures.",
     empty: "Vous n'avez encore enregistré aucune entreprise.",

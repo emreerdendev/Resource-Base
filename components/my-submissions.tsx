@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { PricingSelect } from "@/components/pricing-select";
 import { TaxonomyProposal } from "@/components/taxonomy-proposal";
+import { CompanyEditProposal } from "@/components/company-edit-proposal";
 import { FormField } from "@/components/form-field";
 import { ResourceGridSkeleton } from "@/components/skeletons";
 import { normalizeWebUrl } from "@/lib/company-input";
@@ -158,7 +159,9 @@ export function MySubmissions({ categories }: { categories: Category[] }) {
           ? t("submissions.urlFix")
           : s.kind === "taxonomy"
             ? t(s.propose_removal ? "submissions.removal" : "submissions.taxonomyFix")
-            : null;
+            : s.kind === "companyEdit"
+              ? t(s.propose_removal ? "submissions.removal" : "submissions.companyEdit")
+              : null;
     return (
       <button
         key={s.id}
@@ -167,7 +170,7 @@ export function MySubmissions({ categories }: { categories: Category[] }) {
         className="card-hover group flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card p-4 text-left"
       >
         <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted/50">
-          {s.kind === "company" ? (
+          {s.kind === "company" || s.kind === "companyEdit" ? (
             <Building2 className="size-5 text-muted-foreground" />
           ) : icon ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -500,6 +503,15 @@ function SubmissionDialog({
                     />
                   )}
 
+                {s.kind === "companyEdit" && (
+                  <CompanyEditProposal
+                    proposed={s.proposed_fields}
+                    original={s.original_fields}
+                    proposeRemoval={s.propose_removal}
+                    note={s.note}
+                  />
+                )}
+
                 {/* New-resource submissions — mirror the home modal layout:
                     pricing on its own badge row, tags in a labelled section. */}
                 {s.kind !== "taxonomy" && s.pricing && (
@@ -533,7 +545,7 @@ function SubmissionDialog({
                     </div>
                   </div>
                 )}
-                {s.note && (
+                {s.note && s.kind !== "companyEdit" && (
                   <DetailRow label={t("submit.note")} value={s.note} />
                 )}
 

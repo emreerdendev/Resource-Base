@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-const KINDS = ["new", "fix", "taxonomy", "removal", "company", "cv"];
+const KINDS = ["new", "fix", "taxonomy", "removal", "company", "companyEdit", "cv"];
 
 /**
  * Title + body in the reader's language. Notifications carry a structured

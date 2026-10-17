@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import type { CompanyEditFields } from "@/lib/company-edit";
 import {
   integer,
   primaryKey,
@@ -216,6 +217,10 @@ export const submissions = sqliteTable(
     proposedName: text("proposed_name"),
     proposedUrl: text("proposed_url"),
     proposeRemoval: integer("propose_removal", { mode: "boolean" }).notNull().default(false),
+    // Company edit suggestions: the changed fields and their values at submit
+    // time ({ name, website, careerUrl, linkedin, emails }), for the diff view.
+    proposedFields: text("proposed_fields", { mode: "json" }).$type<CompanyEditFields>(),
+    originalFields: text("original_fields", { mode: "json" }).$type<CompanyEditFields>(),
     originalCategories: text("original_categories", { mode: "json" })
       .$type<string[]>()
       .notNull()

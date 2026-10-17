@@ -23,6 +23,7 @@ export const submission = defineType({
           { title: 'URL fix', value: 'fix' },
           { title: 'Category / tag fix', value: 'taxonomy' },
           { title: 'New company', value: 'company' },
+          { title: 'Company edit', value: 'companyEdit' },
           { title: 'CV', value: 'cv' },
         ],
         layout: 'radio',
@@ -32,12 +33,12 @@ export const submission = defineType({
     }),
     defineField({
       name: 'targetResourceId',
-      title: 'Target resource (_id) — for fixes',
+      title: 'Target document (_id) — for fixes and edits',
       type: 'string',
       description:
-        'The resource this fix corrects. On approval the relevant fields are updated automatically.',
+        'The resource or company this suggestion changes. On approval the relevant fields are updated automatically.',
       readOnly: true,
-      hidden: ({ parent }) => parent?.kind !== 'fix' && parent?.kind !== 'taxonomy',
+      hidden: ({ parent }) => !['fix', 'taxonomy', 'companyEdit'].includes(parent?.kind),
     }),
     defineField({
       name: 'proposedCategories',
@@ -66,14 +67,26 @@ export const submission = defineType({
       description:
         'The submitter says this resource no longer exists. Approving hides it from the directory (status → Removed); undo by setting it back to Published.',
       readOnly: true,
-      hidden: ({ parent }) => parent?.kind !== 'taxonomy' || !parent?.proposeRemoval,
+      hidden: ({ parent }) =>
+        !['taxonomy', 'companyEdit'].includes(parent?.kind) || !parent?.proposeRemoval,
+    }),
+    defineField({
+      name: 'clearFields',
+      title: 'Fields to clear',
+      type: 'array',
+      of: [{ type: 'string' }],
+      description: 'Company edits: links/emails the submitter says should be removed (cleared on approval).',
+      options: { layout: 'tags' },
+      readOnly: true,
+      hidden: ({ parent }) => parent?.kind !== 'companyEdit' || !parent?.clearFields?.length,
     }),
     defineField({
       name: 'proposedName',
       title: 'Proposed name',
       type: 'string',
-      description: 'Applied to the resource on approval.',
-      hidden: ({ parent }) => parent?.kind !== 'taxonomy' || !parent?.proposedName,
+      description: 'Applied to the resource or company on approval.',
+      hidden: ({ parent }) =>
+        !['taxonomy', 'companyEdit'].includes(parent?.kind) || !parent?.proposedName,
     }),
     defineField({
       name: 'proposedUrl',
@@ -121,19 +134,19 @@ export const submission = defineType({
       name: 'companyWebsite',
       title: 'Company website',
       type: 'url',
-      hidden: ({ parent }) => parent?.kind !== 'company',
+      hidden: ({ parent }) => parent?.kind !== 'company' && parent?.kind !== 'companyEdit',
     }),
     defineField({
       name: 'companyCareerUrl',
       title: 'Career page / job board',
       type: 'url',
-      hidden: ({ parent }) => parent?.kind !== 'company',
+      hidden: ({ parent }) => parent?.kind !== 'company' && parent?.kind !== 'companyEdit',
     }),
     defineField({
       name: 'companyLinkedin',
       title: 'LinkedIn',
       type: 'url',
-      hidden: ({ parent }) => parent?.kind !== 'company',
+      hidden: ({ parent }) => parent?.kind !== 'company' && parent?.kind !== 'companyEdit',
     }),
     defineField({
       name: 'companyEmails',
@@ -142,7 +155,7 @@ export const submission = defineType({
       of: [{ type: 'string' }],
       options: { layout: 'tags' },
       description: 'Generic inboxes only — remove personal employee addresses before approving.',
-      hidden: ({ parent }) => parent?.kind !== 'company',
+      hidden: ({ parent }) => parent?.kind !== 'company' && parent?.kind !== 'companyEdit',
     }),
     defineField({
       name: 'companyCities',
@@ -150,7 +163,7 @@ export const submission = defineType({
       type: 'array',
       of: [{ type: 'string' }],
       options: { list: studioOptions(CITIES), layout: 'grid' },
-      hidden: ({ parent }) => parent?.kind !== 'company',
+      hidden: ({ parent }) => parent?.kind !== 'company' && parent?.kind !== 'companyEdit',
     }),
     defineField({
       name: 'companyOtherLocations',
@@ -159,7 +172,7 @@ export const submission = defineType({
       of: [{ type: 'string' }],
       options: { layout: 'tags' },
       description: 'Free-text places outside the quick-pick cities, e.g. "Berlin, Germany".',
-      hidden: ({ parent }) => parent?.kind !== 'company',
+      hidden: ({ parent }) => parent?.kind !== 'company' && parent?.kind !== 'companyEdit',
     }),
     defineField({
       name: 'companyWorkModels',
@@ -167,7 +180,7 @@ export const submission = defineType({
       type: 'array',
       of: [{ type: 'string' }],
       options: { list: studioOptions(WORK_MODELS), layout: 'grid' },
-      hidden: ({ parent }) => parent?.kind !== 'company',
+      hidden: ({ parent }) => parent?.kind !== 'company' && parent?.kind !== 'companyEdit',
     }),
     defineField({
       name: 'cvFileUrl',
@@ -228,7 +241,7 @@ export const submission = defineType({
       type: 'url',
       validation: (rule) =>
         rule.uri({ scheme: ['http', 'https'] }).custom((value, ctx) =>
-          value || ['company', 'cv'].includes((ctx.parent as { kind?: string })?.kind ?? '')
+          value || ['company', 'companyEdit', 'cv'].includes((ctx.parent as { kind?: string })?.kind ?? '')
             ? true
             : 'Required',
         ),

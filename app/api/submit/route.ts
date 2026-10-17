@@ -8,7 +8,8 @@ import { parseCompanySuggestion } from "@/lib/company-submission";
 import { normalizeWebUrl } from "@/lib/company-input";
 import { slugify } from "@/lib/slug";
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
-import { isPlainId, isResourceId } from "@/sanity/lib/slugs";
+import { isPlainId, isResourceId, listCompanyIds } from "@/sanity/lib/slugs";
+import { changedFields, parseCompanyEdit, type CompanyEditFields } from "@/lib/company-edit";
 import { isSameOrigin } from "@/lib/request";
 
 export const runtime = "nodejs";
@@ -74,7 +75,10 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Too many requests", { status: 429 });
   }
 
-  // Company suggestions have their own shape and approval path.
+  // Company suggestions and company edits have their own shape and approval path.
+  if (data.kind === "companyEdit") {
+    return submitCompanyEdit(data, user.id, user.email ?? "");
+  }
   if (data.kind === "company") {
     return submitCompany(data, user.id, user.email ?? "");
   }
@@ -416,6 +420,104 @@ async function submitCompany(data: Record<string, unknown>, userId: string, emai
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("company submission failed", err);
+    return new NextResponse("Server error", { status: 500 });
+  }
+}
+
+/**
+ * A suggested correction to a published company (or a report that it should
+ * be removed) → a pending `submission` (kind "companyEdit"). Only fields that
+ * differ from the live company are kept; /api/notify applies them on approval.
+ */
+async function submitCompanyEdit(data: Record<string, unknown>, userId: string, email: string) {
+  const companyId = str(data.targetCompanyId);
+  if (!(await listCompanyIds()).has(companyId)) {
+    return new NextResponse("Unknown company", { status: 400 });
+  }
+  const current = await writeClient.fetch<{
+    name?: string;
+    website?: string;
+    careerLinks?: string[];
+    linkedin?: string;
+    emails?: string[];
+  } | null>(
+    `*[_type == "company" && _id == $id][0]{ name, website, careerLinks, linkedin, emails }`,
+    { id: companyId },
+    { perspective: "published" },
+  );
+  if (!current?.name) return new NextResponse("Unknown company", { status: 400 });
+  const original = {
+    name: current.name,
+    website: current.website ?? "",
+    careerUrl: current.careerLinks?.[0] ?? "",
+    linkedin: current.linkedin ?? "",
+    emails: current.emails ?? [],
+  };
+
+  const removal = data.proposeRemoval === true;
+  let changes: CompanyEditFields = {};
+  if (!removal) {
+    const parsed = parseCompanyEdit(data);
+    if (!parsed.ok) return new NextResponse(`Invalid ${parsed.error}`, { status: 400 });
+    changes = changedFields(original, parsed.value);
+    if (!Object.keys(changes).length) {
+      return new NextResponse("Propose at least one change", { status: 400 });
+    }
+  }
+  const note = str(data.note).slice(0, 1000);
+
+  try {
+    const dup = await writeClient.fetch<string | null>(
+      `*[_type == "submission" && kind == "companyEdit" && submittedBy == $u && targetResourceId == $r && status == "pending"][0]._id`,
+      { u: userId, r: companyId },
+    );
+    if (dup) return NextResponse.json({ error: "pending" }, { status: 409 });
+
+    const cleared = (["website", "careerUrl", "linkedin", "emails"] as const).filter((k) =>
+      k === "emails" ? changes.emails?.length === 0 : changes[k] === "",
+    );
+    const created = await writeClient.create({
+      _type: "submission",
+      kind: "companyEdit",
+      name: original.name,
+      ...(original.website && { url: original.website }),
+      targetResourceId: companyId,
+      ...(removal && { proposeRemoval: true }),
+      ...(changes.name && { proposedName: changes.name }),
+      ...(changes.website && { companyWebsite: changes.website }),
+      ...(changes.careerUrl && { companyCareerUrl: changes.careerUrl }),
+      ...(changes.linkedin && { companyLinkedin: changes.linkedin }),
+      ...(changes.emails?.length && { companyEmails: changes.emails }),
+      ...(cleared.length && { clearFields: cleared }),
+      note,
+      email: email.slice(0, 200),
+      submittedBy: userId,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    });
+    try {
+      await getDb().insert(submissions).values({
+        userId,
+        sanitySubmissionId: created._id,
+        kind: "companyEdit",
+        targetResourceId: companyId,
+        name: original.name,
+        url: original.website || null,
+        proposeRemoval: removal,
+        proposedName: changes.name ?? null,
+        proposedFields: removal ? null : changes,
+        originalFields: original,
+        note,
+        status: "pending",
+      });
+    } catch (err) {
+      console.error("company edit mirror failed", err);
+      await writeClient.delete(created._id).catch(() => {});
+      return new NextResponse("Could not save submission", { status: 500 });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("company edit failed", err);
     return new NextResponse("Server error", { status: 500 });
   }
 }

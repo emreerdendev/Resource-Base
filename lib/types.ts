@@ -1,5 +1,6 @@
 /** Shapes returned by the GROQ projections in sanity/lib/queries.ts. */
 import type { ApplicationChannel, City, Sector, WorkModel } from './company-taxonomy'
+import type { CompanyEditFields } from './company-edit'
 
 export type LinkStatus = 'ok' | 'broken' | 'redirect' | 'suspect' | 'unchecked'
 export type Pricing = 'free' | 'freemium' | 'paid'
@@ -90,7 +91,7 @@ export interface Tag {
 
 export type SubmissionStatus = 'pending' | 'approved' | 'rejected'
 
-export type SubmissionKind = 'new' | 'fix' | 'taxonomy' | 'company'
+export type SubmissionKind = 'new' | 'fix' | 'taxonomy' | 'company' | 'companyEdit'
 
 /** A user's own submission row (public.submissions mirror, RLS read-own). */
 export interface Submission {
@@ -113,6 +114,8 @@ export interface Submission {
   original_categories: string[]
   original_tags: string[]
   original_description: string | null
+  proposed_fields: CompanyEditFields | null
+  original_fields: CompanyEditFields | null
   note: string | null
   rejection_reason: string | null
   created_at: string

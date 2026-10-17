@@ -214,6 +214,7 @@ export const tr = {
     signInPrompt: "Bildirimlerini görmek için giriş yap.",
     browse: "Şirketlere Göz At",
     approvedTitle: {
+      companyEdit: "Düzeltmen uygulandı ✅",
       new: "Kaynağın onaylandı 🎉",
       fix: "Düzeltmen uygulandı ✅",
       taxonomy: "Düzeltmen uygulandı ✅",
@@ -222,6 +223,7 @@ export const tr = {
       removal: "Bildirimin onaylandı ✅",
     },
     approvedBody: {
+      companyEdit: "Teşekkürler! “{{name}}” için önerdiğin değişiklikler uygulandı.",
       new: "“{{name}}” artık dizinde yayında.",
       fix: "Teşekkürler! “{{name}}” artık düzeltilmiş bağlantıya gidiyor.",
       taxonomy: "Teşekkürler! “{{name}}” için önerdiğin değişiklikler uygulandı.",
@@ -271,6 +273,7 @@ export const tr = {
     cancel: "Vazgeç",
     urlFix: "URL Düzeltme",
     taxonomyFix: "Düzenleme Önerisi",
+    companyEdit: "Şirket Düzeltmesi",
     editResubmit: "Düzenle ve Tekrar Gönder",
     resubmit: "Tekrar gönder",
     resubmitSuccess: "Tekrar gönderildi! İnceleme sırasına alındı.",
@@ -486,6 +489,27 @@ export const tr = {
     related: "Benzer Şirketler",
   },
 
+  companyEdit: {
+
+    removal: "Bu şirket artık yok veya kaldırılmalı",
+
+    clearHint: "Kaldırılmasını istediğin alanı boş bırak.",
+
+    note: "Not (İsteğe Bağlı)",
+
+    notePlaceholder: "Bunu nerede gördün? Örn. kariyer sayfaları",
+
+    removalPlaceholder: "Örn. Şirket kapandı veya satın alındı…",
+
+    removalProposed: "Artık yok olarak bildirildi — onaylanırsa dizinden kaldırılacak.",
+
+    cleared: "Kaldırılacak",
+
+    alreadyPending: "Bu şirket için zaten bekleyen bir önerin var.",
+
+  },
+
+
   tracker: {
     import: {
       button: "İçe aktar",
@@ -524,6 +548,9 @@ export const tr = {
     notePrivate: "Özel — notlarını yalnızca sen görebilirsin.",
     saveNote: "Notu Kaydet",
     noteSaved: "Not kaydedildi.",
+    noteSaving: "Kaydediliyor…",
+    noteSavedHint: "Kaydedildi · notlarını yalnızca sen görebilirsin.",
+    noteSavedShort: "Kaydedildi",
     signInHint: "Şirketleri kaydetmek, başvuru durumunu takip etmek ve özel notlar tutmak için giriş yap.",
     signInPrompt: "Başvurularını takip etmek için giriş yap.",
     empty: "Henüz hiç şirket kaydetmedin.",

@@ -115,6 +115,57 @@ async function createCompanyFromSubmission(
 }
 
 /**
+ * Apply an approved company edit. The proposal is read from the submission
+ * (editors may adjust it before approving). Set fields replace the live ones,
+ * `clearFields` empties them, and a removal hides the company (undo by setting
+ * it back to Published in the Studio).
+ */
+async function applyCompanyEdit(submissionId: string, companyId: string, removal: boolean) {
+  if (removal) {
+    await writeClient.patch(companyId).set({ status: "hidden" }).commit();
+    return;
+  }
+  const [doc, live] = await Promise.all([
+    writeClient.fetch<(CompanySubmissionDoc & { proposedName?: string; clearFields?: string[] }) | null>(
+      `*[_type == "submission" && _id == $id][0]{ proposedName, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, clearFields }`,
+      { id: submissionId },
+    ),
+    writeClient.fetch<{ careerLinks?: string[]; linkedin?: string; emails?: string[] } | null>(
+      `*[_type == "company" && _id == $id][0]{ careerLinks, linkedin, emails }`,
+      { id: companyId },
+    ),
+  ]);
+  if (!doc || !live) return;
+  const clear = new Set(doc.clearFields ?? []);
+  const set: Record<string, unknown> = {};
+  const unset: string[] = [];
+  const name = doc.proposedName?.trim();
+  if (name) set.name = name.slice(0, 200);
+  if (doc.companyWebsite) set.website = doc.companyWebsite;
+  else if (clear.has("website")) unset.push("website");
+  // The first career link is the one shown and edited; keep any others.
+  let careerLinks = live.careerLinks ?? [];
+  if (doc.companyCareerUrl) careerLinks = [doc.companyCareerUrl, ...careerLinks.slice(1)];
+  else if (clear.has("careerUrl")) careerLinks = careerLinks.slice(1);
+  set.careerLinks = careerLinks;
+  let linkedin = live.linkedin;
+  if (doc.companyLinkedin) set.linkedin = linkedin = doc.companyLinkedin;
+  else if (clear.has("linkedin")) {
+    unset.push("linkedin");
+    linkedin = undefined;
+  }
+  let emails = live.emails ?? [];
+  if (doc.companyEmails?.length) emails = doc.companyEmails;
+  else if (clear.has("emails")) emails = [];
+  set.emails = emails;
+  // How to apply follows from what's left.
+  set.channels = [emails.length && "email", careerLinks.length && "career", linkedin && "linkedin"].filter(Boolean);
+  let patch = writeClient.patch(companyId).set(set);
+  if (unset.length) patch = patch.unset(unset);
+  await patch.commit();
+}
+
+/**
  * Sanity webhook → D1 notification + mirror sync (+ fix apply).
  * Configure a webhook in sanity.io/manage filtered to
  *   _type == "submission" && (status == "approved" || status == "rejected")
@@ -177,6 +228,7 @@ export async function POST(req: NextRequest) {
   const isTaxonomyFix = body.kind === "taxonomy";
   const isFix = isUrlFix || isTaxonomyFix;
   const isCompany = body.kind === "company";
+  const isCompanyEdit = body.kind === "companyEdit";
   const isCv = body.kind === "cv";
   const label = body.name ? `“${body.name}”` : "Your submission";
 
@@ -234,7 +286,7 @@ export async function POST(req: NextRequest) {
   // Categories/tags resolve to references; free-text values that match no doc
   // are noted back on the submission for the editor.
   let removal = false;
-  if (isTaxonomyFix) {
+  if (isTaxonomyFix || isCompanyEdit) {
     const flag = await writeClient.fetch<boolean | null>(
       `*[_type == "submission" && _id == $id][0].proposeRemoval`,
       { id: body._id },
@@ -291,12 +343,34 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Company edits may only patch a published company document.
+  let companyEditSlug: string | null = null;
+  if (approved && isCompanyEdit && body.targetResourceId && isPlainId(body.targetResourceId)) {
+    const target = await writeClient.fetch<{ slug?: string } | null>(
+      `*[_type == "company" && _id == $id][0]{ "slug": slug.current }`,
+      { id: body.targetResourceId },
+    );
+    if (target) {
+      try {
+        await applyCompanyEdit(body._id, body.targetResourceId, removal);
+        companyEditSlug = removal ? null : (target.slug ?? null);
+      } catch (err) {
+        console.error("company edit apply failed", err);
+        return new NextResponse("Company edit not applied", { status: 500 });
+      }
+    }
+  }
+
   // Idempotent: source_key has a unique index, so webhook retries are no-ops.
   // The status is part of the key so an approve-after-reject still notifies.
   // `data` lets the UI render the message in the reader's language; title and
   // body keep an English fallback.
   const kind = isCv
     ? "cv"
+    : isCompanyEdit
+      ? removal
+        ? "removal"
+        : "companyEdit"
     : isCompany
       ? "company"
       : isUrlFix
@@ -317,8 +391,10 @@ export async function POST(req: NextRequest) {
       userId: body.submittedBy,
       type: approved ? "submission_approved" : "submission_rejected",
       title: approved
-        ? isFix
+        ? isFix || (isCompanyEdit && !removal)
           ? "Your fix was applied ✅"
+          : isCompanyEdit
+            ? "Your report was confirmed ✅"
           : isCv
             ? "Your CV is now listed 🎉"
             : isCompany
@@ -330,7 +406,7 @@ export async function POST(req: NextRequest) {
           ? `Thanks! ${label} now points to the corrected link.`
           : removal
             ? `Thanks! ${label} was removed from the directory.`
-            : isTaxonomyFix
+            : isTaxonomyFix || isCompanyEdit
             ? `Thanks! Your suggested changes to ${label} were applied.`
             : isCv
               ? `“${name}” is now in the CV directory.`
@@ -349,8 +425,8 @@ export async function POST(req: NextRequest) {
         ? "/profile/edit?tab=cv"
         : approved && isUrlFix
           ? (body.url ?? null)
-          : approved && companySlug
-            ? `/company/${companySlug}`
+          : approved && (companySlug || companyEditSlug)
+            ? `/company/${companySlug ?? companyEditSlug}`
             : approved
               ? null
               : "/submissions",

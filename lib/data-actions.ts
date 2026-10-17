@@ -11,6 +11,7 @@ import { getSessionUser, requireUser } from "@/lib/authz";
 import { overLimit } from "@/lib/rate-limit";
 import { isResourceId } from "@/sanity/lib/slugs";
 import { writeClient } from "@/sanity/lib/writeClient";
+import type { CompanyEditFields } from "@/lib/company-edit";
 
 /* ----------------------------- favorites (own) ---------------------------- */
 
@@ -128,6 +129,8 @@ export type SubmissionRow = {
   original_categories: string[];
   original_tags: string[];
   original_description: string | null;
+  proposed_fields: CompanyEditFields | null;
+  original_fields: CompanyEditFields | null;
   note: string | null;
   rejection_reason: string | null;
   created_at: string;
@@ -162,6 +165,8 @@ export async function listSubmissions(): Promise<SubmissionRow[]> {
     original_categories: r.originalCategories,
     original_tags: r.originalTags,
     original_description: r.originalDescription,
+    proposed_fields: r.proposedFields ?? null,
+    original_fields: r.originalFields ?? null,
     note: r.note,
     rejection_reason: r.rejectionReason,
     created_at: r.createdAt.toISOString(),

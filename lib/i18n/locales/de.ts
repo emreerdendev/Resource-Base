@@ -214,6 +214,7 @@ export const de = {
     signInPrompt: "Melde dich an, um deine Benachrichtigungen zu sehen.",
     browse: "Unternehmen ansehen",
     approvedTitle: {
+      companyEdit: "Deine Korrektur wurde übernommen ✅",
       new: "Deine Ressource wurde angenommen 🎉",
       fix: "Deine Korrektur wurde übernommen ✅",
       taxonomy: "Deine Korrektur wurde übernommen ✅",
@@ -222,6 +223,7 @@ export const de = {
       removal: "Deine Meldung wurde bestätigt ✅",
     },
     approvedBody: {
+      companyEdit: "Danke! Deine Änderungen an „{{name}}“ wurden übernommen.",
       new: "„{{name}}“ ist jetzt im Verzeichnis.",
       fix: "Danke! „{{name}}“ verweist jetzt auf den korrigierten Link.",
       taxonomy: "Danke! Deine Änderungsvorschläge für „{{name}}“ wurden übernommen.",
@@ -271,6 +273,7 @@ export const de = {
     cancel: "Abbrechen",
     urlFix: "URL-Korrektur",
     taxonomyFix: "Änderungsvorschlag",
+    companyEdit: "Unternehmenskorrektur",
     editResubmit: "Bearbeiten & erneut senden",
     resubmit: "Erneut senden",
     resubmitSuccess: "Erneut gesendet! Wieder in der Prüfung.",
@@ -488,6 +491,27 @@ export const de = {
     related: "Ähnliche Unternehmen",
   },
 
+  companyEdit: {
+
+    removal: "Dieses Unternehmen gibt es nicht mehr oder es sollte entfernt werden",
+
+    clearHint: "Lass ein Feld leer, um seine Entfernung vorzuschlagen.",
+
+    note: "Notiz (optional)",
+
+    notePlaceholder: "Wo hast du das gesehen? z. B. auf der Karriereseite",
+
+    removalPlaceholder: "z. B. Das Unternehmen wurde geschlossen oder übernommen…",
+
+    removalProposed: "Als nicht mehr existent gemeldet — wird bei Bestätigung aus dem Verzeichnis entfernt.",
+
+    cleared: "Wird entfernt",
+
+    alreadyPending: "Du hast für dieses Unternehmen bereits einen offenen Vorschlag.",
+
+  },
+
+
   tracker: {
     import: {
       button: "Importieren",
@@ -526,6 +550,9 @@ export const de = {
     notePrivate: "Privat — nur du siehst deine Notizen.",
     saveNote: "Notiz speichern",
     noteSaved: "Notiz gespeichert.",
+    noteSaving: "Wird gespeichert…",
+    noteSavedHint: "Gespeichert · nur du siehst deine Notizen.",
+    noteSavedShort: "Gespeichert",
     signInHint: "Melde dich an, um Unternehmen zu speichern, deinen Bewerbungsstatus zu verfolgen und private Notizen zu führen.",
     signInPrompt: "Melde dich an, um deine Bewerbungen zu verfolgen.",
     empty: "Du hast noch keine Unternehmen gespeichert.",

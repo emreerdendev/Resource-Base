@@ -2,20 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Check, ChevronRight, Share2 } from "lucide-react";
+import { Check, ChevronRight, Share2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CompanyCard } from "@/components/company-card";
 import { CompanyDetails } from "@/components/company-details";
 import { CompanyLogo } from "@/components/company-logo";
+import { CompanyEditPanel, CompanyMeta, CompanyTitle, SuggestButton } from "@/components/company-modal";
+import { Separator } from "@/components/ui/separator";
 import { CompanyStatusMenu } from "@/components/company-status-menu";
 import { Button } from "@/components/ui/button";
-import { hostLabel } from "@/lib/company-utils";
 import type { CompanyWithRelated } from "@/lib/types";
 
-/** Deep-linkable company page — same body as the modal, plus related companies. */
+/**
+ * Deep-linkable company page — same body as the modal, plus related companies.
+ * Share and the application status stay top right; meta and Suggest edit sit
+ * under the details, like the resource page.
+ */
 export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
   // Only the company's own site — career platforms live under "How to apply".
   const url = company.website;
 
@@ -52,33 +59,42 @@ export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
         <CompanyLogo company={company} size="xl" />
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold tracking-tight">
-            {url ? (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={hostLabel(url)}
-                className="underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground"
-              >
-                {company.name}
-                <ArrowUpRight className="ml-1 inline size-4 align-baseline opacity-60" />
-              </a>
-            ) : (
-              company.name
-            )}
+            {/* Name and "Open Page" are one link, like the resource page. */}
+            <CompanyTitle company={company} url={url} large />
           </h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={share}>
-            {copied ? <Check className="size-3.5" /> : <Share2 className="size-3.5" />}
-            {t("resource.share")}
+            {copied ? <Check className="size-3.5 text-emerald-500" /> : <Share2 className="size-3.5" />}
+            {copied ? t("resource.linkCopied") : t("resource.share")}
           </Button>
           <CompanyStatusMenu companyId={company._id} size="md" />
         </div>
       </div>
 
-      <div className="mt-8 max-w-2xl">
+      <div className="mt-8 flex max-w-2xl flex-col gap-6">
         <CompanyDetails company={company} />
+        <CompanyEditPanel
+          company={company}
+          editOpen={editOpen}
+          setEditOpen={setEditOpen}
+          viewOpen={viewOpen}
+          setViewOpen={setViewOpen}
+        />
+        <div className="flex flex-col gap-y-5">
+          <Separator />
+          <CompanyMeta company={company} />
+          {/* Suggest edit — the editor / pending suggestion open above. */}
+          <div>
+            <SuggestButton
+              company={company}
+              editOpen={editOpen}
+              setEditOpen={setEditOpen}
+              viewOpen={viewOpen}
+              setViewOpen={setViewOpen}
+            />
+          </div>
+        </div>
       </div>
 
       {company.related.length > 0 && (

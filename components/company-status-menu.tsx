@@ -75,7 +75,7 @@ export function CompanyStatusMenu({
   className,
 }: {
   companyId: string;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   className?: string;
 }) {
   const { t } = useTranslation();
@@ -85,7 +85,7 @@ export function CompanyStatusMenu({
 
   const base = cn(
     "relative z-10 inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-    size === "sm" ? "h-7 px-2 text-[11px]" : "h-9 px-3 text-sm",
+    size === "sm" ? "h-7 px-2 text-[11px]" : size === "md" ? "h-9 px-3 text-sm" : "h-9 justify-center px-2.5 text-sm",
     className,
   );
 
@@ -106,7 +106,7 @@ export function CompanyStatusMenu({
         )}
       >
         <Bookmark className={size === "sm" ? "size-3.5" : "size-4"} />
-        {size === "md" && t("tracker.save")}
+        {size !== "sm" && <span className="truncate">{t("tracker.save")}</span>}
       </button>
     );
   }
@@ -120,9 +120,9 @@ export function CompanyStatusMenu({
           aria-label={t("tracker.changeStatus")}
           className={cn(base, STATUS_STYLES[tracked.status].pill)}
         >
-          <BookmarkCheck className={size === "sm" ? "size-3.5" : "size-4"} />
-          {t(`tracker.status.${tracked.status}`)}
-          <ChevronDown className="size-3 opacity-70" />
+          <BookmarkCheck className={cn("shrink-0", size === "sm" ? "size-3.5" : "size-4")} />
+          <span className="truncate">{t(`tracker.status.${tracked.status}`)}</span>
+          <ChevronDown className="size-3 shrink-0 opacity-70" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

@@ -214,6 +214,7 @@ export const es = {
     signInPrompt: "Inicia sesión para ver tus notificaciones.",
     browse: "Ver empresas",
     approvedTitle: {
+      companyEdit: "Tu corrección se aplicó ✅",
       new: "Tu recurso fue aprobado 🎉",
       fix: "Tu corrección se aplicó ✅",
       taxonomy: "Tu corrección se aplicó ✅",
@@ -222,6 +223,7 @@ export const es = {
       removal: "Tu aviso fue confirmado ✅",
     },
     approvedBody: {
+      companyEdit: "¡Gracias! Se aplicaron tus cambios a «{{name}}».",
       new: "«{{name}}» ya está en el directorio.",
       fix: "¡Gracias! «{{name}}» ahora apunta al enlace corregido.",
       taxonomy: "¡Gracias! Se aplicaron los cambios que sugeriste para «{{name}}».",
@@ -271,6 +273,7 @@ export const es = {
     cancel: "Cancelar",
     urlFix: "Corrección de URL",
     taxonomyFix: "Sugerencia de cambio",
+    companyEdit: "Corrección de empresa",
     editResubmit: "Editar y reenviar",
     resubmit: "Reenviar",
     resubmitSuccess: "¡Reenviada! Está de nuevo en revisión.",
@@ -488,6 +491,27 @@ export const es = {
     related: "Empresas similares",
   },
 
+  companyEdit: {
+
+    removal: "Esta empresa ya no existe o debería retirarse",
+
+    clearHint: "Deja un campo vacío para pedir que se elimine.",
+
+    note: "Nota (opcional)",
+
+    notePlaceholder: "¿Dónde lo viste? p. ej. su página de empleo",
+
+    removalPlaceholder: "p. ej. La empresa cerró o fue adquirida…",
+
+    removalProposed: "Marcada como desaparecida — se retirará del directorio si se confirma.",
+
+    cleared: "Se eliminará",
+
+    alreadyPending: "Ya tienes una sugerencia pendiente para esta empresa.",
+
+  },
+
+
   tracker: {
     import: {
       button: "Importar",
@@ -526,6 +550,9 @@ export const es = {
     notePrivate: "Privado — solo tú ves tus notas.",
     saveNote: "Guardar nota",
     noteSaved: "Nota guardada.",
+    noteSaving: "Guardando…",
+    noteSavedHint: "Guardada · solo tú ves tus notas.",
+    noteSavedShort: "Guardada",
     signInHint: "Inicia sesión para guardar empresas, seguir el estado de tus postulaciones y tomar notas privadas.",
     signInPrompt: "Inicia sesión para seguir tus postulaciones.",
     empty: "Aún no has guardado ninguna empresa.",
