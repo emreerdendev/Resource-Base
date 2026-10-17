@@ -61,14 +61,6 @@ export const structure: StructureResolver = (S) =>
             .filter('_type == "submission" && kind == "cv" && status == "pending"')
             .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
         ),
-      S.listItem()
-        .title('🔓 Pending: account reactivations')
-        .child(
-          S.documentList()
-            .title('Account reactivation requests')
-            .filter('_type == "accountRequest" && status == "pending"')
-            .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
-        ),
       S.divider(),
       // Hidden by an approved removal report: set back to Published to undo.
       S.listItem()

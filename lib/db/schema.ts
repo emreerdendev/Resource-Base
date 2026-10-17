@@ -38,7 +38,7 @@ export const user = sqliteTable(
     socialLinks: text("social_links", { mode: "json" }).$type<SocialLinks>(),
     /**
      * Email/password accounts must verify their email by this time (sign-up
-     * + 7 days, or again after a reactivation); null once there's nothing to
+     * + 7 days); null once there's nothing to
      * verify. Until verified, writes are locked; after it, the account is
      * suspended by the daily cron.
      */

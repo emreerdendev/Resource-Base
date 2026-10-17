@@ -143,7 +143,7 @@ async function cleanupDatabase(env: Env): Promise<void> {
     env.DB.prepare("DELETE FROM usage_counters WHERE expires_at < ?").bind(now),
     // Email/password accounts still unverified after their 7 days are
     // suspended and signed out (the app refuses their sign-ins; verifying the
-    // email or an approved reactivation request lifts it).
+    // email — a new link from the sign-in dialog — lifts it).
     env.DB.prepare(
       "UPDATE user SET suspended_at = ? WHERE email_verified = 0 AND suspended_at IS NULL AND verify_deadline IS NOT NULL AND verify_deadline < ?",
     ).bind(now, now),

@@ -1,9 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { parseBody } from "next-sanity/webhook";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { cvs, notifications, submissions, user } from "@/lib/db/schema";
-import { VERIFY_WINDOW_MS } from "@/lib/auth";
+import { cvs, notifications, submissions } from "@/lib/db/schema";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { slugify } from "@/lib/slug";
 import { isPlainId } from "@/sanity/lib/slugs";
@@ -13,9 +12,6 @@ export const runtime = "nodejs";
 
 type ModerationBody = {
   _id: string;
-  _type?: string;
-  /** accountRequest only: the suspended account. */
-  userId?: string;
   status: string;
   submittedBy?: string;
   name?: string;
@@ -248,12 +244,10 @@ async function applyCompanyEdit(submissionId: string, companyId: string, removal
  * hidden for a removal report), a CV is listed. If applying fails the route
  * returns 500 so Sanity retries, and nothing is announced.
  *
- * Also approves account reactivation requests (accountRequest).
- *
  * Configure in sanity.io/manage: filter
- *   _type in ["submission", "accountRequest"] && status in ["approved", "rejected"] && delta::changedAny(status)
+ *   _type == "submission" && status in ["approved", "rejected"] && delta::changedAny(status)
  * projection
- *   { _id, _type, status, submittedBy, userId, name, url, rejectionReason, kind, targetResourceId }
+ *   { _id, status, submittedBy, name, url, rejectionReason, kind, targetResourceId }
  * drafts off, secret SANITY_NOTIFY_SECRET.
  */
 export async function POST(req: NextRequest) {
@@ -277,17 +271,6 @@ export async function POST(req: NextRequest) {
   if (!body || (body.status !== "approved" && body.status !== "rejected")) {
     // Not a moderation decision — ack so Sanity doesn't retry.
     return NextResponse.json({ skipped: true });
-  }
-  // A reactivation request: approval lifts the suspension and gives the
-  // account another 7 days to verify its email.
-  if (body._type === "accountRequest") {
-    if (body.status === "approved" && body.userId) {
-      await getDb()
-        .update(user)
-        .set({ suspendedAt: null, verifyDeadline: new Date(Date.now() + VERIFY_WINDOW_MS) })
-        .where(and(eq(user.id, body.userId), eq(user.emailVerified, false)));
-    }
-    return NextResponse.json({ ok: true });
   }
   if (!body.submittedBy) {
     // Anonymous submission — no one to notify.

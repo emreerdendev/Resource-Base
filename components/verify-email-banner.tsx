@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Loader2, MailWarning } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useCooldown } from "@/lib/use-cooldown";
 import { Button } from "@/components/ui/button";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -18,6 +19,7 @@ export function VerifyEmailBanner() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [pending, setPending] = useState(false);
+  const wait = useCooldown();
   // Read once: the count only needs day precision.
   const [now] = useState(() => Date.now());
   if (!user || user.emailVerified) return null;
@@ -35,6 +37,7 @@ export function VerifyEmailBanner() {
       if (res.status === 429) throw new Error(t("auth.tooManyEmails"));
       if (!res.ok) throw new Error(t("auth.failed"));
       toast.success(t("verifyBanner.sent", { email: user!.email }));
+      wait.start();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failed"));
     } finally {
@@ -49,9 +52,9 @@ export function VerifyEmailBanner() {
         <span className="font-medium">{t("verifyBanner.title")}</span>{" "}
         <span className="text-muted-foreground">{t("verifyBanner.body", { count: days, email: user.email })}</span>
       </p>
-      <Button size="sm" variant="outline" onClick={resend} disabled={pending}>
+      <Button size="sm" variant="outline" onClick={resend} disabled={pending || wait.left > 0}>
         {pending && <Loader2 className="size-3.5 animate-spin" />}
-        {t("verifyBanner.resend")}
+        {wait.left > 0 ? t("suspended.wait", { count: wait.left }) : t("verifyBanner.resend")}
       </Button>
     </div>
   );

@@ -5,7 +5,6 @@ import { tag } from './tag'
 import { resource } from './resource'
 import { submission } from './submission'
 import { company } from './company'
-import { accountRequest } from './account-request'
 
 export const schemaTypes: SchemaTypeDefinition[] = [
   category,
@@ -13,5 +12,4 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   resource,
   submission,
   company,
-  accountRequest,
 ]
