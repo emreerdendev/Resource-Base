@@ -67,15 +67,23 @@ const isDev = process.env.NODE_ENV === "development";
 // challenge in an iframe on challenges.cloudflare.com.
 const TURNSTILE = "https://challenges.cloudflare.com";
 
+// Google Analytics 4 per Google's CSP guide: hits go to regional endpoints
+// (e.g. region1.google-analytics.com for EU/TR visitors) and to
+// *.analytics.google.com — allowing only www.google-analytics.com silently
+// dropped most of them.
+const GA_SCRIPT = "https://*.googletagmanager.com";
+const GA_CONNECT =
+  "https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com";
+
 const scriptSrc = isDev
-  ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com ${TURNSTILE}`
-  : `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com ${TURNSTILE}`;
+  ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${GA_SCRIPT} ${TURNSTILE}`
+  : `script-src 'self' 'unsafe-inline' ${GA_SCRIPT} ${TURNSTILE}`;
 
 // In dev, Next.js needs a WebSocket (ws:) to the local server for HMR; without
 // it the browser blocks the connection and the console floods with CSP errors.
 const connectSrc = isDev
-  ? `connect-src 'self' ws: wss: https://*.sanity.io https://www.google-analytics.com ${TURNSTILE}`
-  : `connect-src 'self' https://*.sanity.io https://www.google-analytics.com ${TURNSTILE}`;
+  ? `connect-src 'self' ws: wss: https://*.sanity.io ${GA_CONNECT} ${TURNSTILE}`
+  : `connect-src 'self' https://*.sanity.io ${GA_CONNECT} ${TURNSTILE}`;
 
 const csp = [
   "default-src 'self'",
