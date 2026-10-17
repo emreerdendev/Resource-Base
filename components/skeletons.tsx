@@ -55,7 +55,7 @@ export function PageHeaderSkeleton({ actions = 0 }: { actions?: number }) {
           </div>
         )}
       </div>
-      <Skeleton className="mt-3 h-4 w-full max-w-xl" />
+      <Skeleton className="mt-3 h-4 w-full max-w-2xl" />
     </div>
   );
 }

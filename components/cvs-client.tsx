@@ -128,7 +128,9 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
 
   const loading = !all || (mode === "liked" && likes.loading);
   const disclaimer = (
-    <p className="mt-10 text-center text-xs text-muted-foreground">{t("cvs.disclaimer")}</p>
+    <p className="mx-auto mt-10 max-w-2xl text-balance text-center text-xs leading-relaxed text-muted-foreground">
+      {t("cvs.disclaimer")}
+    </p>
   );
 
   return (
