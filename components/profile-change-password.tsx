@@ -75,7 +75,7 @@ export function ProfileChangePassword() {
           newPassword: next,
           revokeOtherSessions: true,
         });
-        if (error) throw new Error(error.message ?? t("auth.failed"));
+        if (error) throw new Error(t(error.code === "INVALID_PASSWORD" ? "auth.invalidCredentials" : "auth.failed"));
         toast.success(t("auth.passwordChanged"));
       } else {
         const { error } = await setMyPassword(next);

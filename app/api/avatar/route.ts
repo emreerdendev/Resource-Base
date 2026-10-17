@@ -4,7 +4,7 @@ import { AVATAR_MAX_BYTES, avatarBucket, avatarUrl, deleteAvatarFile, sniffImage
 import { getSessionUser } from "@/lib/authz";
 import { getDb } from "@/lib/db";
 import { user as userTable } from "@/lib/db/schema";
-import { isRateLimited, overLimit } from "@/lib/rate-limit";
+import { DAILY_CAPS, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/request";
 
 export const runtime = "nodejs";
@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
   if (!isSameOrigin(req)) return new NextResponse("Forbidden", { status: 403 });
   const me = await getSessionUser();
   if (!me) return new NextResponse("Unauthorized", { status: 401 });
+  if (isPaused("UPLOADS_PAUSED")) return NextResponse.json({ error: "paused" }, { status: 503 });
   if (Number(req.headers.get("content-length") ?? 0) > AVATAR_MAX_BYTES)
     return NextResponse.json({ error: "too_large" }, { status: 413 });
   if (await overLimit("RL_USER", `avatar:${me.id}`))
@@ -42,6 +43,8 @@ export async function POST(req: NextRequest) {
   if (!ext) return NextResponse.json({ error: "not_image" }, { status: 400 });
   // Counted only for valid uploads, so a rejected file doesn't use up the day.
   if (await isRateLimited(`avatar-day:${me.id}`, CHANGES_PER_DAY, 86400))
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  if (await dailyCapReached("avatars", DAILY_CAPS.avatars))
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
 
   const path = `${me.id}/${crypto.randomUUID()}.${ext}`;

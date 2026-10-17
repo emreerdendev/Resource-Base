@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { captcha } from "better-auth/plugins";
@@ -7,6 +7,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import * as schema from "@/lib/db/schema";
+import { isDisposableEmail } from "@/lib/disposable-email";
 import { sendEmail } from "@/lib/email";
 import { resetPasswordEmail, verifyEmail } from "@/lib/email-templates";
 
@@ -44,19 +45,20 @@ export async function getAuth() {
   // letting the request reach the account-creation / email-sending endpoints —
   // this is what stops a bot from mass-registering random addresses and firing
   // verification mail at scale (per-IP limits don't, since bots rotate IPs).
-  // Only wired up when TURNSTILE_SECRET_KEY is set, so local dev (no key) and
-  // the OAuth-only path keep working unguarded.
-  const turnstileSecret = (env as unknown as Record<string, string | undefined>)
-    .TURNSTILE_SECRET_KEY;
+  // Always on, and it fails closed: in production a missing
+  // TURNSTILE_SECRET_KEY makes these endpoints refuse requests instead of
+  // silently running unguarded. Locally the test secret is used.
+  const vars = env as unknown as Record<string, string | undefined>;
+  const turnstileSecret = vars.TURNSTILE_SECRET_KEY;
   const plugins: BetterAuthPlugin[] = [];
-  if (turnstileSecret) {
+  {
     plugins.push(
       captcha({
         provider: "cloudflare-turnstile",
         // Locally the widget runs with Cloudflare's always-pass test site key
         // (see components/auth/turnstile.tsx), whose tokens only verify
         // against the matching test secret.
-        secretKey: isLocal ? "1x0000000000000000000000000000000AA" : turnstileSecret,
+        secretKey: isLocal ? "1x0000000000000000000000000000000AA" : (turnstileSecret ?? "missing"),
         // Guard every endpoint that creates an account or sends an email.
         endpoints: [
           "/sign-up/email",
@@ -198,7 +200,15 @@ export async function getAuth() {
         create: {
           // Sign-up input and provider profiles both land here; keep the
           // fields that end up on public profiles bounded and http(s)-only.
-          before: async (data) => ({ data: { ...data, ...cleanIdentity(data) } }),
+          before: async (data) => {
+            // Emergency switch (set SIGNUPS_PAUSED=1 in the dashboard) and
+            // throwaway inboxes: no new account is created.
+            if (vars.SIGNUPS_PAUSED === "1")
+              throw new APIError("FORBIDDEN", { message: "Sign-ups are paused.", code: "SIGNUPS_PAUSED" });
+            if (typeof data.email === "string" && isDisposableEmail(data.email))
+              throw new APIError("BAD_REQUEST", { message: "Disposable email.", code: "DISPOSABLE_EMAIL" });
+            return { data: { ...data, ...cleanIdentity(data) } };
+          },
           // Auto-assign a unique username on signup (replaces handle_new_user).
           after: async (createdUser) => {
             const stem = usernameStem(createdUser.name || createdUser.email);

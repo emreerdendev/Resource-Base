@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { getDb } from "@/lib/db";
-import { submissions } from "@/lib/db/schema";
+import { notifications, submissions } from "@/lib/db/schema";
 import { getSessionUser } from "@/lib/authz";
 import { parseCompanySuggestion } from "@/lib/company-submission";
 import { normalizeWebUrl } from "@/lib/company-input";
 import { slugify } from "@/lib/slug";
-import { isRateLimited, overLimit } from "@/lib/rate-limit";
+import { DAILY_CAPS, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isPlainId, isResourceId, listCompanyIds } from "@/sanity/lib/slugs";
 import { changedFields, parseCompanyEdit, type CompanyEditFields } from "@/lib/company-edit";
 import { isSameOrigin } from "@/lib/request";
@@ -22,9 +22,9 @@ const MAX_PENDING = 20;
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
 /**
- * Burst limit (free binding, per minute), daily cap (KV, only touched by real
- * submissions) and a ceiling on open submissions in the review queue — so one
- * account can't fill the Sanity dataset or the moderation queue.
+ * Burst limit (free binding, per minute), a ceiling on open submissions in the
+ * review queue, a per-user daily cap and a site-wide daily cap — so neither one
+ * account nor many can fill the Sanity dataset or the moderation queue.
  */
 async function submitLimited(userId: string): Promise<boolean> {
   if (await overLimit("RL_SUBMIT", `submit:${userId}`)) return true;
@@ -33,7 +33,9 @@ async function submitLimited(userId: string): Promise<boolean> {
     .from(submissions)
     .where(and(eq(submissions.userId, userId), eq(submissions.status, "pending")));
   if (open >= MAX_PENDING) return true;
-  return isRateLimited(`submit-day:${userId}`, MAX_PER_DAY, 86400);
+  if (await isRateLimited(`submit-day:${userId}`, MAX_PER_DAY, 86400)) return true;
+  // Site-wide: however many accounts a spammer has, the dataset can't fill up.
+  return dailyCapReached("submissions", DAILY_CAPS.submissions);
 }
 
 function isValidUrl(url: string): boolean {
@@ -55,6 +57,9 @@ export async function POST(req: NextRequest) {
   const user = await getSessionUser();
   if (!user) {
     return new NextResponse("Unauthorized", { status: 401 });
+  }
+  if (isPaused("SUBMISSIONS_PAUSED")) {
+    return NextResponse.json({ error: "paused" }, { status: 503 });
   }
 
   let data: Record<string, unknown>;
@@ -238,6 +243,20 @@ export async function POST(req: NextRequest) {
         .set({ ...fields, status: "pending" })
         .unset(["rejectionReason"])
         .commit();
+      // The next decision on this document must notify again: retire the key
+      // of the earlier one (it's kept, just renamed, so the old notice stays).
+      await db
+        .update(notifications)
+        .set({ sourceKey: sql`${notifications.sourceKey} || ':' || ${Date.now()}` })
+        .where(
+          and(
+            eq(notifications.userId, userId),
+            inArray(notifications.sourceKey, [
+              `submission_rejected:${resubmitId}`,
+              `submission_approved:${resubmitId}`,
+            ]),
+          ),
+        );
 
       await db
         .update(submissions)

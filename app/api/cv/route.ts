@@ -6,7 +6,7 @@ import { parseCvMeta } from "@/lib/cv-input";
 import { CV_MAX_BYTES } from "@/lib/cv-taxonomy";
 import { getDb } from "@/lib/db";
 import { cvs } from "@/lib/db/schema";
-import { isRateLimited, overLimit } from "@/lib/rate-limit";
+import { DAILY_CAPS, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/request";
 import { writeClient } from "@/sanity/lib/writeClient";
 
@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
   if (!isSameOrigin(req)) return new NextResponse("Forbidden", { status: 403 });
   const user = await getSessionUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
+  if (isPaused("UPLOADS_PAUSED")) return NextResponse.json({ error: "paused" }, { status: 503 });
 
   // Reject oversized bodies before reading them.
   const length = Number(req.headers.get("content-length") ?? 0);
@@ -52,6 +53,8 @@ export async function POST(req: NextRequest) {
   // Counted only for valid uploads, so a rejected file doesn't use up the day.
   if (await isRateLimited(`cv-day:${user.id}`, UPLOADS_PER_DAY, 86400))
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  if (await dailyCapReached("cv-uploads", DAILY_CAPS.cvUploads))
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
 
   const db = getDb();
   const [existing] = await db.select().from(cvs).where(eq(cvs.userId, user.id)).limit(1);
@@ -60,6 +63,7 @@ export async function POST(req: NextRequest) {
   const bucket = cvBucket();
   await bucket.put(fileKey, bytes, { httpMetadata: { contentType: "application/pdf" } });
 
+  let submissionId: string | null = null;
   try {
     const submission = await writeClient.create({
       _type: "submission",
@@ -77,6 +81,7 @@ export async function POST(req: NextRequest) {
       status: "pending",
       createdAt: new Date().toISOString(),
     });
+    submissionId = submission._id;
 
     const now = new Date();
     const row = {
@@ -88,20 +93,22 @@ export async function POST(req: NextRequest) {
       sanitySubmissionId: submission._id,
       updatedAt: now,
     };
-    if (existing) {
-      await db.update(cvs).set(row).where(eq(cvs.id, id));
-      // The previous file is no longer referenced.
-      await bucket.delete(existing.fileKey);
-      // A replaced CV leaves the review queue for good.
-      if (existing.sanitySubmissionId && existing.status === "pending")
-        await writeClient.delete(existing.sanitySubmissionId).catch(() => {});
-    } else {
-      await db.insert(cvs).values({ id, userId: user.id, ...row });
-    }
+    if (existing) await db.update(cvs).set(row).where(eq(cvs.id, id));
+    else await db.insert(cvs).values({ id, userId: user.id, ...row });
   } catch (err) {
+    // Nothing points at the new file or review document yet: remove both.
     console.error("cv upload failed", err);
     await bucket.delete(fileKey).catch(() => {});
+    if (submissionId) await writeClient.delete(submissionId).catch(() => {});
     return NextResponse.json({ error: "server" }, { status: 500 });
+  }
+  // The row now points at the new file. Cleaning up the old one is best effort
+  // and must never undo the upload.
+  if (existing) {
+    await bucket.delete(existing.fileKey).catch((err) => console.error("old cv file delete failed", err));
+    // A replaced CV leaves the review queue for good.
+    if (existing.sanitySubmissionId && existing.status === "pending")
+      await writeClient.delete(existing.sanitySubmissionId).catch(() => {});
   }
   return NextResponse.json({ ok: true });
 }

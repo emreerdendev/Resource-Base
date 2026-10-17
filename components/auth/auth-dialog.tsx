@@ -112,18 +112,26 @@ export function AuthDialog({
       errorCallbackURL: "/",
     });
     if (error) {
-      toast.error(error.message ?? t("auth.failed"));
+      toast.error(authErrorMessage(error));
       setPending(false);
     }
   }
 
   /** Map a Better Auth error to a user-facing message. */
+  // Always a translated message: Better Auth's own `message` is English.
   function authErrorMessage(error: { code?: string; status?: number }): string {
+    const code = error.code ?? "";
     // Captcha rejected (missing/invalid/failed verification) by the server.
-    if (error.code?.startsWith("CAPTCHA") || error.code === "MISSING_RESPONSE")
-      return t("auth.captchaFailed");
+    if (code.includes("CAPTCHA") || code === "MISSING_RESPONSE") return t("auth.captchaFailed");
     // Too many requests (Better Auth rate limit / per-recipient email cap).
     if (error.status === 429) return t("auth.tooManyEmails");
+    if (code === "EMAIL_NOT_VERIFIED") return t("auth.emailNotVerified");
+    if (code === "INVALID_EMAIL_OR_PASSWORD") return t("auth.invalidCredentials");
+    if (code.startsWith("USER_ALREADY_EXISTS")) return t("auth.userExists");
+    if (code === "DISPOSABLE_EMAIL") return t("auth.disposableEmail");
+    if (code === "SIGNUPS_PAUSED") return t("auth.signupsPaused");
+    if (code.startsWith("PASSWORD_TOO")) return t("auth.passwordTooShort");
+    if (code === "INVALID_EMAIL") return t("auth.emailInvalid");
     return t("auth.failed");
   }
 
@@ -139,9 +147,7 @@ export function AuthDialog({
         // Unverified email/password account: Better Auth blocks sign-in with
         // EMAIL_NOT_VERIFIED (403) and, with sendOnSignIn, resends the link.
         // Tell the user to check their inbox rather than showing a raw error.
-        if (error.code === "EMAIL_NOT_VERIFIED" || error.status === 403)
-          throw new Error(t("auth.emailNotVerified"));
-        throw new Error(error.message ?? authErrorMessage(error));
+        throw new Error(authErrorMessage(error));
       }
       // Welcome toast is fired centrally in AuthProvider (on the user-id
       // transition) so it works for both email and OAuth sign-in.
@@ -167,7 +173,7 @@ export function AuthDialog({
         { email, password: suPw, name: email.split("@")[0], callbackURL: callbackPath() },
         captchaHeaders(captcha),
       );
-      if (error) throw new Error(error.message ?? authErrorMessage(error));
+      if (error) throw new Error(authErrorMessage(error));
       // Verification is required: signUp does NOT create a session. Show a
       // check-your-inbox screen instead of closing the dialog.
       toast.success(t("auth.verifyEmailSent"));
@@ -194,7 +200,7 @@ export function AuthDialog({
         },
         captchaHeaders(captcha),
       );
-      if (error) throw new Error(error.message ?? authErrorMessage(error));
+      if (error) throw new Error(authErrorMessage(error));
       toast.success(t("auth.resetEmailSent"));
       setView("auth");
     } catch (err) {

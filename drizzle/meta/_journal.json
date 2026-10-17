@@ -85,6 +85,13 @@
       "when": 1792269143274,
       "tag": "0011_clean_usernames",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1792272367401,
+      "tag": "0012_usage_counters",
+      "breakpoints": true
     }
   ]
 }

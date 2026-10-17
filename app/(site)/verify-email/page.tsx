@@ -50,7 +50,7 @@ function VerifyEmail() {
         )
           throw new Error(t("auth.captchaFailed"));
         if (sendError.status === 429) throw new Error(t("auth.tooManyEmails"));
-        throw new Error(sendError.message ?? t("auth.failed"));
+        throw new Error(t("auth.failed"));
       }
       // Generic message (don't reveal whether the account exists / is verified).
       toast.success(t("auth.verificationResent"));

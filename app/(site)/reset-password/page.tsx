@@ -42,7 +42,7 @@ function ResetForm() {
     });
     setPending(false);
     if (error) {
-      toast.error(error.message ?? t("auth.failed"));
+      toast.error(t(error.code === "INVALID_TOKEN" ? "auth.resetLinkInvalid" : "auth.failed"));
       setPw("");
       setConfirm("");
       return;

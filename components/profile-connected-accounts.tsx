@@ -57,7 +57,7 @@ export function ProfileConnectedAccounts() {
       errorCallbackURL: "/profile/edit",
     });
     if (error) {
-      toast.error(error.message ?? t("auth.linkFailed"));
+      toast.error(t("auth.linkFailed"));
       setPending(null);
     }
     // success → OAuth redirect happens; on return the list reloads
@@ -72,7 +72,7 @@ export function ProfileConnectedAccounts() {
     const { error } = await authClient.unlinkAccount({ providerId: provider });
     setPending(null);
     if (error) {
-      toast.error(error.message ?? t("auth.unlinkFailed"));
+      toast.error(t("auth.unlinkFailed"));
       return;
     }
     await load();

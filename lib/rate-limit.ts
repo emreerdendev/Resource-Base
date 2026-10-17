@@ -1,80 +1,116 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { lt, sql } from "drizzle-orm";
+import { getDb } from "@/lib/db";
+import { usageCounters } from "@/lib/db/schema";
+import { siteUrl } from "@/lib/site";
 
 /**
- * KV-backed fixed-window rate limiter. Unlike the per-warm-instance Maps used in
- * some routes, KV is shared across all Worker isolates and survives cold starts,
- * so the limit is a real ceiling — an attacker can't reset it by forcing a new
- * isolate. Best-effort (KV is eventually consistent), which is exactly right for
- * abuse limiting: the window count may be off by one under a burst, never wildly.
+ * Abuse limits. Three tools, all free on the Workers Paid plan, and none of
+ * them spends KV writes (KV is kept for the page cache only):
  *
- * Limits here are set WELL ABOVE normal human usage — they only ever bite bots /
- * scripted spam. A real user toggling a favorite or editing their profile will
- * never come close, so there's no UX cost and no added latency on the happy path
- * (one KV get + one put, single-digit ms, and the callers run it server-side).
+ *  - `overLimit`  — Workers Rate Limiting bindings: short windows on hot paths.
+ *  - `isRateLimited` / `dailyCapReached` — counters in D1 (one atomic upsert):
+ *    long windows per user/recipient, and site-wide daily ceilings that cap
+ *    what any amount of traffic can cost (Sanity documents, R2 writes, email).
+ *  - `alreadySeen` — the Cache API, for "count once per window" deduping.
+ *
+ * Limits sit well above real use; they only bite scripts. On an unexpected
+ * error they let the request through rather than break the site.
  */
-type KvBinding = {
-  get: (key: string) => Promise<string | null>;
-  put: (
-    key: string,
-    value: string,
-    opts?: { expirationTtl?: number },
-  ) => Promise<void>;
-};
 
-function getKv(): KvBinding | undefined {
-  try {
-    const { env } = getCloudflareContext();
-    return (env as unknown as Record<string, unknown>).NEXT_INC_CACHE_KV as
-      | KvBinding
-      | undefined;
-  } catch {
-    return undefined; // no CF context (shouldn't happen in routes/actions)
+/** Bump `key` (creating it for `windowSec`) and return its new count. */
+async function bump(key: string, windowSec: number): Promise<number> {
+  const now = Math.floor(Date.now() / 1000);
+  const [row] = await getDb()
+    .insert(usageCounters)
+    .values({ key, count: 1, expiresAt: now + windowSec })
+    .onConflictDoUpdate({
+      target: usageCounters.key,
+      set: { count: sql`${usageCounters.count} + 1` },
+    })
+    .returning({ count: usageCounters.count });
+  // Prune stale windows now and then (about 1 in 200 calls).
+  if (Math.random() < 0.005) {
+    await getDb().delete(usageCounters).where(lt(usageCounters.expiresAt, now)).catch(() => {});
   }
+  return row?.count ?? 1;
 }
 
 /**
  * Returns true if `key` is OVER its limit for the current window (caller should
- * reject), false if it's within limits (caller should proceed). When KV is
- * unavailable (local dev) it always allows — never blocks development.
+ * reject). Fixed windows: the key is bucketed by window so it resets itself.
  *
- * @param key      unique bucket, e.g. `fav:<userId>` or `click:<ip>:<id>`
- * @param max      max actions allowed per window
+ * @param key       unique bucket, e.g. `submit-day:<userId>`
+ * @param max       max actions allowed per window
  * @param windowSec window length in seconds
  */
-export async function isRateLimited(
-  key: string,
-  max: number,
-  windowSec: number,
-): Promise<boolean> {
-  const kv = getKv();
-  if (!kv) return false; // local/dev → don't block
-
-  // Fixed window: bucket the key by the current window index so it auto-resets.
-  const windowIndex = Math.floor(Date.now() / 1000 / windowSec);
-  const bucket = `rl:${key}:${windowIndex}`;
-  const current = Number((await kv.get(bucket)) ?? "0");
-  if (current >= max) return true;
-  await kv.put(bucket, String(current + 1), { expirationTtl: windowSec + 60 });
-  return false;
+export async function isRateLimited(key: string, max: number, windowSec: number): Promise<boolean> {
+  try {
+    const window = Math.floor(Date.now() / 1000 / windowSec);
+    return (await bump(`rl:${key}:${window}`, windowSec + 60)) > max;
+  } catch (err) {
+    console.error("rate limit check failed", err);
+    return false;
+  }
 }
 
 /**
- * Dedup helper for "count this once per window" semantics (e.g. click counting):
- * returns true if this key was ALREADY seen in the window (caller should skip),
- * false the first time (caller should proceed). Persistent across isolates, so
- * unlike an in-memory Map it isn't reset by cold starts.
+ * Site-wide daily ceiling for `name` (UTC day). Returns true once `max` uses
+ * were counted today — the circuit breaker that keeps bots from turning
+ * traffic into cost. Counts the attempt it allows.
  */
-export async function alreadySeen(
-  key: string,
-  windowSec: number,
-): Promise<boolean> {
-  const kv = getKv();
-  if (!kv) return false; // local/dev → always count
-  const k = `seen:${key}`;
-  if ((await kv.get(k)) !== null) return true;
-  await kv.put(k, "1", { expirationTtl: windowSec });
-  return false;
+export async function dailyCapReached(name: string, max: number): Promise<boolean> {
+  try {
+    const day = new Date().toISOString().slice(0, 10);
+    return (await bump(`cap:${name}:${day}`, 2 * 86400)) > max;
+  } catch (err) {
+    console.error("daily cap check failed", err);
+    return false;
+  }
 }
+
+/**
+ * "Count this once per window" (e.g. one click per IP and resource a day):
+ * true if `key` was already seen (skip), false the first time (proceed).
+ * Kept in the Workers Cache API — free and per data center, which is plenty
+ * for deduping counts.
+ */
+export async function alreadySeen(key: string, windowSec: number): Promise<boolean> {
+  try {
+    const cache = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
+    if (!cache) return false; // local dev → always count
+    // A URL on our own zone, so the entry lives in this site's cache.
+    const url = `${siteUrl}/__dedupe/${encodeURIComponent(key)}`;
+    if (await cache.match(url)) return true;
+    await cache.put(url, new Response("1", { headers: { "Cache-Control": `max-age=${windowSec}` } }));
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Emergency switches, flipped from the Cloudflare dashboard (Worker →
+ * Settings → Variables) without a code change: SUBMISSIONS_PAUSED,
+ * UPLOADS_PAUSED, SIGNUPS_PAUSED ("1" = paused).
+ */
+export function isPaused(flag: "SUBMISSIONS_PAUSED" | "UPLOADS_PAUSED"): boolean {
+  try {
+    return (getCloudflareContext().env as unknown as Record<string, string | undefined>)[flag] === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** Site-wide daily ceilings (see dailyCapReached). Far above real use. */
+export const DAILY_CAPS = {
+  /** New Sanity documents from users (keeps the free plan's 10k documents safe). */
+  submissions: 150,
+  /** CV uploads (R2 writes + a Sanity document each). */
+  cvUploads: 50,
+  /** Avatar changes (R2 writes). */
+  avatars: 200,
+} as const;
 
 type Limiter = "RL_PUBLIC" | "RL_USER" | "RL_SUBMIT";
 
@@ -96,20 +132,4 @@ export async function overLimit(limiter: Limiter, key: string): Promise<boolean>
   }
 }
 
-/**
- * The client IP for per-IP limits. IPv6 is cut to its /64 — one subscriber
- * typically owns a whole /64, so per-address limits would be trivial to rotate.
- */
-export function clientIp(headers: Headers): string {
-  const ip =
-    headers.get("cf-connecting-ip") ??
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    "unknown";
-  if (!ip.includes(":")) return ip;
-  // Expand "::" so equal /64 prefixes compare equal however they're written.
-  const [head, tail = ""] = ip.split("::");
-  const h = head ? head.split(":") : [];
-  const t = ip.includes("::") && tail ? tail.split(":") : [];
-  const groups = [...h, ...Array(Math.max(0, 8 - h.length - t.length)).fill("0"), ...t];
-  return groups.slice(0, 4).map((g) => g.toLowerCase().replace(/^0+(?=.)/, "")).join(":");
-}
+export { clientIp } from "@/lib/client-ip";

@@ -6,6 +6,7 @@ import { cvs, notifications, submissions } from "@/lib/db/schema";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { slugify } from "@/lib/slug";
 import { isPlainId } from "@/sanity/lib/slugs";
+import { isFreshWebhook } from "@/lib/webhook-age";
 
 export const runtime = "nodejs";
 
@@ -115,6 +116,77 @@ async function createCompanyFromSubmission(
 }
 
 /**
+ * Publish the resource from an approved "new" suggestion. Reads the submission
+ * itself (editors may adjust it before approving). The id is derived from the
+ * submission, so a retried webhook never creates it twice; the slug gets a
+ * numeric suffix if another resource already uses it. The suggested category
+ * and tags are matched to existing ones; anything unmatched is noted on the
+ * submission for the editor. Returns the resource slug.
+ */
+async function createResourceFromSubmission(submissionId: string, submittedBy: string): Promise<string | null> {
+  const doc = await writeClient.fetch<{
+    name?: string;
+    url?: string;
+    suggestedCategory?: string;
+    pricing?: string;
+    tags?: string[];
+  } | null>(
+    `*[_type == "submission" && _id == $id][0]{ name, url, suggestedCategory, pricing, tags }`,
+    { id: submissionId },
+  );
+  const name = doc?.name?.trim().slice(0, 200);
+  const base = name ? slugify(name) : "";
+  if (!doc?.url || !name || !base) return null;
+
+  const id = `resource-${submissionId.replace(/[^A-Za-z0-9_-]/g, "")}`;
+  const existing = await writeClient.fetch<{ slug?: string } | null>(
+    `*[_id == $id][0]{ "slug": slug.current }`,
+    { id },
+  );
+  if (existing?.slug) return existing.slug; // already created by an earlier delivery
+
+  const taken = new Set(
+    await writeClient.fetch<string[]>(
+      `*[_type == "resource" && slug.current match $prefix].slug.current`,
+      { prefix: `${base}*` },
+    ),
+  );
+  let slug = base;
+  for (let n = 2; taken.has(slug); n++) slug = `${base}-${n}`;
+
+  const [cats, tags] = await Promise.all([
+    resolveRefs("category", doc.suggestedCategory ? [doc.suggestedCategory] : []),
+    resolveRefs("tag", doc.tags ?? []),
+  ]);
+  await writeClient.createIfNotExists({
+    _id: id,
+    _type: "resource",
+    name,
+    slug: { _type: "slug", current: slug },
+    url: doc.url,
+    categories: cats.refs,
+    tags: tags.refs,
+    ...(doc.pricing && ["free", "freemium", "paid"].includes(doc.pricing) && { pricing: doc.pricing }),
+    featured: false,
+    linkStatus: "unchecked",
+    submissionStatus: "published",
+    addedAt: new Date().toISOString(),
+    // Credits the suggester ("Added by @username", resolved live by id).
+    submittedBy,
+    internalNotes: `Suggested by the community (submission ${submissionId}).`,
+  });
+  const unresolved = [...cats.unresolved, ...tags.unresolved];
+  if (unresolved.length) {
+    await writeClient
+      .patch(submissionId)
+      .set({ note: `Created without these unmatched values — add them by hand: ${unresolved.join(", ")}` })
+      .commit()
+      .catch(() => {});
+  }
+  return slug;
+}
+
+/**
  * Apply an approved company edit. The proposal is read from the submission
  * (editors may adjust it before approving). Set fields replace the live ones,
  * `clearFields` empties them, and a removal hides the company (undo by setting
@@ -166,16 +238,17 @@ async function applyCompanyEdit(submissionId: string, companyId: string, removal
 }
 
 /**
- * Sanity webhook → D1 notification + mirror sync (+ fix apply).
- * Configure a webhook in sanity.io/manage filtered to
- *   _type == "submission" && (status == "approved" || status == "rejected")
- * projecting { _id, status, submittedBy, name, url, rejectionReason, kind,
- * targetResourceId, proposedCategories, proposedTags }, POSTing here with
- * SANITY_NOTIFY_SECRET. On approval of a "fix" the resource's url is updated
- * (and link status reset); on a "taxonomy" fix its categories/tags are set
- * from the resolved references. The submitter is notified and their "My
- * submissions" view
- * reflects the decision either way.
+ * Sanity webhook → applies a moderation decision, notifies the submitter and
+ * syncs their "My Submissions" row. On approval: a new resource or company is
+ * published, a fix / edit suggestion / company edit is applied (or the item
+ * hidden for a removal report), a CV is listed. If applying fails the route
+ * returns 500 so Sanity retries, and nothing is announced.
+ *
+ * Configure in sanity.io/manage: filter
+ *   _type == "submission" && status in ["approved", "rejected"] && delta::changedAny(status)
+ * projection
+ *   { _id, status, submittedBy, name, url, rejectionReason, kind, targetResourceId }
+ * drafts off, secret SANITY_NOTIFY_SECRET.
  */
 export async function POST(req: NextRequest) {
   let parsed;
@@ -191,6 +264,9 @@ export async function POST(req: NextRequest) {
   const { isValidSignature, body } = parsed;
   if (!isValidSignature) {
     return new NextResponse("Invalid signature", { status: 401 });
+  }
+  if (!isFreshWebhook(req)) {
+    return new NextResponse("Stale webhook", { status: 401 });
   }
   if (!body || (body.status !== "approved" && body.status !== "rejected")) {
     // Not a moderation decision — ack so Sanity doesn't retry.
@@ -230,6 +306,7 @@ export async function POST(req: NextRequest) {
   const isCompany = body.kind === "company";
   const isCompanyEdit = body.kind === "companyEdit";
   const isCv = body.kind === "cv";
+  const isNew = !body.kind || body.kind === "new";
   const label = body.name ? `“${body.name}”` : "Your submission";
 
   // A CV decision publishes or rejects the listing it was made for. A review
@@ -267,8 +344,40 @@ export async function POST(req: NextRequest) {
     if (!companySlug) return new NextResponse("Company not created", { status: 500 });
   }
 
+  // On approval of a new resource, publish it.
+  let resourceSlug: string | null = null;
+  if (approved && isNew) {
+    try {
+      resourceSlug = await createResourceFromSubmission(body._id, body.submittedBy);
+    } catch (err) {
+      console.error("resource create failed", err);
+    }
+    // Not created → fail so Sanity retries, instead of telling the user their
+    // resource is live when it isn't.
+    if (!resourceSlug) return new NextResponse("Resource not created", { status: 500 });
+  }
+
+  // An approved fix whose resource or company is gone has nothing to apply;
+  // record the decision without telling the user it was applied.
+  const editTargetGone =
+    approved &&
+    ((isFix && !targetResourceId) ||
+      (isCompanyEdit &&
+        !(body.targetResourceId && isPlainId(body.targetResourceId) &&
+          (await writeClient.fetch<string | null>(`*[_type == "company" && _id == $id][0]._id`, {
+            id: body.targetResourceId,
+          })))));
+  if (editTargetGone) {
+    await db
+      .update(submissions)
+      .set({ status: body.status, rejectionReason: null, updatedAt: new Date() })
+      .where(eq(submissions.sanitySubmissionId, body._id));
+    return NextResponse.json({ skipped: "target gone" });
+  }
+
   // On approval of a URL fix, apply the corrected url to the live resource and
-  // reset its link health so the daily checker re-verifies it.
+  // reset its link health so the daily checker re-verifies it. A failure
+  // returns 500 so Sanity retries, rather than notifying "applied".
   if (approved && isUrlFix && targetResourceId && body.url) {
     try {
       await writeClient
@@ -277,6 +386,7 @@ export async function POST(req: NextRequest) {
         .commit();
     } catch (err) {
       console.error("fix apply failed", err);
+      return new NextResponse("Fix not applied", { status: 500 });
     }
   }
 
@@ -340,6 +450,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (err) {
       console.error("edit suggestion apply failed", err);
+      return new NextResponse("Edit not applied", { status: 500 });
     }
   }
 
@@ -427,6 +538,8 @@ export async function POST(req: NextRequest) {
           ? (body.url ?? null)
           : approved && (companySlug || companyEditSlug)
             ? `/company/${companySlug ?? companyEditSlug}`
+            : approved && resourceSlug
+              ? `/resource/${resourceSlug}`
             : approved
               ? null
               : "/submissions",

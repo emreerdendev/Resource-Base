@@ -322,3 +322,20 @@ export const cvLikes = sqliteTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.cvId] }), index("cv_likes_cv_idx").on(t.cvId)],
 );
+
+/* -------------------------------------------------------------------------- */
+/*  Abuse counters: per-user/per-recipient windows and site-wide daily caps.  */
+/*  One atomic upsert per check (lib/rate-limit.ts); expired rows are pruned  */
+/*  opportunistically. Kept out of KV so nothing here spends KV writes.       */
+/* -------------------------------------------------------------------------- */
+
+export const usageCounters = sqliteTable(
+  "usage_counters",
+  {
+    key: text("key").primaryKey(),
+    count: integer("count").notNull().default(0),
+    /** Unix seconds after which the row is stale and may be pruned. */
+    expiresAt: integer("expires_at").notNull(),
+  },
+  (t) => [index("usage_counters_expires_idx").on(t.expiresAt)],
+);

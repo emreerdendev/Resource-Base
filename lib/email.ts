@@ -1,4 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { dailyCapReached, isRateLimited } from "@/lib/rate-limit";
 
 /**
  * Single send helper. ALL outbound email goes through here, so swapping the
@@ -23,19 +24,9 @@ type EmailBinding = {
   }) => Promise<unknown>;
 };
 
-type KvBinding = {
-  get: (key: string) => Promise<string | null>;
-  put: (
-    key: string,
-    value: string,
-    opts?: { expirationTtl?: number },
-  ) => Promise<void>;
-};
-
 // Global hard ceiling on emails per day, regardless of source. Per-IP rate
 // limiting (Better Auth) stops a single attacker; this is the circuit breaker
 // against DISTRIBUTED abuse exhausting the sending quota / running up cost.
-// Kept under Cloudflare Email Sending's 200/day quota.
 const MAX_EMAILS_PER_DAY = 150;
 
 // Per-RECIPIENT limits. Unlike per-IP limits (which an attacker defeats by
@@ -54,7 +45,7 @@ export type EmailResult = {
 };
 
 /** SHA-256 hex of a string — used to key per-recipient counters without
- * storing raw email addresses in KV. */
+ * storing raw email addresses. */
 async function hashKey(value: string): Promise<string> {
   const data = new TextEncoder().encode(value.trim().toLowerCase());
   const digest = await crypto.subtle.digest("SHA-256", data);
@@ -64,50 +55,15 @@ async function hashKey(value: string): Promise<string> {
     .slice(0, 32);
 }
 
-/** Best-effort daily counter in KV. Returns true if under the cap (safe to send). */
-async function underDailyCap(kv: KvBinding | undefined): Promise<boolean> {
-  if (!kv) return true; // no KV (local/dev) → don't block
-  const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
-  const key = `email-count:${day}`;
-  const current = Number((await kv.get(key)) ?? "0");
-  if (current >= MAX_EMAILS_PER_DAY) return false;
-  // KV is eventually consistent, so this count is approximate — fine for a cap.
-  await kv.put(key, String(current + 1), { expirationTtl: 172800 }); // 2 days
-  return true;
-}
-
 /**
- * Per-recipient cooldown + hourly/daily caps. Returns true if this address is
- * within limits (safe to send). Keyed on a hash of the address so we never put
- * raw emails in KV. Best-effort (KV is eventually consistent) — that's fine for
- * abuse limiting.
+ * Per-recipient cooldown + hourly/daily caps (D1 counters, keyed on a hash of
+ * the address). Returns true if this address is within limits.
  */
-async function recipientAllowed(
-  kv: KvBinding | undefined,
-  email: string,
-): Promise<boolean> {
-  if (!kv) return true; // no KV (local/dev) → don't block
+async function recipientAllowed(email: string): Promise<boolean> {
   const h = await hashKey(email);
-  const now = new Date();
-  const hour = now.toISOString().slice(0, 13); // YYYY-MM-DDTHH
-  const day = now.toISOString().slice(0, 10); // YYYY-MM-DD
-
-  // Cooldown: a short window key that simply existing means "sent recently".
-  const cdKey = `mail-cd:${h}`;
-  if ((await kv.get(cdKey)) !== null) return false;
-
-  const hourKey = `mail-h:${h}:${hour}`;
-  const dayKey = `mail-d:${h}:${day}`;
-  const hourCount = Number((await kv.get(hourKey)) ?? "0");
-  const dayCount = Number((await kv.get(dayKey)) ?? "0");
-  if (hourCount >= RECIPIENT_MAX_PER_HOUR) return false;
-  if (dayCount >= RECIPIENT_MAX_PER_DAY) return false;
-
-  // Reserve a slot: bump counters and arm the cooldown.
-  await kv.put(cdKey, "1", { expirationTtl: RECIPIENT_COOLDOWN_SECONDS });
-  await kv.put(hourKey, String(hourCount + 1), { expirationTtl: 7200 }); // 2h
-  await kv.put(dayKey, String(dayCount + 1), { expirationTtl: 172800 }); // 2d
-  return true;
+  if (await isRateLimited(`mail-cd:${h}`, 1, RECIPIENT_COOLDOWN_SECONDS)) return false;
+  if (await isRateLimited(`mail-h:${h}`, RECIPIENT_MAX_PER_HOUR, 3600)) return false;
+  return !(await isRateLimited(`mail-d:${h}`, RECIPIENT_MAX_PER_DAY, 86400));
 }
 
 export async function sendEmail(opts: {
@@ -125,7 +81,6 @@ export async function sendEmail(opts: {
   const { env } = getCloudflareContext();
   const e = env as unknown as Record<string, unknown>;
   const emailBinding = e.EMAIL as EmailBinding | undefined;
-  const kv = e.NEXT_INC_CACHE_KV as KvBinding | undefined;
 
   if (!emailBinding) {
     // No EMAIL binding (free plan / local dev): don't block the auth flow.
@@ -137,7 +92,7 @@ export async function sendEmail(opts: {
 
   // Per-recipient abuse limit (IP-independent) — checked before the global cap
   // so a single targeted address can't burn the shared daily quota.
-  if (opts.dedupeKey && !(await recipientAllowed(kv, opts.dedupeKey))) {
+  if (opts.dedupeKey && !(await recipientAllowed(opts.dedupeKey))) {
     console.warn(
       `[email] per-recipient limit hit; skipped send to ${opts.to} (${opts.subject})`,
     );
@@ -145,7 +100,7 @@ export async function sendEmail(opts: {
   }
 
   // Circuit breaker: hard daily cap across all senders.
-  if (!(await underDailyCap(kv))) {
+  if (await dailyCapReached("email", MAX_EMAILS_PER_DAY)) {
     console.error(
       `[email] daily cap (${MAX_EMAILS_PER_DAY}) reached; skipped send to ${opts.to}`,
     );
