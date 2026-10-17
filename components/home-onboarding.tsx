@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useAuth } from "@/components/auth/auth-provider";
+import { cn } from "@/lib/utils";
 import {
   ArrowRight,
   Boxes,
@@ -10,9 +11,8 @@ import {
   Heart,
   Star,
 } from "lucide-react";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/components/auth/auth-provider";
-import { cn } from "@/lib/utils";
 
 /** CSS-only entrance (tw-animate-css) so content is visible before hydration. */
 const ENTER = "animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500";
@@ -87,7 +87,7 @@ export function HomeOnboarding({
           {t("home.onboardTitleLead").replace(/ (\S+)$/, "\u00a0$1")}{" "}
           <span className="text-primary">{t("home.onboardTitleHighlight")}</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
+        <p className="mx-auto mt-4 max-w-4xl text-balance text-muted-foreground">
           {t("home.onboardSubtitle")}
         </p>
         {user && (

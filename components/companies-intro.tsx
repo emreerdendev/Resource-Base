@@ -19,7 +19,7 @@ export function CompaniesIntro({ count }: { count: number }) {
       <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
         {t("nav.companies")}
       </h1>
-      <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
+      <p className="mx-auto mt-4 max-w-4xl text-balance text-muted-foreground">
         {t("companies.subtitle")}
       </p>
     </div>

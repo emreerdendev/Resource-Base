@@ -14,7 +14,7 @@ export function HomeIntro({ count }: { count: number }) {
       <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
         {t("nav.resources")}
       </h1>
-      <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
+      <p className="mx-auto mt-4 max-w-4xl text-balance text-muted-foreground">
         {t("home.subtitle")}
       </p>
     </div>

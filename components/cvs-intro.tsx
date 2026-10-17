@@ -18,7 +18,7 @@ export function CvsIntro({ count }: { count: number | null }) {
         {count === null ? t("command.loading") : t("cvs.badge", { count })}
       </div>
       <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">{t("nav.cvs")}</h1>
-      <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">{t("cvs.subtitle")}</p>
+      <p className="mx-auto mt-4 max-w-4xl text-balance text-muted-foreground">{t("cvs.subtitle")}</p>
     </div>
   );
 }
