@@ -664,6 +664,7 @@ export const tr = {
     newTab: "Yeni Sekmede Aç",
     download: "İndir",
     report: "Bildir",
+    similar: "Benzer CV'ler",
     close: "Kapat",
     previewError: "CV burada gösterilemedi — yeni sekmede aç veya indir.",
     disclaimer: "CV'ler sahipleri tarafından paylaşılır ve Resource Base tarafından doğrulanmaz. Örnek olarak kullan; birinin CV'sini kopyalamak veya sahibine spam amaçlı ulaşmak yasaktır.",

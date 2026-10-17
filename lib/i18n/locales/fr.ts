@@ -666,6 +666,7 @@ export const fr = {
     newTab: "Ouvrir dans un nouvel onglet",
     download: "Télécharger",
     report: "Signaler",
+    similar: "CV similaires",
     close: "Fermer",
     previewError: "Impossible d’afficher ce CV ici — ouvre-le dans un nouvel onglet ou télécharge-le.",
     disclaimer: "Les CV sont partagés par leurs auteurs et ne sont pas vérifiés par Resource Base. Sers-t’en comme exemples ; copier le CV de quelqu’un ou contacter son auteur pour du spam est interdit.",

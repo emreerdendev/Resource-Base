@@ -1,14 +1,15 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import { Download, ExternalLink, Flag, Heart } from "lucide-react";
+import { Download, ExternalLink, FileText, Flag, Heart } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCvLikes } from "@/components/cv-likes-provider";
 import { useProfile } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { contactEmail } from "@/lib/site";
+import { similarCvs } from "@/lib/cv-similar";
 import type { CvListing } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -37,15 +38,26 @@ function useSmallScreen() {
  * browsing the list never downloads a CV.
  */
 export function CvPreview({
-  cv,
+  cv: initialCv,
+  pool = [],
   open,
   onOpenChange,
 }: {
   cv: CvListing;
+  /** The loaded listing, for "Similar CVs" (computed here, no extra request). */
+  pool?: CvListing[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
+  // A similar CV opens in place; closing returns to the one this was opened for.
+  const [shownId, setShownId] = useState(initialCv.id);
+  const cv = pool.find((x) => x.id === shownId) ?? initialCv;
+  const similar = useMemo(() => similarCvs(cv, pool), [cv, pool]);
+  const change = (o: boolean) => {
+    if (!o) setShownId(initialCv.id);
+    onOpenChange(o);
+  };
   const likes = useCvLikes();
   const { profile } = useProfile();
   // Your own CV can't be liked (the server refuses it too).
@@ -56,7 +68,7 @@ export function CvPreview({
   const report = `mailto:${contactEmail}?subject=${encodeURIComponent(`Report CV ${cv.id}`)}&body=${encodeURIComponent(`CV: ${cv.title}\nReason: `)}`;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={change}>
       <DialogContent className="flex max-h-[92vh] flex-col gap-3 sm:max-w-4xl">
         <div className="pr-8">
           <DialogTitle className="leading-tight">{cv.title}</DialogTitle>
@@ -68,9 +80,10 @@ export function CvPreview({
 
         {open &&
           (small ? (
-            <PdfViewer url={file} title={cv.title} errorText={t("cvs.previewError")} />
+            <PdfViewer key={cv.id} url={file} title={cv.title} errorText={t("cvs.previewError")} />
           ) : (
             <iframe
+              key={cv.id}
               src={file}
               title={cv.title}
               className="h-[70vh] w-full rounded-lg border border-border bg-muted"
@@ -106,6 +119,33 @@ export function CvPreview({
             </a>
           </Button>
         </div>
+
+        {similar.length > 0 && (
+          <div className="flex flex-col gap-2 border-t border-border pt-3">
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              {t("cvs.similar")}
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {similar.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => setShownId(o.id)}
+                  className="flex min-w-0 cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2 text-left transition-colors hover:border-primary/40"
+                >
+                  <FileText className="size-4 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">{o.title}</span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {t(`cvs.field.${o.field}`)} · {t(`cvs.seniority.${o.seniority}`)}
+                      {o.technologies.length > 0 && ` · ${o.technologies.slice(0, 3).join(", ")}`}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

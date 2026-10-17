@@ -666,6 +666,7 @@ export const en = {
     newTab: "Open in New Tab",
     download: "Download",
     report: "Report",
+    similar: "Similar CVs",
     close: "Close",
     previewError: "Couldn’t show this CV here — open it in a new tab or download it.",
     disclaimer: "CVs are shared by their owners and aren’t verified by Resource Base. Use them as examples; copying someone’s CV or contacting its owner for spam isn’t allowed.",

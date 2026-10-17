@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 const MAX_TECH = 5;
 
 /** One CV in the directory: what it's for, who shared it, likes, and a link to the PDF. */
-export function CvCard({ cv }: { cv: CvListing }) {
+export function CvCard({ cv, pool }: { cv: CvListing; pool?: CvListing[] }) {
   const { t } = useTranslation();
   const { user, openAuth } = useAuth();
   const likes = useCvLikes();
@@ -94,7 +94,7 @@ export function CvCard({ cv }: { cv: CvListing }) {
           </Button>
         </div>
       </div>
-      {user && <CvPreview cv={cv} open={open} onOpenChange={setOpen} />}
+      {user && <CvPreview cv={cv} pool={pool} open={open} onOpenChange={setOpen} />}
     </article>
   );
 }

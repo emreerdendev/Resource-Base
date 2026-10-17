@@ -666,6 +666,7 @@ export const es = {
     newTab: "Abrir en una pestaña nueva",
     download: "Descargar",
     report: "Denunciar",
+    similar: "CV similares",
     close: "Cerrar",
     previewError: "No se pudo mostrar este CV aquí: ábrelo en una pestaña nueva o descárgalo.",
     disclaimer: "Los CV los comparten sus dueños y Resource Base no los verifica. Úsalos como ejemplo; copiar el CV de otra persona o contactar a su dueño con spam no está permitido.",

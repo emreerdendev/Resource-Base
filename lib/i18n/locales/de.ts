@@ -666,6 +666,7 @@ export const de = {
     newTab: "In neuem Tab öffnen",
     download: "Herunterladen",
     report: "Melden",
+    similar: "Ähnliche Lebensläufe",
     close: "Schließen",
     previewError: "Der Lebenslauf kann hier nicht angezeigt werden – öffne ihn in einem neuen Tab oder lade ihn herunter.",
     disclaimer: "Lebensläufe werden von ihren Inhaber:innen geteilt und von Resource Base nicht geprüft. Nutze sie als Beispiele; Kopieren oder Spam an die Inhaber:innen ist nicht erlaubt.",
