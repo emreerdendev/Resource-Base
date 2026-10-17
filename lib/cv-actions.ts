@@ -1,8 +1,9 @@
 "use server";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getSessionUser, requireUser } from "@/lib/authz";
 import { getDb } from "@/lib/db";
+import { recountLikes } from "@/lib/cv-like-count";
 import { cvLikes, cvs } from "@/lib/db/schema";
 import { overLimit } from "@/lib/rate-limit";
 
@@ -35,13 +36,7 @@ export async function toggleCvLike(
     return { liked: Boolean(existing), error: "rate_limited" };
 
   if (existing) {
-    await db.batch([
-      db.delete(cvLikes).where(own),
-      db
-        .update(cvs)
-        .set({ likeCount: sql`max(${cvs.likeCount} - 1, 0)` })
-        .where(eq(cvs.id, cvId)),
-    ]);
+    await db.batch([db.delete(cvLikes).where(own), recountLikes(db, cvId)]);
     return { liked: false };
   }
   const [cv] = await db
@@ -52,13 +47,11 @@ export async function toggleCvLike(
   if (!cv || cv.status !== "published" || cv.userId === me.id) return { liked: false, error: "invalid" };
   await db.batch([
     db.insert(cvLikes).values({ userId: me.id, cvId }).onConflictDoNothing(),
-    db
-      .update(cvs)
-      .set({ likeCount: sql`${cvs.likeCount} + 1` })
-      .where(eq(cvs.id, cvId)),
+    recountLikes(db, cvId),
   ]);
   return { liked: true };
 }
+
 
 export type MyCv = {
   id: string;

@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { cvs, user } from "@/lib/db/schema";
+import { cvLikes, cvs, user } from "@/lib/db/schema";
+import { recountLikes } from "@/lib/cv-like-count";
 import { cvBucket } from "@/lib/cv-files";
 import { deleteAvatarFile } from "@/lib/avatar";
 import { getAuth } from "@/lib/auth";
@@ -70,6 +71,8 @@ export async function POST(req: NextRequest) {
   const db = getDb();
   const [cv] = await db.select({ fileKey: cvs.fileKey }).from(cvs).where(eq(cvs.userId, userId)).limit(1);
   const [row] = await db.select({ image: user.image }).from(user).where(eq(user.id, userId)).limit(1);
+  // CVs this user liked: their counts drop once the likes cascade away.
+  const liked = await db.select({ cvId: cvLikes.cvId }).from(cvLikes).where(eq(cvLikes.userId, userId));
   try {
     await db.delete(user).where(eq(user.id, userId));
   } catch (err) {
@@ -78,6 +81,7 @@ export async function POST(req: NextRequest) {
   }
   if (cv) await cvBucket().delete(cv.fileKey).catch((err) => console.error("cv file delete failed", err));
   await deleteAvatarFile(row?.image);
+  for (const { cvId } of liked) await recountLikes(db, cvId).catch(() => {});
 
   // 3) Sign the now-orphaned session out (clears cookies).
   try {

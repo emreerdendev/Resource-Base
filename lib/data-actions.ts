@@ -50,7 +50,8 @@ export async function toggleFavorite(
   // Only published resources can be added, so the table (and the public
   // counts every visitor loads) can't fill with made-up ids.
   if (!(await isResourceId(resourceId))) return { favorited: false, error: "invalid" };
-  await db.insert(favorites).values({ userId: me.id, resourceId });
+  // A double click can race past the check above; the second insert is a no-op.
+  await db.insert(favorites).values({ userId: me.id, resourceId }).onConflictDoNothing();
   return { favorited: true };
 }
 
