@@ -164,6 +164,12 @@ export const fr = {
     subtitle: "Ajoute-la à l’annuaire. Chaque envoi est vérifié avant publication.",
     submit: "Ajouter une ressource",
     emptyPrompt: "Introuvable ? Ajoute-le pour que d’autres le trouvent aussi.",
+    cv: {
+      title: "Tu veux partager ton CV ?",
+      subtitle: "D’autres pourront voir à quoi ressemble un CV pour ton poste. Il est vérifié avant publication et seuls les utilisateurs connectés peuvent l’ouvrir.",
+      submit: "Partager ton CV",
+      emptyPrompt: "Partage le tien pour que d’autres s’en inspirent.",
+    },
   },
 
   command: {
@@ -557,7 +563,7 @@ export const fr = {
       popular: "Plus aimés",
     },
     empty: "Aucun CV ne correspond à tes filtres.",
-    emptyAll: "Aucun CV pour l’instant — sois le premier à partager le tien.",
+    emptyAll: "Aucun CV n’a encore été partagé.",
     loadError: "Impossible de charger les CV. Actualise la page.",
     signInToOpen: "Se connecter pour ouvrir",
     like: "Aimer ce CV",
@@ -608,6 +614,7 @@ export const fr = {
     close: "Fermer",
     previewError: "Impossible d’afficher ce CV ici — ouvre-le dans un nouvel onglet ou télécharge-le.",
     disclaimer: "Les CV sont partagés par leurs auteurs et ne sont pas vérifiés par Resource Base. Sers-t’en comme exemples ; copier le CV de quelqu’un ou contacter son auteur pour du spam est interdit.",
+    badge: "{{count}} CV",
   },
 
   myCv: {

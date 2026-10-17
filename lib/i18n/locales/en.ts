@@ -164,6 +164,12 @@ export const en = {
     subtitle: "Add it to the directory. Every submission is reviewed before it’s published.",
     submit: "Add a Resource",
     emptyPrompt: "Can’t find it? Add it so others can find it too.",
+    cv: {
+      title: "Want to share your CV?",
+      subtitle: "Others can see how a CV for your role looks. It’s reviewed before it’s listed, and only signed-in users can open it.",
+      submit: "Share Your CV",
+      emptyPrompt: "Share yours so others can learn from it.",
+    },
   },
 
   command: {
@@ -557,7 +563,7 @@ export const en = {
       popular: "Most Liked",
     },
     empty: "No CVs match your filters.",
-    emptyAll: "No CVs yet — be the first to share yours.",
+    emptyAll: "No CVs have been shared yet.",
     loadError: "Couldn’t load CVs. Please refresh the page.",
     signInToOpen: "Sign In to Open",
     like: "Like this CV",
@@ -608,6 +614,7 @@ export const en = {
     close: "Close",
     previewError: "Couldn’t show this CV here — open it in a new tab or download it.",
     disclaimer: "CVs are shared by their owners and aren’t verified by Resource Base. Use them as examples; copying someone’s CV or contacting its owner for spam isn’t allowed.",
+    badge: "{{count}} CVs",
   },
 
   myCv: {

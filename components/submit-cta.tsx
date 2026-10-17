@@ -3,12 +3,12 @@
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Building2, Plus, Sparkles } from "lucide-react";
+import { Building2, FileText, Plus, Sparkles, Upload } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
 /**
- * Invites visitors to contribute a resource or a company (and sign in if
+ * Invites visitors to contribute a resource, a company or their CV (and sign in if
  * needed). Two variants: a full "band" under the listings, and a compact
  * prompt for empty search results. Signed-out users get the auth modal first.
  */
@@ -18,29 +18,33 @@ export function SubmitCta({
   name,
 }: {
   variant?: "band" | "compact";
-  kind?: "resource" | "company";
+  kind?: "resource" | "company" | "cv";
   /** Prefills the company name (e.g. the search that found nothing). */
   name?: string;
 }) {
   const { t } = useTranslation();
   const { user, openAuth } = useAuth();
   const company = kind === "company";
-  const k = company ? "cta.company" : "cta";
+  const cv = kind === "cv";
+  const k = company ? "cta.company" : cv ? "cta.cv" : "cta";
   const href = company
     ? `/submit?type=company${name?.trim() ? `&name=${encodeURIComponent(name.trim())}` : ""}`
-    : "/submit";
+    : cv
+      ? "/profile/edit?tab=cv"
+      : "/submit";
+  const ButtonIcon = cv ? Upload : Plus;
 
   const cta = user ? (
     <Button asChild>
       <Link href={href}>
-        <Plus className="size-4" />
+        <ButtonIcon className="size-4" />
         {t(`${k}.submit`)}
       </Link>
     </Button>
   ) : (
     // Guests: open sign-in in place, then forward to /submit after auth.
     <Button onClick={() => openAuth(href)}>
-      <Plus className="size-4" />
+      <ButtonIcon className="size-4" />
       {t(`${k}.submit`)}
     </Button>
   );
@@ -62,7 +66,13 @@ export function SubmitCta({
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-          {company ? <Building2 className="size-5" /> : <Sparkles className="size-5" />}
+          {company ? (
+            <Building2 className="size-5" />
+          ) : cv ? (
+            <FileText className="size-5" />
+          ) : (
+            <Sparkles className="size-5" />
+          )}
         </span>
         <div>
           <p className="font-semibold tracking-tight">{t(`${k}.title`)}</p>

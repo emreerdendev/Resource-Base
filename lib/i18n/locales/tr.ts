@@ -164,6 +164,12 @@ export const tr = {
     subtitle: "Dizine ekle. Her gönderi yayınlanmadan önce incelenir.",
     submit: "Kaynak Ekle",
     emptyPrompt: "Bulamadın mı? Ekle, başkaları da bulabilsin.",
+    cv: {
+      title: "CV'ni paylaşmak ister misin?",
+      subtitle: "Başkaları senin rolün için bir CV'nin nasıl göründüğünü görebilir. Listelenmeden önce incelenir ve yalnızca giriş yapan kullanıcılar açabilir.",
+      submit: "CV'ni Paylaş",
+      emptyPrompt: "Seninkini paylaş, başkaları da faydalansın.",
+    },
   },
 
   command: {
@@ -555,7 +561,7 @@ export const tr = {
       popular: "En Çok Beğenilen",
     },
     empty: "Filtrelerine uyan CV yok.",
-    emptyAll: "Henüz CV yok — ilk paylaşan sen ol.",
+    emptyAll: "Henüz paylaşılmış bir CV yok.",
     loadError: "CV'ler yüklenemedi. Lütfen sayfayı yenile.",
     signInToOpen: "Açmak için Giriş Yap",
     like: "Bu CV'yi beğen",
@@ -606,6 +612,7 @@ export const tr = {
     close: "Kapat",
     previewError: "CV burada gösterilemedi — yeni sekmede aç veya indir.",
     disclaimer: "CV'ler sahipleri tarafından paylaşılır ve Resource Base tarafından doğrulanmaz. Örnek olarak kullan; birinin CV'sini kopyalamak veya sahibine spam amaçlı ulaşmak yasaktır.",
+    badge: "{{count}} CV",
   },
 
   myCv: {

@@ -164,6 +164,12 @@ export const de = {
     subtitle: "Füge sie dem Verzeichnis hinzu. Jede Einreichung wird vor der Veröffentlichung geprüft.",
     submit: "Ressource hinzufügen",
     emptyPrompt: "Nicht gefunden? Füge es hinzu, damit andere es auch finden.",
+    cv: {
+      title: "Möchtest du deinen Lebenslauf teilen?",
+      subtitle: "Andere sehen, wie ein Lebenslauf für deine Rolle aussieht. Er wird vor dem Listen geprüft und nur angemeldete Nutzer:innen können ihn öffnen.",
+      submit: "Lebenslauf teilen",
+      emptyPrompt: "Teile deinen, damit andere davon lernen können.",
+    },
   },
 
   command: {
@@ -557,7 +563,7 @@ export const de = {
       popular: "Meiste Likes",
     },
     empty: "Keine Lebensläufe passen zu deinen Filtern.",
-    emptyAll: "Noch keine Lebensläufe – teile als Erste:r deinen.",
+    emptyAll: "Es wurden noch keine Lebensläufe geteilt.",
     loadError: "Lebensläufe konnten nicht geladen werden. Bitte lade die Seite neu.",
     signInToOpen: "Zum Öffnen anmelden",
     like: "Diesen Lebenslauf liken",
@@ -608,6 +614,7 @@ export const de = {
     close: "Schließen",
     previewError: "Der Lebenslauf kann hier nicht angezeigt werden – öffne ihn in einem neuen Tab oder lade ihn herunter.",
     disclaimer: "Lebensläufe werden von ihren Inhaber:innen geteilt und von Resource Base nicht geprüft. Nutze sie als Beispiele; Kopieren oder Spam an die Inhaber:innen ist nicht erlaubt.",
+    badge: "{{count}} Lebensläufe",
   },
 
   myCv: {
