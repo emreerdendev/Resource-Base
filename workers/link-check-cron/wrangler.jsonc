@@ -4,7 +4,11 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-04-01",
   "compatibility_flags": ["nodejs_compat"],
-  // Daily at 06:00 UTC — same schedule as the old Vercel cron.
+  // Cron only: no public URL to call it from.
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  // Daily at 06:00 UTC.
   "triggers": {
     "crons": ["0 6 * * *"]
   },

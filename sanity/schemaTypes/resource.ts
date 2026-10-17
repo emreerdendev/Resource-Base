@@ -131,6 +131,14 @@ export const resource = defineType({
     defineField({ name: 'lastCheckedAt', type: 'datetime', group: 'health' }),
     defineField({ name: 'httpStatus', type: 'number', group: 'health' }),
     defineField({
+      name: 'linkFailures',
+      title: 'Failed checks in a row',
+      type: 'number',
+      group: 'health',
+      readOnly: true,
+      description: 'Set by the daily link checker; the link is marked broken at 2.',
+    }),
+    defineField({
       name: 'manualOverride',
       title: 'Manual override (skip auto-checker)',
       type: 'boolean',

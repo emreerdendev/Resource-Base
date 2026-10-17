@@ -1,7 +1,8 @@
 import { createClient } from "@sanity/client";
 
 // Standalone Cloudflare Worker: daily link-health check over Sanity resources,
-// plus a cleanup of rows nothing reads anymore in the app database.
+// a cleanup of rows nothing reads anymore in the app database, and pruning of
+// old decided submissions from Sanity.
 // Runs on a Cron Trigger (scheduled handler) — kept separate from the main
 // OpenNext app so that app stays a clean fetch-only worker. Writes results
 // (linkStatus / lastCheckedAt / httpStatus) back to Sanity. No user auth.
@@ -15,6 +16,8 @@ interface Env {
 }
 
 const BATCH = 80;
+/** Consecutive failed checks before a link counts as broken. */
+const BROKEN_AFTER = 2;
 const CONCURRENCY = 10;
 const TIMEOUT_MS = 9000;
 const UA =
@@ -69,9 +72,11 @@ async function runLinkCheck(env: Env): Promise<void> {
     useCdn: false,
   });
 
-  const resources = await client.fetch<{ _id: string; url: string }[]>(
+  const resources = await client.fetch<
+    { _id: string; url: string; linkStatus?: string; linkFailures?: number }[]
+  >(
     `*[_type == "resource" && manualOverride != true]
-       | order(coalesce(lastCheckedAt, "1970-01-01") asc)[0...$batch]{ _id, url }`,
+       | order(coalesce(lastCheckedAt, "1970-01-01") asc)[0...$batch]{ _id, url, linkStatus, linkFailures }`,
     { batch: BATCH },
   );
 
@@ -84,9 +89,21 @@ async function runLinkCheck(env: Env): Promise<void> {
     while (i < resources.length) {
       const r = resources[i++];
       const { status, httpStatus } = await check(r.url);
+      // A single failed check is often a timeout or a site having a bad
+      // moment. Only the second failure in a row marks a link broken (which
+      // the site shows, and which refreshes the cached pages); until then it
+      // keeps its previous status.
+      const failures = status === "broken" ? (r.linkFailures ?? 0) + 1 : 0;
+      const shown: Status =
+        status === "broken" && failures < BROKEN_AFTER
+          ? r.linkStatus === "broken"
+            ? "broken"
+            : "suspect"
+          : status;
       tx.patch(r._id, {
         set: {
-          linkStatus: status,
+          linkStatus: shown,
+          linkFailures: failures,
           lastCheckedAt: now,
           ...(httpStatus ? { httpStatus } : {}),
         },
@@ -121,8 +138,39 @@ async function cleanupDatabase(env: Env): Promise<void> {
     env.DB.prepare(
       "DELETE FROM notifications WHERE read_at IS NOT NULL AND created_at < ?",
     ).bind(now - NOTIFICATION_RETENTION_DAYS * DAY_SEC),
+    // Expired abuse-limit windows (lib/rate-limit.ts).
+    env.DB.prepare("DELETE FROM usage_counters WHERE expires_at < ?").bind(now),
   ]);
   console.log(`cleanup: deleted ${results.map((r) => r.meta.changes).join("/")} rows`);
+}
+
+/** Decided submissions are removed from Sanity after this many days. */
+const SUBMISSION_RETENTION_DAYS = 90;
+
+/**
+ * Keeps the Sanity dataset under the free plan's document limit: approved and
+ * rejected submissions are only history once decided (the app keeps its own
+ * copy in D1 for "My Submissions"), so old ones are deleted. A few dozen per
+ * run is plenty.
+ */
+async function pruneSubmissions(env: Env): Promise<void> {
+  const client = createClient({
+    projectId: env.SANITY_PROJECT_ID,
+    dataset: env.SANITY_DATASET,
+    apiVersion: env.SANITY_API_VERSION,
+    token: env.SANITY_API_WRITE_TOKEN,
+    useCdn: false,
+  });
+  const cutoff = new Date(Date.now() - SUBMISSION_RETENTION_DAYS * DAY_SEC * 1000).toISOString();
+  const ids = await client.fetch<string[]>(
+    `*[_type == "submission" && status in ["approved", "rejected"] && _updatedAt < $cutoff][0...50]._id`,
+    { cutoff },
+  );
+  if (!ids.length) return;
+  const tx = client.transaction();
+  for (const id of ids) tx.delete(id);
+  await tx.commit({ visibility: "async" });
+  console.log(`prune: deleted ${ids.length} old submissions`);
 }
 
 export default {
@@ -132,6 +180,9 @@ export default {
     );
     ctx.waitUntil(
       cleanupDatabase(env).catch((err) => console.error("cleanup failed", err)),
+    );
+    ctx.waitUntil(
+      pruneSubmissions(env).catch((err) => console.error("prune failed", err)),
     );
   },
 } satisfies ExportedHandler<Env>;
