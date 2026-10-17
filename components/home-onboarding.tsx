@@ -94,8 +94,8 @@ export function HomeOnboarding({
           // Signed in: straight back to your own lists.
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             {[
-              { href: "/applications", icon: BriefcaseBusiness, label: t("home.continueTracking") },
               { href: "/favorites", icon: Star, label: t("nav.favorites") },
+              { href: "/applications", icon: BriefcaseBusiness, label: t("nav.applications") },
               { href: "/liked-cvs", icon: Heart, label: t("nav.likedCvs") },
             ].map(({ href, icon: Icon, label }) => (
               <Link

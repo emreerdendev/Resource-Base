@@ -64,7 +64,6 @@ export const en = {
     onboardTitleLead: "Find where to apply —",
     onboardTitleHighlight: "and what to learn.",
     onboardSubtitle: "Resource Base brings together a directory of companies with exactly how to apply to each, hand-picked resources for development, design and more, and CVs shared by the community.",
-    continueTracking: "Continue to My Applications",
     companiesStat: "{{count}} companies",
     companiesBody: "Application emails, career pages and LinkedIn for every company. Save them and track each application from “saved” to “offer”.",
     resourcesStat: "{{count}}+ resources · {{categories}} categories",

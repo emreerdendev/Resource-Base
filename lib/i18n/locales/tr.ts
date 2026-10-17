@@ -64,7 +64,6 @@ export const tr = {
     onboardTitleLead: "Nereye başvuracağını bul —",
     onboardTitleHighlight: "ne öğreneceğini de.",
     onboardSubtitle: "Resource Base; her birine nasıl başvurulacağıyla birlikte bir şirket dizinini, yazılım, tasarım ve daha fazlası için özenle seçilmiş kaynakları ve topluluğun paylaştığı CV'leri bir araya getirir.",
-    continueTracking: "Başvurularıma Devam Et",
     companiesStat: "{{count}} şirket",
     companiesBody: "Her şirket için başvuru e-postaları, kariyer sayfaları ve LinkedIn. Şirketleri kaydet, her başvuruyu “kaydedildi”den “teklif”e kadar takip et.",
     resourcesStat: "{{count}}+ kaynak · {{categories}} kategori",

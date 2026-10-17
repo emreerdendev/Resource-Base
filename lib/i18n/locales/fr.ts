@@ -64,7 +64,6 @@ export const fr = {
     onboardTitleLead: "Trouvez où postuler —",
     onboardTitleHighlight: "et quoi apprendre.",
     onboardSubtitle: "Resource Base réunit un annuaire d’entreprises avec la façon exacte de postuler chez chacune, des ressources choisies pour le développement, le design et plus encore, et des CV partagés par la communauté.",
-    continueTracking: "Continuer vers mes candidatures",
     companiesStat: "{{count}} entreprises",
     companiesBody: "E-mails de candidature, pages carrières et LinkedIn pour chaque entreprise. Enregistrez-les et suivez chaque candidature de « enregistrée » à « offre ».",
     resourcesStat: "{{count}}+ ressources · {{categories}} catégories",

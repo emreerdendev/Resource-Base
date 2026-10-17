@@ -64,7 +64,6 @@ export const de = {
     onboardTitleLead: "Finde, wo du dich bewirbst —",
     onboardTitleHighlight: "und was du lernst.",
     onboardSubtitle: "Resource Base vereint ein Unternehmensverzeichnis mit genau dem richtigen Bewerbungsweg für jedes Unternehmen, handverlesene Ressourcen für Entwicklung, Design und mehr sowie Lebensläufe aus der Community.",
-    continueTracking: "Weiter zu meinen Bewerbungen",
     companiesStat: "{{count}} Unternehmen",
     companiesBody: "Bewerbungs-E-Mails, Karriereseiten und LinkedIn für jedes Unternehmen. Speichere sie und verfolge jede Bewerbung von „gespeichert“ bis „Angebot“.",
     resourcesStat: "{{count}}+ Ressourcen · {{categories}} Kategorien",
