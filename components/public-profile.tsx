@@ -1,13 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
-import {
-  DribbbleIcon,
-  GithubIcon,
-  InstagramIcon,
-  LinkedinIcon,
-  XIcon,
-} from "@/components/brand-icons";
+import { SOCIAL_ICONS } from "@/components/social-icons";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
 import { useCvLikes } from "@/components/cv-likes-provider";
 import { useFavorites } from "@/components/favorites-provider";
@@ -17,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { contributorTier } from "@/lib/contributor-tier";
 import { initial } from "@/lib/initial";
+import { socialEntries } from "@/lib/social-links";
 import { fetchPublicEmail } from "@/lib/profile";
 import { useSubmissions } from "@/lib/submissions";
 import type { PublicProfile, Resource } from "@/lib/types";
@@ -28,7 +23,6 @@ import {
   BriefcaseBusiness,
   Eye,
   EyeOff,
-  Globe,
   Heart,
   Mail,
   Pencil,
@@ -155,36 +149,14 @@ export function PublicProfileView({
           </p>
         )}
         <div className="flex flex-wrap items-center justify-center gap-2">
-          {profile.portfolio_url && (
-            <SocialLink href={profile.portfolio_url} label="Portfolio">
-              <Globe className="size-4" />
-            </SocialLink>
-          )}
-          {profile.linkedin_url && (
-            <SocialLink href={profile.linkedin_url} label="LinkedIn">
-              <LinkedinIcon />
-            </SocialLink>
-          )}
-          {profile.github_url && (
-            <SocialLink href={profile.github_url} label="GitHub">
-              <GithubIcon />
-            </SocialLink>
-          )}
-          {profile.twitter_url && (
-            <SocialLink href={profile.twitter_url} label="X">
-              <XIcon />
-            </SocialLink>
-          )}
-          {profile.instagram_url && (
-            <SocialLink href={profile.instagram_url} label="Instagram">
-              <InstagramIcon />
-            </SocialLink>
-          )}
-          {profile.dribbble_url && (
-            <SocialLink href={profile.dribbble_url} label="Dribbble">
-              <DribbbleIcon />
-            </SocialLink>
-          )}
+          {socialEntries(profile.social_links).map(([p, href]) => {
+            const Icon = SOCIAL_ICONS[p.id];
+            return (
+              <SocialLink key={p.id} href={href} label={p.id === "website" ? t("profile.website") : p.label}>
+                <Icon className="size-4" />
+              </SocialLink>
+            );
+          })}
         </div>
       </div>
 

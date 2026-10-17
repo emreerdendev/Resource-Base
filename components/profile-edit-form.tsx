@@ -2,14 +2,16 @@
 
 import { useId, useState } from "react";
 import { toast } from "sonner";
-import { AtSign, Eye, EyeOff, Globe, Loader2, Mail, User } from "lucide-react";
+import { AtSign, Eye, EyeOff, Loader2, Mail, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { LinkedinIcon } from "@/components/brand-icons";
+import { ProfileAvatarField } from "@/components/profile-avatar-field";
+import { ProfileLinksField, linkError, type LinkRow } from "@/components/profile-links-field";
 import { IconInput } from "@/components/ui/icon-input";
 import { FormField } from "@/components/form-field";
-import { normalizeWebUrl } from "@/lib/company-input";
+import { normalizeSocialLink, socialEntries, type SocialLinks, type SocialPlatformId } from "@/lib/social-links";
+import type { Profile } from "@/lib/types";
 import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { FormSkeleton } from "@/components/skeletons";
 import { cn } from "@/lib/utils";
@@ -19,52 +21,36 @@ type Fields = {
   username: string;
   full_name: string;
   bio: string;
-  portfolio_url: string;
-  github_url: string;
-  twitter_url: string;
-  instagram_url: string;
-  dribbble_url: string;
-  linkedin_url: string;
+  links: LinkRow[];
   show_email: boolean;
 };
 
-function fieldsFromProfile(p: {
-  username?: string | null;
-  full_name?: string | null;
-  bio?: string | null;
-  portfolio_url?: string | null;
-  github_url?: string | null;
-  twitter_url?: string | null;
-  instagram_url?: string | null;
-  dribbble_url?: string | null;
-  linkedin_url?: string | null;
-  show_email?: boolean | null;
-}): Fields {
+function fieldsFromProfile(p: Profile): Fields {
   return {
     username: p.username ?? "",
     full_name: p.full_name ?? "",
     bio: p.bio ?? "",
-    portfolio_url: p.portfolio_url ?? "",
-    github_url: p.github_url ?? "",
-    twitter_url: p.twitter_url ?? "",
-    instagram_url: p.instagram_url ?? "",
-    dribbble_url: p.dribbble_url ?? "",
-    linkedin_url: p.linkedin_url ?? "",
+    links: socialEntries(p.social_links).map(([platform, url]) => ({ id: platform.id, value: url })),
     show_email: !!p.show_email,
   };
 }
 
-type UrlKey = "portfolio_url" | "linkedin_url" | "github_url" | "twitter_url" | "instagram_url" | "dribbble_url";
+/** Links as saved: valid ones by platform, empty rows dropped. */
+function linksObject(rows: LinkRow[]): SocialLinks {
+  const out: SocialLinks = {};
+  for (const r of rows) {
+    const v = r.value.trim() && normalizeSocialLink(r.id, r.value);
+    if (v) out[r.id] = v;
+  }
+  return out;
+}
 
-/** [field, label (or "portfolio" → translated), icon, placeholder] */
-const URL_FIELDS: [UrlKey, string, React.ComponentType<{ className?: string }>, string][] = [
-  ["portfolio_url", "portfolio", Globe, "https://…"],
-  ["linkedin_url", "LinkedIn", LinkedinIcon, "https://linkedin.com/in/…"],
-  ["github_url", "GitHub", Globe, "https://github.com/…"],
-  ["twitter_url", "X (Twitter)", Globe, "https://x.com/…"],
-  ["instagram_url", "Instagram", Globe, "https://instagram.com/…"],
-  ["dribbble_url", "Dribbble", Globe, "https://dribbble.com/…"],
-];
+const sameLinks = (a: LinkRow[], b: LinkRow[]) => {
+  const x = linksObject(a);
+  const y = linksObject(b);
+  const keys = new Set([...Object.keys(x), ...Object.keys(y)]) as Set<keyof SocialLinks>;
+  return [...keys].every((k) => x[k] === y[k]) && a.length === b.length;
+};
 
 export function ProfileEditForm() {
   const { t } = useTranslation();
@@ -90,31 +76,37 @@ export function ProfileEditForm() {
     setFields((f) => (f ? { ...f, [key]: value } : f));
 
   // Same rules lib/profile-actions.ts enforces.
-  const urlErr = (v = "") => (v.trim() && !normalizeWebUrl(v) ? t("validation.url") : null);
   const errors = {
     username: !fields?.username.trim()
       ? t("validation.required")
       : /^[a-zA-Z0-9_-]{3,20}$/.test(fields.username.trim())
         ? null
         : t("validation.username"),
-    ...Object.fromEntries(URL_FIELDS.map(([k]) => [k, urlErr(fields?.[k])])),
-  } as Record<"username" | UrlKey, string | null>;
+  };
   const form = useFormErrors(errors);
+  // Link rows show their error once left (or after a save attempt).
+  const [touchedLinks, setTouchedLinks] = useState<Set<SocialPlatformId>>(new Set());
+  const [attempted, setAttempted] = useState(false);
+  const linksInvalid = (fields?.links ?? []).some((r) => linkError(r, t));
 
   if (loading || !profile || !fields || !baseline) {
-    return <FormSkeleton fields={9} tall={[3]} />;
+    return <FormSkeleton fields={6} tall={[3]} />;
   }
 
   // Dirty when any field differs from the loaded baseline; valid when the
   // (required) username clears the same constraints the input enforces.
-  const dirty = (Object.keys(fields) as (keyof Fields)[]).some(
-    (k) => fields[k] !== baseline[k],
-  );
+  const dirty =
+    fields.username !== baseline.username ||
+    fields.full_name !== baseline.full_name ||
+    fields.bio !== baseline.bio ||
+    fields.show_email !== baseline.show_email ||
+    !sameLinks(fields.links, baseline.links);
   const canSave = dirty && !pending;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!fields || !canSave || !form.check(e.currentTarget)) return;
+    setAttempted(true);
+    if (!fields || !canSave || !form.check(e.currentTarget) || linksInvalid) return;
     setPending(true);
     try {
       // Username goes through the validated RPC if it changed.
@@ -138,12 +130,7 @@ export function ProfileEditForm() {
       const { error } = await update({
         full_name: fields.full_name || null,
         bio: fields.bio || null,
-        portfolio_url: fields.portfolio_url || null,
-        github_url: fields.github_url || null,
-        twitter_url: fields.twitter_url || null,
-        instagram_url: fields.instagram_url || null,
-        dribbble_url: fields.dribbble_url || null,
-        linkedin_url: fields.linkedin_url || null,
+        social_links: linksObject(fields.links),
         show_email: fields.show_email,
       });
       if (error)
@@ -166,6 +153,7 @@ export function ProfileEditForm() {
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
+      <ProfileAvatarField />
 
       {/* Email is read-only (managed by auth) with a public-visibility toggle. */}
       <Field label={t("profile.email")}>
@@ -212,24 +200,12 @@ export function ProfileEditForm() {
       <FormField id={`${id}-bio`} label={t("profile.bio")} counter={`${fields.bio.length}/280`}>
         <Textarea id={`${id}-bio`} rows={3} value={fields.bio} onChange={(e) => setField("bio", e.target.value)} maxLength={280} />
       </FormField>
-      {URL_FIELDS.map(([key, label, icon, placeholder]) => (
-        <FormField key={key} id={`${id}-${key}`} label={label === "portfolio" ? t("profile.portfolio") : label} error={form.show(key)}>
-          <IconInput
-            {...fieldProps(`${id}-${key}`, form.show(key))}
-            icon={icon}
-            inputMode="url"
-            maxLength={200}
-            value={fields[key]}
-            onChange={(e) => setField(key, e.target.value)}
-            onBlur={() => {
-              form.touch(key);
-              const n = fields[key].trim() && normalizeWebUrl(fields[key]);
-              if (n) setField(key, n);
-            }}
-            placeholder={placeholder}
-          />
-        </FormField>
-      ))}
+      <ProfileLinksField
+        rows={fields.links}
+        onChange={(links) => setField("links", links)}
+        showErrors={(pid) => attempted || touchedLinks.has(pid)}
+        onTouch={(pid) => setTouchedLinks((s) => new Set(s).add(pid))}
+      />
 
       <Button type="submit" disabled={!canSave} size="lg" className="w-full">
         {pending && <Loader2 className="size-4 animate-spin" />}

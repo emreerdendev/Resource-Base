@@ -7,7 +7,7 @@ import { user } from "@/lib/db/schema";
 import { getAuth } from "@/lib/auth";
 import { getSessionUser, requireFreshUser, requireUser } from "@/lib/authz";
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
-import { normalizeWebUrl } from "@/lib/company-input";
+import { cleanSocialLinks } from "@/lib/social-links";
 
 const PW_MIN = 8;
 const PW_MAX = 64;
@@ -47,23 +47,7 @@ export async function setMyPassword(
 
 const USERNAME_RE = /^[a-z0-9_-]{3,20}$/;
 
-const EDITABLE = [
-  "fullName",
-  "bio",
-  "portfolioUrl",
-  "githubUrl",
-  "twitterUrl",
-  "instagramUrl",
-  "dribbbleUrl",
-  "linkedinUrl",
-  "showEmail",
-] as const;
-type EditableKey = (typeof EDITABLE)[number];
-export type EditableProfileInput = Partial<
-  Record<Exclude<EditableKey, "showEmail">, string | null> & {
-    showEmail: boolean;
-  }
->;
+const EDITABLE = ["fullName", "bio", "socialLinks", "showEmail"] as const;
 
 /** Validate + set a unique username (replaces set_username RPC). Own row only. */
 export async function setUsername(
@@ -108,12 +92,6 @@ export async function getMyProfile() {
 const MAX_LEN: Record<string, number> = {
   fullName: 60,
   bio: 280,
-  portfolioUrl: 200,
-  githubUrl: 200,
-  twitterUrl: 200,
-  instagramUrl: 200,
-  dribbbleUrl: 200,
-  linkedinUrl: 200,
 };
 
 /** Update editable profile fields (own only). Caps lengths server-side. */
@@ -132,14 +110,17 @@ export async function updateProfile(
       patch[key] = raw;
       continue;
     }
-    if (raw !== null && typeof raw !== "string") return { error: "invalid" };
-    let v = raw?.trim() || null;
-    if (v && v.length > MAX_LEN[key]) return { error: "too_long" };
-    // Links render as <a href> on the public profile: http(s) only.
-    if (v && key.endsWith("Url")) {
-      v = normalizeWebUrl(v);
-      if (!v) return { error: "invalid_url" };
+    // Links render as <a href> on the public profile: known platforms only,
+    // each a valid http(s) link on that platform's own domain.
+    if (key === "socialLinks") {
+      const links = cleanSocialLinks(raw);
+      if (links === "invalid") return { error: "invalid_url" };
+      patch[key] = Object.keys(links).length ? links : null;
+      continue;
     }
+    if (raw !== null && typeof raw !== "string") return { error: "invalid" };
+    const v = raw?.trim() || null;
+    if (v && v.length > MAX_LEN[key]) return { error: "too_long" };
     patch[key] = v;
   }
   if (Object.keys(patch).length === 0) return { error: null };
@@ -157,12 +138,7 @@ const PUBLIC_COLUMNS = {
   full_name: user.fullName,
   avatar_url: user.image,
   bio: user.bio,
-  portfolio_url: user.portfolioUrl,
-  github_url: user.githubUrl,
-  twitter_url: user.twitterUrl,
-  instagram_url: user.instagramUrl,
-  dribbble_url: user.dribbbleUrl,
-  linkedin_url: user.linkedinUrl,
+  social_links: user.socialLinks,
   show_email: user.showEmail,
 } as const;
 

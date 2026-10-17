@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import type { CompanyEditFields } from "@/lib/company-edit";
+import type { SocialLinks } from "@/lib/social-links";
 import {
   integer,
   primaryKey,
@@ -33,12 +34,8 @@ export const user = sqliteTable(
     username: text("username"),
     fullName: text("full_name"),
     bio: text("bio"),
-    portfolioUrl: text("portfolio_url"),
-    githubUrl: text("github_url"),
-    twitterUrl: text("twitter_url"),
-    instagramUrl: text("instagram_url"),
-    dribbbleUrl: text("dribbble_url"),
-    linkedinUrl: text("linkedin_url"),
+    /** Profile links by platform (lib/social-links.ts) — one JSON object. */
+    socialLinks: text("social_links", { mode: "json" }).$type<SocialLinks>(),
     showEmail: integer("show_email", { mode: "boolean" })
       .notNull()
       .default(false),

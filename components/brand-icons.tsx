@@ -76,3 +76,33 @@ export function LinkedinIcon({ className = "size-4" }: { className?: string }) {
     </svg>
   );
 }
+
+export function CodepenIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+      <line x1="12" x2="12" y1="22" y2="15.5" />
+      <polyline points="22 8.5 12 15.5 2 8.5" />
+      <polyline points="2 15.5 12 8.5 22 15.5" />
+      <line x1="12" x2="12" y1="2" y2="8.5" />
+    </svg>
+  );
+}
+
+/** Single-colour GitLab mark, to sit with the other monochrome profile links. */
+export function GitlabMonoIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg fill="currentColor" viewBox="70 95 214 192" className={className} aria-hidden="true">
+      <path d="M282.83 170.73l-.27-.69-26.14-68.22a6.81 6.81 0 00-2.69-3.24 7 7 0 00-8 .43 7 7 0 00-2.32 3.52l-17.65 54H154.29l-17.65-54a6.86 6.86 0 00-2.32-3.53 7 7 0 00-8-.43 6.87 6.87 0 00-2.69 3.24L97.44 170l-.26.69-26.61 69a4.83 4.83 0 001.75 5.61l.13.1.36.26 39.59 29.65 19.59 14.82 11.93 9a8.070 8.070 0 009.78 0l11.94-9 19.58-14.82 39.83-29.82.1-.08a4.84 4.84 0 001.75-5.6z" />
+    </svg>
+  );
+}

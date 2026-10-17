@@ -22,12 +22,7 @@ export type EditableProfile = Pick<
   Profile,
   | "full_name"
   | "bio"
-  | "portfolio_url"
-  | "github_url"
-  | "twitter_url"
-  | "instagram_url"
-  | "dribbble_url"
-  | "linkedin_url"
+  | "social_links"
   | "show_email"
 >;
 
@@ -42,12 +37,7 @@ function toProfile(row: DbProfile, email: string | null): Profile {
     full_name: row.fullName,
     avatar_url: row.image,
     bio: row.bio,
-    portfolio_url: row.portfolioUrl,
-    github_url: row.githubUrl,
-    twitter_url: row.twitterUrl,
-    instagram_url: row.instagramUrl,
-    dribbble_url: row.dribbbleUrl,
-    linkedin_url: row.linkedinUrl,
+    social_links: row.socialLinks,
     show_email: row.showEmail,
   } as Profile;
 }
@@ -56,12 +46,7 @@ function toProfile(row: DbProfile, email: string | null): Profile {
 const KEY_MAP: Record<keyof EditableProfile, string> = {
   full_name: "fullName",
   bio: "bio",
-  portfolio_url: "portfolioUrl",
-  github_url: "githubUrl",
-  twitter_url: "twitterUrl",
-  instagram_url: "instagramUrl",
-  dribbble_url: "dribbbleUrl",
-  linkedin_url: "linkedinUrl",
+  social_links: "socialLinks",
   show_email: "showEmail",
 };
 

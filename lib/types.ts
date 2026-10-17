@@ -1,6 +1,7 @@
 /** Shapes returned by the GROQ projections in sanity/lib/queries.ts. */
 import type { ApplicationChannel, City, Sector, WorkModel } from './company-taxonomy'
 import type { CompanyEditFields } from './company-edit'
+import type { SocialLinks } from './social-links'
 
 export type LinkStatus = 'ok' | 'broken' | 'redirect' | 'suspect' | 'unchecked'
 export type Pricing = 'free' | 'freemium' | 'paid'
@@ -14,12 +15,8 @@ export interface PublicProfile {
   full_name: string | null
   avatar_url: string | null
   bio: string | null
-  portfolio_url: string | null
-  github_url: string | null
-  twitter_url: string | null
-  instagram_url: string | null
-  dribbble_url: string | null
-  linkedin_url: string | null
+  /** Profile links by platform (lib/social-links.ts). */
+  social_links: SocialLinks | null
   /** Whether the user opted to show their email publicly. */
   show_email: boolean
 }
