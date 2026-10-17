@@ -47,6 +47,6 @@ export const config = {
   // Run on everything except static assets, the Studio, the auth API
   // (Better Auth manages its own), and the cron route.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|studio|api/auth|api/cron|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

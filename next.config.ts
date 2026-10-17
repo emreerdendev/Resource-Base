@@ -111,6 +111,8 @@ const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
 ];
 
+const STUDIO_URL = "https://resourcebase.sanity.studio";
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -118,11 +120,10 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    // Apply to everything except the Sanity Studio, which needs a looser CSP
-    // (it loads its own scripts/iframes/eval and manages its own security).
+    // Apply to everything except CV files, which get their own (below).
     return [
       {
-        source: "/((?!studio|api/cv/|api/cv$).*)",
+        source: "/((?!api/cv/|api/cv$).*)",
         headers: securityHeaders,
       },
       // CV PDFs: framed only by this site (the CV preview). A page CSP here
@@ -147,6 +148,8 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // The Studio moved to Sanity's free hosting.
+      { source: "/studio/:path*", destination: `${STUDIO_URL}/:path*`, permanent: false },
       // Old profile links → /@username (the editor keeps /profile/edit).
       {
         source: "/profile/:username((?!edit$)[^/]+)",

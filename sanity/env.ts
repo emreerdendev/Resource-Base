@@ -18,9 +18,11 @@ export const dataset = assertValue(
   'Missing environment variable: NEXT_PUBLIC_SANITY_DATASET'
 )
 
+// Public, non-secret; the fallback lets `sanity deploy` run without env files.
 export const projectId = assertValue(
   process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||
-    process.env.SANITY_STUDIO_PROJECT_ID,
+    process.env.SANITY_STUDIO_PROJECT_ID ||
+    '77o1dw6w',
   'Missing environment variable: NEXT_PUBLIC_SANITY_PROJECT_ID'
 )
 
