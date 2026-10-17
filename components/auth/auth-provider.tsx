@@ -8,11 +8,13 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { authClient, useSession } from "@/lib/auth-client";
+import { clearAuthHint, hasAuthHint, subscribeAuthHint } from "@/lib/auth-hint";
 import { AuthDialog, isSafePath } from "@/components/auth/auth-dialog";
 import { isProtectedPage } from "@/lib/protected-routes";
 
@@ -52,11 +54,36 @@ export function useAuth() {
   return ctx;
 }
 
+type SessionState = { session: AuthSession | null; isPending: boolean };
+
+/**
+ * Mounts Better Auth's session hook (which fetches /api/auth/get-session) and
+ * reports it upward. Only rendered when the "signed in" hint cookie is set, so
+ * signed-out visitors make no session request at all.
+ */
+function SessionBridge({ onChange }: { onChange: (s: SessionState) => void }) {
+  const { data, isPending } = useSession();
+  useEffect(() => {
+    onChange({ session: data ?? null, isPending });
+  }, [data, isPending, onChange]);
+  return null;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslation();
-  const { data: session, isPending } = useSession();
+  // false on the server and during hydration, then the real cookie.
+  const hinted = useSyncExternalStore(subscribeAuthHint, hasAuthHint, () => false);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const [bridged, setBridged] = useState<SessionState>({ session: null, isPending: true });
+  const session = hinted ? bridged.session : null;
+  // Pending until hydrated; then only while a hinted session is loading.
+  const isPending = !hydrated || (hinted && bridged.isPending);
   const user = session?.user ?? null;
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -175,6 +202,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     await authClient.signOut();
+    clearAuthHint();
+    setBridged({ session: null, isPending: true });
     router.refresh();
   }, [router]);
 
@@ -191,6 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
+      {hinted && <SessionBridge onChange={setBridged} />}
       {children}
       <AuthDialog
         open={dialogOpen}

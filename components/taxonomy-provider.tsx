@@ -12,11 +12,14 @@ const TaxonomyContext = createContext<TaxonomyValue>({ ...EMPTY, load: () => {} 
 
 /**
  * All categories + tags, so taxonomy-fix editors can offer existing options.
- * Loaded on first use from the edge-cached /api/taxonomy, not with every page.
+ * Loaded on first use from the edge-cached /api/taxonomy, not with every page;
+ * pass `active` false while the UI that needs it is closed.
  */
-export function useTaxonomy(): TaxonomyData {
+export function useTaxonomy(active = true): TaxonomyData {
   const { load, categories, tags } = useContext(TaxonomyContext);
-  useEffect(load, [load]);
+  useEffect(() => {
+    if (active) load();
+  }, [active, load]);
   return { categories, tags };
 }
 

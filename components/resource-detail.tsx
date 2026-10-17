@@ -46,12 +46,13 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
   const { get: getFavorites } = useFavoriteCounts();
   const { register, get: getContributor } = useContributors();
   const { user, openAuth } = useAuth();
-  const { categories: allCats, tags: allTags } = useTaxonomy();
   const counted = useRef(false);
   const [copied, setCopied] = useState(false);
   // Taxonomy/description suggestion (account-only), mirroring the modal flow.
   const [taxOpen, setTaxOpen] = useState(false);
   const [taxViewOpen, setTaxViewOpen] = useState(false);
+  // Only the pending-suggestion view needs titles for proposed slugs.
+  const { categories: allCats, tags: allTags } = useTaxonomy(taxViewOpen);
 
   const icon = favicon(resource.url);
   const broken = resource.linkStatus === "broken";

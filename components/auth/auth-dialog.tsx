@@ -20,6 +20,7 @@ import { GoogleIcon, GithubIcon, GitlabIcon } from "@/components/brand-icons";
 import { authClient } from "@/lib/auth-client";
 import { markSignInIntent } from "@/components/auth/auth-provider";
 import { Turnstile, turnstileEnabled } from "@/components/auth/turnstile";
+import { setAuthHint } from "@/lib/auth-hint";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PW_MIN = 8;
@@ -149,8 +150,10 @@ export function AuthDialog({
         // Tell the user to check their inbox rather than showing a raw error.
         throw new Error(authErrorMessage(error));
       }
-      // Welcome toast is fired centrally in AuthProvider (on the user-id
-      // transition) so it works for both email and OAuth sign-in.
+      // Signed in: start loading the session (see lib/auth-hint). The welcome
+      // toast is fired centrally in AuthProvider (on the user-id transition)
+      // so it works for both email and OAuth sign-in.
+      setAuthHint();
       onOpenChange(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failed"));

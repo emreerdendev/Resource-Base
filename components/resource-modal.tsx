@@ -73,7 +73,7 @@ export function ResourceModal({
   const { get: getFavorites } = useFavoriteCounts();
   const { register, get: getContributor } = useContributors();
   const { user, openAuth } = useAuth();
-  const { categories: allCats, tags: allTags } = useTaxonomy();
+  const { categories: allCats, tags: allTags } = useTaxonomy(open);
   // Resolve a proposed slug to its existing title for display (free-text shows
   // the slug-ish token as-is).
   const titleForCat = (slug: string) =>

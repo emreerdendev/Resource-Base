@@ -4,6 +4,9 @@ import { getSessionCookie } from "better-auth/cookies";
 import { clientIp } from "@/lib/client-ip";
 import { isProtectedPage } from "@/lib/protected-routes";
 
+/** Mirrors AUTH_HINT_COOKIE in lib/auth-hint.ts (a client module). */
+const AUTH_HINT_COOKIE = "rb_auth";
+
 /**
  * Per-IP limit on a Workers Rate Limiting binding (free, no storage). Lets the
  * request through if the binding is missing (local dev) or errors.
@@ -66,10 +69,29 @@ export async function middleware(request: NextRequest) {
       url.pathname = "/";
       // Remember the destination so signing in continues there.
       url.search = `?auth=required&next=${encodeURIComponent(pathname + request.nextUrl.search)}`;
-      return NextResponse.redirect(url);
+      return syncAuthHint(request, NextResponse.redirect(url), false);
     }
   }
-  return NextResponse.next();
+  return syncAuthHint(request, NextResponse.next(), hasSession);
+}
+
+/**
+ * Keep the readable "signed in" hint (lib/auth-hint.ts) in step with the real
+ * session cookie, so the browser only asks for a session when there is one.
+ */
+function syncAuthHint(request: NextRequest, response: NextResponse, hasSession: boolean) {
+  const hinted = request.cookies.get(AUTH_HINT_COOKIE)?.value === "1";
+  if (hasSession && !hinted) {
+    response.cookies.set(AUTH_HINT_COOKIE, "1", {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+    });
+  } else if (!hasSession && hinted) {
+    response.cookies.delete(AUTH_HINT_COOKIE);
+  }
+  return response;
 }
 
 export const config = {
