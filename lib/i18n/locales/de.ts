@@ -123,6 +123,7 @@ export const de = {
     categories: "Kategorien",
     tags: "Tags",
     addedOn: "Hinzugefügt am {{date}}",
+    fixSame: "Das ist der bereits gespeicherte Link – gib den korrigierten ein.",
   },
 
   taxonomy: {
@@ -655,12 +656,8 @@ export const de = {
       submit: "Zur Prüfung senden",
     },
     error: {
-      tooLarge: "Die Datei ist größer als 2 MB.",
-      notPdf: "Bitte wähle eine PDF-Datei.",
       unsafe: "Diese PDF enthält Skripte oder eingebettete Dateien und kann nicht angenommen werden. Exportiere sie erneut als einfache PDF.",
       rateLimited: "Zu viele Uploads heute. Bitte versuche es morgen erneut.",
-      consent: "Bitte bestätige, dass du deinen Lebenslauf teilen möchtest.",
-      title: "Füge eine Überschrift hinzu (2–80 Zeichen).",
       generic: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
     },
   },
@@ -673,5 +670,25 @@ export const de = {
       account: "Anmeldung & Sicherheit",
       data: "Deine Daten",
     },
+  },
+
+  validation: {
+    required: "Dieses Feld ist erforderlich.",
+    choose: "Bitte wähle eine Option.",
+    tooShort: "Mindestens {{min}} Zeichen.",
+    tooLong: "Höchstens {{max}} Zeichen.",
+    url: "Gib eine gültige Webadresse ein, z. B. https://example.com",
+    email: "Gib eine gültige E-Mail-Adresse ein.",
+    username: "3–20 Zeichen: a–z, 0–9, - oder _.",
+    password: "Verwende 8–64 Zeichen.",
+    passwordMatch: "Die Passwörter stimmen nicht überein.",
+    fileRequired: "Wähle eine PDF-Datei.",
+    fileType: "Nur PDF-Dateien werden akzeptiert.",
+    fileSize: "Die Datei darf höchstens 2 MB groß sein.",
+    consent: "Bitte bestätige, um fortzufahren.",
+    tooMany: "Höchstens {{max}} Einträge.",
+    chooseFile: "Datei wählen",
+    noFile: "Keine Datei gewählt",
+    changeFile: "Ändern",
   },
 } as const;

@@ -36,6 +36,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Separator } from "./ui/separator";
+import { normalizeWebUrl } from "@/lib/company-input";
+import { fieldProps } from "@/lib/use-form-errors";
 
 /** Pill shared with the resource card — accent background, rounded, hover. */
 const PILL =
@@ -83,6 +85,7 @@ export function ResourceModal({
   // Broken-link fix suggestion (account-only, like submit/favorites).
   const [fixOpen, setFixOpen] = useState(false);
   const [fixUrl, setFixUrl] = useState("");
+  const [fixError, setFixError] = useState<string | null>(null);
   const [fixPending, setFixPending] = useState(false);
   // Category/tag fix editor (account-only).
   const [taxOpen, setTaxOpen] = useState(false);
@@ -114,6 +117,17 @@ export function ResourceModal({
 
   async function submitFix(e: React.FormEvent) {
     e.preventDefault();
+    if (fixPending) return;
+    const url = normalizeWebUrl(fixUrl);
+    const error = !fixUrl.trim()
+      ? t("validation.required")
+      : !url
+        ? t("validation.url")
+        : url === normalizeWebUrl(resource.url)
+          ? t("modal.fixSame")
+          : null;
+    setFixError(error);
+    if (error || !url) return;
     setFixPending(true);
     try {
       const res = await fetch("/api/submit", {
@@ -123,7 +137,7 @@ export function ResourceModal({
           kind: "fix",
           targetResourceId: resource._id,
           name: resource.name,
-          url: fixUrl.trim(),
+          url,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -227,18 +241,26 @@ export function ResourceModal({
                 </Button>
               </div>
             ) : (
-              <form onSubmit={submitFix} className="space-y-2">
-                <label className="block text-xs font-medium text-foreground">
+              <form onSubmit={submitFix} noValidate className="space-y-2">
+                <label htmlFor="fix-url" className="block text-xs font-medium text-foreground">
                   {t("modal.fixLabel")}
                 </label>
                 <Input
-                  type="url"
-                  required
+                  {...fieldProps("fix-url", fixError)}
+                  inputMode="url"
                   autoFocus
                   value={fixUrl}
-                  onChange={(e) => setFixUrl(e.target.value)}
+                  onChange={(e) => {
+                    setFixUrl(e.target.value);
+                    if (fixError) setFixError(null);
+                  }}
                   placeholder="https://…"
                 />
+                {fixError && (
+                  <p id="fix-url-error" role="alert" className="text-xs text-destructive">
+                    {fixError}
+                  </p>
+                )}
                 <div className="flex gap-2">
                   <Button
                     type="button"

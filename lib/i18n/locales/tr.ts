@@ -122,6 +122,7 @@ export const tr = {
     categories: "Kategoriler",
     tags: "Etiketler",
     addedOn: "{{date}} tarihinde eklendi",
+    fixSame: "Bu zaten kayıtlı bağlantı — düzeltilmiş olanı gir.",
   },
 
   taxonomy: {
@@ -652,12 +653,8 @@ export const tr = {
       submit: "İncelemeye Gönder",
     },
     error: {
-      tooLarge: "Dosya 2 MB'tan büyük.",
-      notPdf: "Lütfen bir PDF dosyası seç.",
       unsafe: "Bu PDF komut dosyası veya gömülü dosya içerdiği için kabul edilemiyor. Düz bir PDF olarak tekrar dışa aktar.",
       rateLimited: "Bugün çok fazla yükleme yaptın. Lütfen yarın tekrar dene.",
-      consent: "Lütfen CV'ni paylaşmayı kabul ettiğini onayla.",
-      title: "Bir başlık ekle (2–80 karakter).",
       generic: "Bir şeyler ters gitti. Lütfen tekrar dene.",
     },
   },
@@ -670,5 +667,25 @@ export const tr = {
       account: "Giriş ve Güvenlik",
       data: "Verilerin",
     },
+  },
+
+  validation: {
+    required: "Bu alan zorunlu.",
+    choose: "Lütfen bir seçenek seç.",
+    tooShort: "En az {{min}} karakter gir.",
+    tooLong: "En fazla {{max}} karakter girebilirsin.",
+    url: "Geçerli bir web adresi gir, örn. https://example.com",
+    email: "Geçerli bir e-posta adresi gir.",
+    username: "3–20 karakter: a–z, 0–9, - veya _.",
+    password: "8–64 karakter kullan.",
+    passwordMatch: "Şifreler eşleşmiyor.",
+    fileRequired: "Bir PDF dosyası seç.",
+    fileType: "Yalnızca PDF dosyaları kabul edilir.",
+    fileSize: "Dosya en fazla 2 MB olmalı.",
+    consent: "Devam etmek için lütfen onayla.",
+    tooMany: "En fazla {{max}} öğe ekleyebilirsin.",
+    chooseFile: "Dosya Seç",
+    noFile: "Dosya seçilmedi",
+    changeFile: "Değiştir",
   },
 } as const;

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/form-field";
+import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { IconInput } from "@/components/ui/icon-input";
 import { authClient } from "@/lib/auth-client";
 import { setMyPassword } from "@/lib/profile-actions";
@@ -23,6 +25,7 @@ const PW_MAX = 64;
  */
 export function ProfileChangePassword() {
   const { t } = useTranslation();
+  const id = useId();
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -47,20 +50,23 @@ export function ProfileChangePassword() {
     };
   }, []);
 
+  const lengthErr = (v: string) =>
+    !v ? t("validation.required") : v.length < PW_MIN || v.length > PW_MAX ? t("validation.password") : null;
+  const errors = {
+    current: hasPassword ? (current ? null : t("validation.required")) : null,
+    next: lengthErr(next),
+    confirm: !confirm ? t("validation.required") : confirm !== next ? t("validation.passwordMatch") : null,
+  };
+  const form = useFormErrors(errors);
+
   if (hasPassword === null) return null; // still loading — render nothing
 
   const title = hasPassword
     ? t("auth.changePassword")
     : t("auth.setPassword");
-  const valid =
-    next.length >= PW_MIN &&
-    next === confirm &&
-    (hasPassword ? current.length >= PW_MIN : true) &&
-    !pending;
-
-  async function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!valid) return;
+    if (pending || !form.check(e.currentTarget)) return;
     setPending(true);
     try {
       if (hasPassword) {
@@ -84,6 +90,7 @@ export function ProfileChangePassword() {
       setCurrent("");
       setNext("");
       setConfirm("");
+      form.reset();
     }
   }
 
@@ -95,46 +102,52 @@ export function ProfileChangePassword() {
           {t("auth.setPasswordHint")}
         </p>
       )}
-      <form className="mt-3 grid gap-3" onSubmit={submit}>
+      <form className="mt-3 grid gap-3" onSubmit={submit} noValidate>
         {hasPassword && (
+        <FormField id={`${id}-current`} error={form.show("current")}>
           <IconInput
+            {...fieldProps(`${id}-current`, form.show("current"))}
+            aria-label={t("auth.currentPassword")}
             icon={Lock}
             type="password"
-            required
-            minLength={PW_MIN}
             maxLength={PW_MAX}
             value={current}
             onChange={(e) => setCurrent(e.target.value)}
+            onBlur={() => form.touch("current")}
             placeholder={t("auth.currentPassword")}
             autoComplete="current-password"
           />
+        </FormField>
         )}
-        <IconInput
-          icon={Lock}
-          type="password"
-          required
-          minLength={PW_MIN}
-          maxLength={PW_MAX}
-          value={next}
-          onChange={(e) => setNext(e.target.value)}
-          placeholder={t("auth.newPasswordPlaceholder")}
-          autoComplete="new-password"
-        />
-        <IconInput
-          icon={Lock}
-          type="password"
-          required
-          minLength={PW_MIN}
-          maxLength={PW_MAX}
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          placeholder={t("auth.confirmPasswordPlaceholder")}
-          autoComplete="new-password"
-        />
-        {confirm.length > 0 && next !== confirm && (
-          <p className="text-xs text-destructive">{t("auth.passwordMismatch")}</p>
-        )}
-        <Button type="submit" disabled={!valid} className="w-fit">
+        <FormField id={`${id}-next`} error={form.show("next")}>
+          <IconInput
+            {...fieldProps(`${id}-next`, form.show("next"))}
+            aria-label={t("auth.newPasswordPlaceholder")}
+            icon={Lock}
+            type="password"
+            maxLength={PW_MAX}
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+            onBlur={() => form.touch("next")}
+            placeholder={t("auth.newPasswordPlaceholder")}
+            autoComplete="new-password"
+          />
+        </FormField>
+        <FormField id={`${id}-confirm`} error={form.show("confirm")}>
+          <IconInput
+            {...fieldProps(`${id}-confirm`, form.show("confirm"))}
+            aria-label={t("auth.confirmPasswordPlaceholder")}
+            icon={Lock}
+            type="password"
+            maxLength={PW_MAX}
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            onBlur={() => form.touch("confirm")}
+            placeholder={t("auth.confirmPasswordPlaceholder")}
+            autoComplete="new-password"
+          />
+        </FormField>
+        <Button type="submit" disabled={pending} className="w-fit">
           {pending && <Loader2 className="size-4 animate-spin" />}
           {title}
         </Button>

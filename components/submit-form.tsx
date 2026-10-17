@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Globe, Hash, ListChecks, Loader2, Send, Type } from "lucide-react";
@@ -9,13 +9,19 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { IconInput } from "@/components/ui/icon-input";
 import { PricingSelect } from "@/components/pricing-select";
+import { FormField } from "@/components/form-field";
+import { normalizeWebUrl } from "@/lib/company-input";
 import { useSubmissions } from "@/lib/submissions";
+import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import type { Category, Pricing } from "@/lib/types";
 
 const OTHER = "__other__";
+/** /api/submit keeps at most this many tags. */
+const MAX_TAGS = 10;
 
 export function SubmitForm({ categories }: { categories: Category[] }) {
   const { t } = useTranslation();
+  const id = useId();
   const { reload: reloadSubmissions } = useSubmissions();
   const [pending, setPending] = useState(false);
   const [name, setName] = useState("");
@@ -23,21 +29,30 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
   const [categoryChoice, setCategoryChoice] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [pricing, setPricing] = useState<Pricing | "">("");
+  const [tags, setTags] = useState("");
+  const [note, setNote] = useState("");
 
-  // Required fields must be filled and the URL well-formed before submitting;
-  // when "Other" is chosen, its free-text category is also required.
-  const urlValid = /^https?:\/\/.+\..+/.test(url.trim());
-  const categoryValid = categoryChoice !== OTHER || customCategory.trim().length > 0;
-  const canSubmit =
-    !pending && name.trim().length > 0 && urlValid && categoryValid;
+  const tagCount = tags.split(",").map((x) => x.trim()).filter(Boolean).length;
+  // Same rules /api/submit enforces.
+  const errors = {
+    name: !name.trim()
+      ? t("validation.required")
+      : name.trim().length < 2
+        ? t("validation.tooShort", { min: 2 })
+        : null,
+    url: !url.trim() ? t("validation.required") : normalizeWebUrl(url) ? null : t("validation.url"),
+    customCategory:
+      categoryChoice === OTHER && !customCategory.trim() ? t("validation.required") : null,
+    tags: tagCount > MAX_TAGS ? t("validation.tooMany", { max: MAX_TAGS }) : null,
+  };
+  const form = useFormErrors(errors);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!canSubmit) return;
-    const form = e.currentTarget;
-    const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    const el = e.currentTarget;
     // Honeypot: bots fill hidden fields.
-    if (data.company) return;
+    if (new FormData(el).get("company")) return;
+    if (pending || !form.check(el)) return;
 
     // "Other" → use the free-text category the user typed.
     const suggestedCategory =
@@ -52,11 +67,11 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
         // in /api/submit — never sent from the client.
         body: JSON.stringify({
           name: name.trim(),
-          url: url.trim(),
+          url: normalizeWebUrl(url),
           suggestedCategory,
-          pricing: data.pricing,
-          tags: data.tags,
-          note: data.note,
+          pricing,
+          tags,
+          note: note.trim(),
         }),
       });
       if (res.status === 429) {
@@ -66,12 +81,14 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
       if (!res.ok) throw new Error(await res.text());
       toast.success(t("submit.success"));
       reloadSubmissions();
-      form.reset();
       setName("");
       setUrl("");
       setCategoryChoice("");
       setCustomCategory("");
       setPricing("");
+      setTags("");
+      setNote("");
+      form.reset();
     } catch {
       toast.error(t("submit.error"));
     } finally {
@@ -80,7 +97,7 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} noValidate className="space-y-4">
       <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-tight">
           {t("submit.title")}
@@ -99,24 +116,35 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
           </Link>
         </Button>
       </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.name")} *
-        </label>
-        <IconInput icon={Type} name="name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="e.g. Tailwind CSS" />
-      </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.url")} *
-        </label>
-        <IconInput icon={Globe} name="url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} required placeholder="https://…" />
-      </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.category")}
-        </label>
+      <FormField id={`${id}-name`} label={t("submit.name")} required error={form.show("name")}>
+        <IconInput
+          {...fieldProps(`${id}-name`, form.show("name"))}
+          icon={Type}
+          value={name}
+          maxLength={200}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => form.touch("name")}
+          placeholder="e.g. Tailwind CSS"
+        />
+      </FormField>
+      <FormField id={`${id}-url`} label={t("submit.url")} required error={form.show("url")}>
+        <IconInput
+          {...fieldProps(`${id}-url`, form.show("url"))}
+          icon={Globe}
+          inputMode="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onBlur={() => {
+            form.touch("url");
+            const n = normalizeWebUrl(url);
+            if (n) setUrl(n);
+          }}
+          placeholder="https://…"
+        />
+      </FormField>
+      <FormField id={`${id}-category`} label={t("submit.category")} error={form.show("customCategory")}>
         <select
-          name="categoryChoice"
+          id={`${id}-category`}
           value={categoryChoice}
           onChange={(e) => setCategoryChoice(e.target.value)}
           className="h-9 w-full cursor-pointer rounded-md border border-border bg-background px-3 text-sm"
@@ -134,40 +162,48 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
         {categoryChoice === OTHER && (
           <div className="mt-2">
             <IconInput
+              {...fieldProps(`${id}-custom`, form.show("customCategory"))}
+              aria-label={t("submit.customCategoryPlaceholder")}
               icon={Type}
-              name="customCategory"
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
-              required
+              onBlur={() => form.touch("customCategory")}
               maxLength={60}
               placeholder={t("submit.customCategoryPlaceholder")}
               autoFocus
             />
           </div>
         )}
-      </div>
+      </FormField>
       <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.pricing")}
-        </label>
+        <span className="mb-1.5 block text-sm font-medium">{t("submit.pricing")}</span>
         <PricingSelect value={pricing} onChange={setPricing} />
       </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.tags")}
-        </label>
-        <IconInput icon={Hash} name="tags" placeholder={t("submit.tagsPlaceholder")} />
-      </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.note")}
-        </label>
+      <FormField
+        id={`${id}-tags`}
+        label={t("submit.tags")}
+        error={form.show("tags")}
+        counter={`${tagCount}/${MAX_TAGS}`}
+      >
+        <IconInput
+          {...fieldProps(`${id}-tags`, form.show("tags"))}
+          icon={Hash}
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          onBlur={() => form.touch("tags")}
+          placeholder={t("submit.tagsPlaceholder")}
+        />
+      </FormField>
+      <FormField id={`${id}-note`} label={t("submit.note")} counter={`${note.length}/1000`}>
         <Textarea
-          name="note"
+          id={`${id}-note`}
           rows={3}
+          maxLength={1000}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
           placeholder={t("submit.notePlaceholder")}
         />
-      </div>
+      </FormField>
 
       {/* Honeypot — hidden from humans, catches bots. */}
       <input
@@ -179,7 +215,7 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
         aria-hidden
       />
 
-      <Button type="submit" disabled={!canSubmit} size="lg" className="w-full">
+      <Button type="submit" disabled={pending} size="lg" className="w-full">
         {pending ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (

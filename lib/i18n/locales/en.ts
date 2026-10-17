@@ -122,6 +122,7 @@ export const en = {
     categories: "Categories",
     tags: "Tags",
     addedOn: "Added {{date}}",
+    fixSame: "That’s the link we already have — enter the corrected one.",
   },
 
   taxonomy: {
@@ -654,12 +655,8 @@ export const en = {
       submit: "Send for Review",
     },
     error: {
-      tooLarge: "That file is larger than 2 MB.",
-      notPdf: "Please choose a PDF file.",
       unsafe: "This PDF contains scripts or embedded files and can’t be accepted. Export it again as a plain PDF.",
       rateLimited: "Too many uploads today. Please try again tomorrow.",
-      consent: "Please confirm that you agree to share your CV.",
-      title: "Add a headline (2–80 characters).",
       generic: "Something went wrong. Please try again.",
     },
   },
@@ -672,5 +669,25 @@ export const en = {
       account: "Sign-In & Security",
       data: "Your Data",
     },
+  },
+
+  validation: {
+    required: "This field is required.",
+    choose: "Please choose an option.",
+    tooShort: "Use at least {{min}} characters.",
+    tooLong: "Use at most {{max}} characters.",
+    url: "Enter a valid web address, e.g. https://example.com",
+    email: "Enter a valid email address.",
+    username: "3–20 characters: a–z, 0–9, - or _.",
+    password: "Use 8–64 characters.",
+    passwordMatch: "Passwords don’t match.",
+    fileRequired: "Choose a PDF file.",
+    fileType: "Only PDF files are accepted.",
+    fileSize: "The file must be 2 MB or smaller.",
+    consent: "Please confirm to continue.",
+    tooMany: "Use at most {{max}} items.",
+    chooseFile: "Choose File",
+    noFile: "No file chosen",
+    changeFile: "Change",
   },
 } as const;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LinkedinIcon } from "@/components/brand-icons";
+import { FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { IconInput } from "@/components/ui/icon-input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +31,7 @@ import {
 } from "@/lib/company-input";
 import { CITIES, WORK_MODELS, type City, type WorkModel } from "@/lib/company-taxonomy";
 import { useSubmissions } from "@/lib/submissions";
+import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { cn } from "@/lib/utils";
 
 const CHIP =
@@ -93,6 +95,7 @@ const splitEmails = (v: string) => v.split(/[,;\s]+/).filter(Boolean);
  */
 export function CompanySubmitForm({ initialName = "" }: { initialName?: string }) {
   const { t } = useTranslation();
+  const id = useId();
   const router = useRouter();
   const { reload: reloadSubmissions } = useSubmissions();
   const [pending, setPending] = useState(false);
@@ -108,9 +111,6 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
   const [otherError, setOtherError] = useState<string | null>(null);
   const [workModels, setWorkModels] = useState<WorkModel[]>([]);
   const [note, setNote] = useState("");
-  // Errors show once a field has been left, not while typing the first time.
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const touch = (k: string) => setTouched((s) => ({ ...s, [k]: true }));
 
   const urlError = (v: string) => (v.trim() && !normalizeWebUrl(v) ? t("suggest.invalidUrl") : null);
   const linkedinError =
@@ -120,18 +120,25 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
     emailList.some((e) => !normalizeEmail(e)) || emailList.length > 5
       ? t("suggest.invalidEmail")
       : null;
+  const hasWay = Boolean(website.trim() || careerUrl.trim() || linkedin.trim() || emailList.length);
+  // Same rules /api/submit enforces (lib/company-submission.ts).
   const errors = {
+    name: !name.trim()
+      ? t("validation.required")
+      : name.trim().length < 2
+        ? t("validation.tooShort", { min: 2 })
+        : null,
     website: urlError(website),
     careerUrl: urlError(careerUrl),
     linkedin: linkedinError,
     emails: emailError,
+    ways: hasWay ? null : t("suggest.waysHint"),
   };
-  const hasWay = Boolean(website.trim() || careerUrl.trim() || linkedin.trim() || emailList.length);
-  const valid =
-    name.trim().length >= 2 && hasWay && Object.values(errors).every((e) => !e);
+  const form = useFormErrors(errors);
+  const touch = form.touch;
 
   /** Replace a field's value with its normalized form when it's valid. */
-  const tidy = (k: string, v: string, set: (v: string) => void, fn: (v: string) => string | null) => {
+  const tidy = (k: keyof typeof errors, v: string, set: (v: string) => void, fn: (v: string) => string | null) => {
     touch(k);
     const n = v.trim() ? fn(v) : null;
     if (n) set(n);
@@ -163,14 +170,14 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
     setOtherDraft("");
     setWorkModels([]);
     setNote("");
-    setTouched({});
+    form.reset();
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!valid || pending) return;
     // Honeypot: bots fill hidden fields.
     if (new FormData(e.currentTarget).get("company")) return;
+    if (pending || !form.check(e.currentTarget)) return;
 
     setPending(true);
     try {
@@ -232,22 +239,30 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
         </Button>
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">{t("suggest.name")} *</label>
+      <FormField id={`${id}-name`} label={t("suggest.name")} required error={form.show("name")}>
         <IconInput
+          {...fieldProps(`${id}-name`, form.show("name"))}
           icon={Building2}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          required
+          onBlur={() => touch("name")}
           maxLength={120}
           placeholder="e.g. Acme Teknoloji"
         />
-      </div>
+      </FormField>
 
       <fieldset className="space-y-3 rounded-xl border border-border p-4">
         <legend className="px-1 text-sm font-medium">{t("company.howToApply")} *</legend>
-        <p className="-mt-1 text-xs text-muted-foreground">{t("suggest.waysHint")}</p>
-        <Field error={touched.emails ? errors.emails : null}>
+        <p
+          className={cn(
+            "-mt-1 text-xs",
+            form.show("ways") ? "text-destructive" : "text-muted-foreground",
+          )}
+          role={form.show("ways") ? "alert" : undefined}
+        >
+          {t("suggest.waysHint")}
+        </p>
+        <Field error={form.show("emails")}>
           <IconInput
             icon={Mail}
             value={emails}
@@ -258,11 +273,11 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
               if (!emailError) setEmails(emailList.map((x) => normalizeEmail(x)).join(", "));
             }}
             placeholder={t("suggest.emailsPlaceholder")}
-            aria-invalid={Boolean(touched.emails && errors.emails)}
+            aria-invalid={Boolean(form.show("emails"))}
             aria-label={t("suggest.emails")}
           />
         </Field>
-        <Field error={touched.careerUrl ? errors.careerUrl : null}>
+        <Field error={form.show("careerUrl")}>
           <IconInput
             icon={Briefcase}
             value={careerUrl}
@@ -270,11 +285,11 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
             onChange={(e) => setCareerUrl(e.target.value)}
             onBlur={() => tidy("careerUrl", careerUrl, setCareerUrl, normalizeWebUrl)}
             placeholder={t("suggest.careerPlaceholder")}
-            aria-invalid={Boolean(touched.careerUrl && errors.careerUrl)}
+            aria-invalid={Boolean(form.show("careerUrl"))}
             aria-label={t("suggest.career")}
           />
         </Field>
-        <Field error={touched.linkedin ? errors.linkedin : null}>
+        <Field error={form.show("linkedin")}>
           <IconInput
             icon={LinkedinIcon}
             value={linkedin}
@@ -282,11 +297,11 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
             onChange={(e) => setLinkedin(e.target.value)}
             onBlur={() => tidy("linkedin", linkedin, setLinkedin, normalizeLinkedinJobsUrl)}
             placeholder="https://www.linkedin.com/company/…"
-            aria-invalid={Boolean(touched.linkedin && errors.linkedin)}
+            aria-invalid={Boolean(form.show("linkedin"))}
             aria-label="LinkedIn"
           />
         </Field>
-        <Field error={touched.website ? errors.website : null}>
+        <Field error={form.show("website")}>
           <IconInput
             icon={Globe}
             value={website}
@@ -294,7 +309,7 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
             onChange={(e) => setWebsite(e.target.value)}
             onBlur={() => tidy("website", website, setWebsite, normalizeWebUrl)}
             placeholder={t("suggest.websitePlaceholder")}
-            aria-invalid={Boolean(touched.website && errors.website)}
+            aria-invalid={Boolean(form.show("website"))}
             aria-label={t("suggest.website")}
           />
         </Field>
@@ -376,21 +391,21 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
         </div>
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">{t("submit.note")}</label>
+      <FormField id={`${id}-note`} label={t("submit.note")} counter={`${note.length}/1000`}>
         <Textarea
+          id={`${id}-note`}
           rows={3}
           value={note}
           maxLength={1000}
           onChange={(e) => setNote(e.target.value)}
           placeholder={t("suggest.notePlaceholder")}
         />
-      </div>
+      </FormField>
 
       {/* Honeypot — hidden from humans, catches bots. */}
       <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
 
-      <Button type="submit" disabled={!valid || pending} size="lg" className="w-full">
+      <Button type="submit" disabled={pending} size="lg" className="w-full">
         {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
         {t("suggest.submit")}
       </Button>

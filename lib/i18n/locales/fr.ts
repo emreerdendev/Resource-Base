@@ -123,6 +123,7 @@ export const fr = {
     categories: "Catégories",
     tags: "Tags",
     addedOn: "Ajouté le {{date}}",
+    fixSame: "C’est déjà le lien enregistré — saisis le lien corrigé.",
   },
 
   taxonomy: {
@@ -655,12 +656,8 @@ export const fr = {
       submit: "Envoyer pour examen",
     },
     error: {
-      tooLarge: "Ce fichier dépasse 2 Mo.",
-      notPdf: "Choisis un fichier PDF.",
       unsafe: "Ce PDF contient des scripts ou des fichiers intégrés et ne peut pas être accepté. Exporte-le à nouveau en PDF simple.",
       rateLimited: "Trop d’envois aujourd’hui. Réessaie demain.",
-      consent: "Confirme que tu acceptes de partager ton CV.",
-      title: "Ajoute un titre (2 à 80 caractères).",
       generic: "Une erreur est survenue. Réessaie.",
     },
   },
@@ -673,5 +670,25 @@ export const fr = {
       account: "Connexion et sécurité",
       data: "Tes données",
     },
+  },
+
+  validation: {
+    required: "Ce champ est obligatoire.",
+    choose: "Choisis une option.",
+    tooShort: "Au moins {{min}} caractères.",
+    tooLong: "Au maximum {{max}} caractères.",
+    url: "Saisis une adresse web valide, ex. https://example.com",
+    email: "Saisis une adresse e-mail valide.",
+    username: "3 à 20 caractères : a–z, 0–9, - ou _.",
+    password: "Utilise 8 à 64 caractères.",
+    passwordMatch: "Les mots de passe ne correspondent pas.",
+    fileRequired: "Choisis un fichier PDF.",
+    fileType: "Seuls les fichiers PDF sont acceptés.",
+    fileSize: "Le fichier doit faire 2 Mo au maximum.",
+    consent: "Confirme pour continuer.",
+    tooMany: "Au maximum {{max}} éléments.",
+    chooseFile: "Choisir un fichier",
+    noFile: "Aucun fichier choisi",
+    changeFile: "Changer",
   },
 } as const;

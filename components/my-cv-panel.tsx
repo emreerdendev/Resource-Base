@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, EyeOff, Heart, Loader2, Upload, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, EyeOff, FileText, Heart, Loader2, Upload, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
+import { FormField } from "@/components/form-field";
 import { FormSkeleton } from "@/components/skeletons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { getMyCv, setCvListed, type MyCv } from "@/lib/cv-actions";
 import { parseCvMeta } from "@/lib/cv-input";
+import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import {
   CV_FIELDS,
   CV_LANGUAGES,
   CV_MAX_BYTES,
+  CV_MAX_TECHNOLOGIES,
   CV_SENIORITIES,
   CV_SUMMARY_MAX,
   CV_TECH_SUGGESTIONS,
@@ -151,14 +154,25 @@ export function MyCvPanel() {
   );
 }
 
-const ERRORS: Record<string, string> = {
-  too_large: "myCv.error.tooLarge",
-  not_pdf: "myCv.error.notPdf",
+/** API error codes → messages. */
+const API_ERRORS: Record<string, string> = {
+  too_large: "validation.fileSize",
+  not_pdf: "validation.fileType",
   unsafe: "myCv.error.unsafe",
   rate_limited: "myCv.error.rateLimited",
-  consent: "myCv.error.consent",
-  title: "myCv.error.title",
+  consent: "validation.consent",
 };
+
+const SELECT =
+  "h-9 w-full cursor-pointer rounded-lg border border-input bg-transparent px-2 text-sm aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30";
+
+/** Is this file worth sending? Checks type, size and the %PDF header locally. */
+async function fileError(file: File | null): Promise<string | null> {
+  if (!file) return "validation.fileRequired";
+  if (file.size > CV_MAX_BYTES) return "validation.fileSize";
+  const head = new TextDecoder("latin1").decode(await file.slice(0, 1024).arrayBuffer());
+  return head.includes("%PDF-") ? null : "validation.fileType";
+}
 
 function CvUploadForm({
   initial,
@@ -172,23 +186,56 @@ function CvUploadForm({
   const { t } = useTranslation();
   const id = useId();
   const [pending, setPending] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileErr, setFileErr] = useState<string | null>("validation.fileRequired");
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [field, setField] = useState(initial?.field ?? "");
+  const [seniority, setSeniority] = useState(initial?.seniority ?? "");
+  const [language, setLanguage] = useState(initial?.language ?? "");
+  const [tech, setTech] = useState(initial?.technologies.join(", ") ?? "");
+  const [summary, setSummary] = useState(initial?.summary ?? "");
+  const [consent, setConsent] = useState(false);
+
+  const techCount = tech.split(",").map((x) => x.trim()).filter(Boolean).length;
+  const errors = {
+    file: fileErr ? t(fileErr) : null,
+    title: !title.trim()
+      ? t("validation.required")
+      : title.trim().length < 2
+        ? t("validation.tooShort", { min: 2 })
+        : null,
+    field: field ? null : t("validation.choose"),
+    seniority: seniority ? null : t("validation.choose"),
+    language: language ? null : t("validation.choose"),
+    tech: techCount > CV_MAX_TECHNOLOGIES ? t("validation.tooMany", { max: CV_MAX_TECHNOLOGIES }) : null,
+    consent: consent ? null : t("validation.consent"),
+  };
+  const form = useFormErrors(errors);
+
+  async function pickFile(next: File | null) {
+    setFile(next);
+    form.touch("file");
+    setFileErr(await fileError(next));
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const file = form.get("file");
-    if (!(file instanceof File) || file.size === 0) return void toast.error(t("myCv.error.notPdf"));
-    if (file.size > CV_MAX_BYTES) return void toast.error(t("myCv.error.tooLarge"));
-    const meta = parseCvMeta(Object.fromEntries(form));
-    if (!meta.ok) return void toast.error(t(ERRORS[meta.error] ?? "myCv.error.generic"));
-    if (form.get("consent") !== "yes") return void toast.error(t("myCv.error.consent"));
+    if (pending || !form.check(e.currentTarget)) return;
+    const meta = parseCvMeta({ title, field, seniority, language, technologies: tech, summary });
+    if (!meta.ok || !file) return; // already covered by the inline errors
 
+    const body = new FormData();
+    body.set("file", file);
+    body.set("consent", "yes");
+    for (const [k, v] of Object.entries(meta.value)) {
+      if (v !== null) body.set(k, Array.isArray(v) ? v.join(",") : v);
+    }
     setPending(true);
     try {
-      const res = await fetch("/api/cv", { method: "POST", body: form });
+      const res = await fetch("/api/cv", { method: "POST", body });
       if (!res.ok) {
         const { error } = (await res.json().catch(() => ({}))) as { error?: string };
-        toast.error(t(ERRORS[error ?? ""] ?? "myCv.error.generic"));
+        toast.error(t(API_ERRORS[error ?? ""] ?? "myCv.error.generic"));
         return;
       }
       toast.success(t("myCv.success"));
@@ -200,22 +247,19 @@ function CvUploadForm({
     }
   }
 
-  const field = (name: string, label: string, control: React.ReactNode, hint?: string) => (
-    <div>
-      <label htmlFor={`${id}-${name}`} className="mb-1.5 block text-sm font-medium">
-        {label}
-      </label>
-      {control}
-      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
-    </div>
-  );
-  const select = (name: string, values: readonly string[], prefix: string, value?: string) => (
+  const select = (
+    name: "field" | "seniority" | "language",
+    values: readonly string[],
+    prefix: string,
+    value: string,
+    set: (v: string) => void,
+  ) => (
     <select
-      id={`${id}-${name}`}
-      name={name}
-      required
-      defaultValue={value ?? ""}
-      className="h-9 w-full cursor-pointer rounded-md border border-border bg-background px-2 text-sm"
+      {...fieldProps(`${id}-${name}`, form.show(name))}
+      value={value}
+      onChange={(e) => set(e.target.value)}
+      onBlur={() => form.touch(name)}
+      className={SELECT}
     >
       <option value="" disabled>
         —
@@ -229,81 +273,128 @@ function CvUploadForm({
   );
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 rounded-xl border border-border p-4">
-      {field(
-        "file",
-        t("myCv.form.file"),
-        <Input id={`${id}-file`} name="file" type="file" accept="application/pdf,.pdf" required />,
-        t("myCv.form.fileHint"),
-      )}
-      {field(
-        "title",
-        t("myCv.form.title"),
-        <Input
-          id={`${id}-title`}
-          name="title"
-          required
-          minLength={2}
-          maxLength={CV_TITLE_MAX}
-          defaultValue={initial?.title}
-          placeholder={t("myCv.form.titlePlaceholder")}
-        />,
-      )}
-      <div className="grid gap-4 sm:grid-cols-3">
-        {field("field", t("cvs.filter.field"), select("field", CV_FIELDS, "cvs.field", initial?.field))}
-        {field(
-          "seniority",
-          t("cvs.filter.seniority"),
-          select("seniority", CV_SENIORITIES, "cvs.seniority", initial?.seniority),
-        )}
-        {field(
-          "language",
-          t("cvs.filter.language"),
-          select("language", CV_LANGUAGES, "cvs.language", initial?.language),
-        )}
-      </div>
-      {field(
-        "technologies",
-        t("myCv.form.technologies"),
-        <>
-          <Input
-            id={`${id}-technologies`}
-            name="technologies"
-            list={`${id}-tech-list`}
-            defaultValue={initial?.technologies.join(", ")}
-            placeholder={t("myCv.form.technologiesPlaceholder")}
+    <form onSubmit={onSubmit} noValidate className="space-y-4 rounded-xl border border-border p-4">
+      <FormField id={`${id}-file`} label={t("myCv.form.file")} required hint={t("myCv.form.fileHint")} error={form.show("file")}>
+        <label
+          className={cn(
+            "flex cursor-pointer items-center gap-3 rounded-lg border border-dashed px-3 py-3 text-sm transition-colors hover:border-primary/50 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
+            form.show("file") ? "border-destructive" : "border-input",
+          )}
+        >
+          <FileText className="size-5 shrink-0 text-primary" />
+          <span className="min-w-0 flex-1 truncate">
+            {file ? (
+              <>
+                {file.name}{" "}
+                <span className="text-muted-foreground">· {(file.size / 1024).toFixed(0)} KB</span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">{t("validation.noFile")}</span>
+            )}
+          </span>
+          <span className="shrink-0 rounded-md border border-border px-2 py-1 text-xs font-medium">
+            {t(file ? "validation.changeFile" : "validation.chooseFile")}
+          </span>
+          <input
+            {...fieldProps(`${id}-file`, form.show("file"), true)}
+            type="file"
+            accept="application/pdf,.pdf"
+            className="sr-only"
+            onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
           />
-          <datalist id={`${id}-tech-list`}>
-            {CV_TECH_SUGGESTIONS.map((x) => (
-              <option key={x} value={x} />
-            ))}
-          </datalist>
-        </>,
-      )}
-      {field(
-        "summary",
-        t("myCv.form.summary"),
+        </label>
+      </FormField>
+
+      <FormField
+        id={`${id}-title`}
+        label={t("myCv.form.title")}
+        required
+        error={form.show("title")}
+        counter={`${title.length}/${CV_TITLE_MAX}`}
+      >
+        <Input
+          {...fieldProps(`${id}-title`, form.show("title"))}
+          value={title}
+          maxLength={CV_TITLE_MAX}
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={() => form.touch("title")}
+          placeholder={t("myCv.form.titlePlaceholder")}
+        />
+      </FormField>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <FormField id={`${id}-field`} label={t("cvs.filter.field")} required error={form.show("field")}>
+          {select("field", CV_FIELDS, "cvs.field", field, setField)}
+        </FormField>
+        <FormField id={`${id}-seniority`} label={t("cvs.filter.seniority")} required error={form.show("seniority")}>
+          {select("seniority", CV_SENIORITIES, "cvs.seniority", seniority, setSeniority)}
+        </FormField>
+        <FormField id={`${id}-language`} label={t("cvs.filter.language")} required error={form.show("language")}>
+          {select("language", CV_LANGUAGES, "cvs.language", language, setLanguage)}
+        </FormField>
+      </div>
+
+      <FormField
+        id={`${id}-tech`}
+        label={t("myCv.form.technologies")}
+        error={form.show("tech")}
+        counter={`${techCount}/${CV_MAX_TECHNOLOGIES}`}
+      >
+        <Input
+          {...fieldProps(`${id}-tech`, form.show("tech"))}
+          list={`${id}-tech-list`}
+          value={tech}
+          onChange={(e) => setTech(e.target.value)}
+          onBlur={() => form.touch("tech")}
+          placeholder={t("myCv.form.technologiesPlaceholder")}
+        />
+        <datalist id={`${id}-tech-list`}>
+          {CV_TECH_SUGGESTIONS.map((x) => (
+            <option key={x} value={x} />
+          ))}
+        </datalist>
+      </FormField>
+
+      <FormField
+        id={`${id}-summary`}
+        label={t("myCv.form.summary")}
+        counter={`${summary.length}/${CV_SUMMARY_MAX}`}
+      >
         <Textarea
           id={`${id}-summary`}
-          name="summary"
           rows={3}
           maxLength={CV_SUMMARY_MAX}
-          defaultValue={initial?.summary ?? ""}
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
           placeholder={t("myCv.form.summaryPlaceholder")}
-        />,
-      )}
+        />
+      </FormField>
+
       <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-muted-foreground">
         {t("myCv.form.privacyHint")}
       </p>
-      <label className="flex cursor-pointer items-start gap-2 text-sm">
-        <input type="checkbox" name="consent" value="yes" required className="mt-0.5 size-4 cursor-pointer" />
-        <span>
-          {t("myCv.form.consent")}{" "}
-          <Link href="/terms" target="_blank" className="text-primary hover:underline">
-            {t("myCv.form.terms")}
-          </Link>
-        </span>
-      </label>
+
+      <FormField id={`${id}-consent`} error={form.show("consent")}>
+        <label className="flex cursor-pointer items-start gap-2 text-sm">
+          <input
+            {...fieldProps(`${id}-consent`, form.show("consent"))}
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => {
+              setConsent(e.target.checked);
+              form.touch("consent");
+            }}
+            className="mt-0.5 size-4 shrink-0 cursor-pointer accent-primary"
+          />
+          <span>
+            {t("myCv.form.consent")}{" "}
+            <Link href="/terms" target="_blank" className="text-primary hover:underline">
+              {t("myCv.form.terms")}
+            </Link>
+          </span>
+        </label>
+      </FormField>
+
       <div className="flex gap-2">
         <Button type="submit" disabled={pending}>
           {pending ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}

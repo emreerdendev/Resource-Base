@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 import { AtSign, Eye, EyeOff, Globe, Loader2, Mail, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LinkedinIcon } from "@/components/brand-icons";
 import { IconInput } from "@/components/ui/icon-input";
+import { FormField } from "@/components/form-field";
+import { normalizeWebUrl } from "@/lib/company-input";
+import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { FormSkeleton } from "@/components/skeletons";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/lib/profile";
@@ -51,8 +54,21 @@ function fieldsFromProfile(p: {
   };
 }
 
+type UrlKey = "portfolio_url" | "linkedin_url" | "github_url" | "twitter_url" | "instagram_url" | "dribbble_url";
+
+/** [field, label (or "portfolio" → translated), icon, placeholder] */
+const URL_FIELDS: [UrlKey, string, React.ComponentType<{ className?: string }>, string][] = [
+  ["portfolio_url", "portfolio", Globe, "https://…"],
+  ["linkedin_url", "LinkedIn", LinkedinIcon, "https://linkedin.com/in/…"],
+  ["github_url", "GitHub", Globe, "https://github.com/…"],
+  ["twitter_url", "X (Twitter)", Globe, "https://x.com/…"],
+  ["instagram_url", "Instagram", Globe, "https://instagram.com/…"],
+  ["dribbble_url", "Dribbble", Globe, "https://dribbble.com/…"],
+];
+
 export function ProfileEditForm() {
   const { t } = useTranslation();
+  const id = useId();
   const { profile, loading, update, setUsername } = useProfile();
   const [pending, setPending] = useState(false);
   // Snapshot of the profile as last loaded — the baseline we diff against to
@@ -60,16 +76,30 @@ export function ProfileEditForm() {
   const [baseline, setBaseline] = useState<Fields | null>(null);
   const [fields, setFields] = useState<Fields | null>(null);
 
-  useEffect(() => {
-    if (profile) {
-      const next = fieldsFromProfile(profile);
-      setBaseline(next);
-      setFields(next);
-    }
-  }, [profile]);
+  // Re-seed the form whenever a (re)loaded profile arrives — adjusted during
+  // render rather than in an effect, so there's no extra pass.
+  const [seededFrom, setSeededFrom] = useState<typeof profile>(null);
+  if (profile && profile !== seededFrom) {
+    setSeededFrom(profile);
+    const next = fieldsFromProfile(profile);
+    setBaseline(next);
+    setFields(next);
+  }
 
   const setField = <K extends keyof Fields>(key: K, value: Fields[K]) =>
     setFields((f) => (f ? { ...f, [key]: value } : f));
+
+  // Same rules lib/profile-actions.ts enforces.
+  const urlErr = (v = "") => (v.trim() && !normalizeWebUrl(v) ? t("validation.url") : null);
+  const errors = {
+    username: !fields?.username.trim()
+      ? t("validation.required")
+      : /^[a-zA-Z0-9_-]{3,20}$/.test(fields.username.trim())
+        ? null
+        : t("validation.username"),
+    ...Object.fromEntries(URL_FIELDS.map(([k]) => [k, urlErr(fields?.[k])])),
+  } as Record<"username" | UrlKey, string | null>;
+  const form = useFormErrors(errors);
 
   if (loading || !profile || !fields || !baseline) {
     return <FormSkeleton fields={9} tall={[3]} />;
@@ -77,15 +107,14 @@ export function ProfileEditForm() {
 
   // Dirty when any field differs from the loaded baseline; valid when the
   // (required) username clears the same constraints the input enforces.
-  const usernameValid = /^[a-zA-Z0-9_-]{3,20}$/.test(fields.username.trim());
   const dirty = (Object.keys(fields) as (keyof Fields)[]).some(
     (k) => fields[k] !== baseline[k],
   );
-  const canSave = dirty && usernameValid && !pending;
+  const canSave = dirty && !pending;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!fields || !canSave) return;
+    if (!fields || !canSave || !form.check(e.currentTarget)) return;
     setPending(true);
     try {
       // Username goes through the validated RPC if it changed.
@@ -136,7 +165,7 @@ export function ProfileEditForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} noValidate className="space-y-4">
 
       {/* Email is read-only (managed by auth) with a public-visibility toggle. */}
       <Field label={t("profile.email")}>
@@ -165,42 +194,42 @@ export function ProfileEditForm() {
         </div>
       </Field>
 
-      <Field label={t("profile.username")}>
+      <FormField id={`${id}-username`} label={t("profile.username")} required error={form.show("username")}>
         <IconInput
+          {...fieldProps(`${id}-username`, form.show("username"))}
           icon={AtSign}
           value={fields.username}
           onChange={(e) => setField("username", e.target.value)}
-          required
-          minLength={3}
+          onBlur={() => form.touch("username")}
           maxLength={20}
-          pattern="[a-zA-Z0-9_\-]{3,20}"
+          autoCapitalize="none"
           placeholder={t("auth.usernamePlaceholder")}
         />
-      </Field>
-      <Field label={t("profile.fullName")}>
-        <IconInput icon={User} maxLength={60} value={fields.full_name} onChange={(e) => setField("full_name", e.target.value)} />
-      </Field>
-      <Field label={t("profile.bio")}>
-        <Textarea rows={3} value={fields.bio} onChange={(e) => setField("bio", e.target.value)} maxLength={280} />
-      </Field>
-      <Field label={t("profile.portfolio")}>
-        <IconInput icon={Globe} type="url" maxLength={200} value={fields.portfolio_url} onChange={(e) => setField("portfolio_url", e.target.value)} placeholder="https://…" />
-      </Field>
-      <Field label="LinkedIn">
-        <IconInput icon={LinkedinIcon} type="url" maxLength={200} value={fields.linkedin_url} onChange={(e) => setField("linkedin_url", e.target.value)} placeholder="https://linkedin.com/in/…" />
-      </Field>
-      <Field label="GitHub">
-        <IconInput icon={Globe} type="url" maxLength={200} value={fields.github_url} onChange={(e) => setField("github_url", e.target.value)} placeholder="https://github.com/…" />
-      </Field>
-      <Field label="X (Twitter)">
-        <IconInput icon={Globe} type="url" maxLength={200} value={fields.twitter_url} onChange={(e) => setField("twitter_url", e.target.value)} placeholder="https://x.com/…" />
-      </Field>
-      <Field label="Instagram">
-        <IconInput icon={Globe} type="url" maxLength={200} value={fields.instagram_url} onChange={(e) => setField("instagram_url", e.target.value)} placeholder="https://instagram.com/…" />
-      </Field>
-      <Field label="Dribbble">
-        <IconInput icon={Globe} type="url" maxLength={200} value={fields.dribbble_url} onChange={(e) => setField("dribbble_url", e.target.value)} placeholder="https://dribbble.com/…" />
-      </Field>
+      </FormField>
+      <FormField id={`${id}-name`} label={t("profile.fullName")} counter={`${fields.full_name.length}/60`}>
+        <IconInput id={`${id}-name`} icon={User} maxLength={60} value={fields.full_name} onChange={(e) => setField("full_name", e.target.value)} />
+      </FormField>
+      <FormField id={`${id}-bio`} label={t("profile.bio")} counter={`${fields.bio.length}/280`}>
+        <Textarea id={`${id}-bio`} rows={3} value={fields.bio} onChange={(e) => setField("bio", e.target.value)} maxLength={280} />
+      </FormField>
+      {URL_FIELDS.map(([key, label, icon, placeholder]) => (
+        <FormField key={key} id={`${id}-${key}`} label={label === "portfolio" ? t("profile.portfolio") : label} error={form.show(key)}>
+          <IconInput
+            {...fieldProps(`${id}-${key}`, form.show(key))}
+            icon={icon}
+            inputMode="url"
+            maxLength={200}
+            value={fields[key]}
+            onChange={(e) => setField(key, e.target.value)}
+            onBlur={() => {
+              form.touch(key);
+              const n = fields[key].trim() && normalizeWebUrl(fields[key]);
+              if (n) setField(key, n);
+            }}
+            placeholder={placeholder}
+          />
+        </FormField>
+      ))}
 
       <Button type="submit" disabled={!canSave} size="lg" className="w-full">
         {pending && <Loader2 className="size-4 animate-spin" />}

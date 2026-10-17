@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/form-field";
+import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { IconInput } from "@/components/ui/icon-input";
 import { GoogleIcon, GithubIcon, GitlabIcon } from "@/components/brand-icons";
 import { authClient } from "@/lib/auth-client";
@@ -79,10 +81,12 @@ export function AuthDialog({
   function resetSignIn() {
     setSiEmail("");
     setSiPw("");
+    siForm.reset();
   }
   function resetSignUp() {
     setSuEmail("");
     setSuPw("");
+    suForm.reset();
   }
 
   async function oauth(provider: "google" | "github" | "gitlab") {
@@ -186,13 +190,20 @@ export function AuthDialog({
     } finally {
       setPending(false);
       setFpEmail("");
+      fpForm.reset();
       resetCaptcha();
     }
   }
 
-  const siValid = emailOk(siEmail) && siPw.length >= PW_MIN;
-  const suValid = emailOk(suEmail) && suPw.length >= PW_MIN;
-  const fpValid = emailOk(fpEmail);
+  // Inline errors (shown after leaving a field or on submit) instead of the
+  // browser's own validation popups.
+  const emailErr = (v: string) =>
+    !v.trim() ? t("validation.required") : emailOk(v) ? null : t("validation.email");
+  const pwErr = (v: string) =>
+    !v ? t("validation.required") : v.length < PW_MIN || v.length > PW_MAX ? t("validation.password") : null;
+  const siForm = useFormErrors({ email: emailErr(siEmail), password: pwErr(siPw) });
+  const suForm = useFormErrors({ email: emailErr(suEmail), password: pwErr(suPw) });
+  const fpForm = useFormErrors({ email: emailErr(fpEmail) });
 
   return (
     <Dialog
@@ -235,32 +246,37 @@ export function AuthDialog({
             </DialogHeader>
             <form
               className="grid gap-3"
+              noValidate
               onSubmit={(e) => {
                 e.preventDefault();
-                if (fpValid && !pending) forgot();
+                if (!pending && captchaOk && fpForm.check(e.currentTarget)) forgot();
               }}
             >
-              <IconInput
-                icon={Mail}
-                type="email"
-                required
-                maxLength={254}
-                value={fpEmail}
-                onChange={(e) => setFpEmail(e.target.value)}
-                placeholder={t("auth.emailPlaceholder")}
-                autoComplete="email"
-                autoFocus
-              />
+              <FormField id="auth-fp-email" error={fpForm.show("email")}>
+                <IconInput
+                  {...fieldProps("auth-fp-email", fpForm.show("email"))}
+                  onBlur={() => fpForm.touch("email")}
+                  icon={Mail}
+                  type="email"
+                  maxLength={254}
+                  value={fpEmail}
+                  onChange={(e) => setFpEmail(e.target.value)}
+                  placeholder={t("auth.emailPlaceholder")}
+                  aria-label={t("auth.emailPlaceholder")}
+                  autoComplete="email"
+                  autoFocus
+                />
+              </FormField>
               <Turnstile
                 action="forgot-password"
                 resetKey={captchaKey}
                 onToken={setCaptcha}
               />
-              <Button type="submit" disabled={!fpValid || !captchaOk || pending}>
+              <Button type="submit" disabled={!captchaOk || pending}>
                 {pending && <Loader2 className="size-4 animate-spin" />}
                 {t("auth.sendResetLink")}
               </Button>
-              {fpValid && !captchaOk && (
+              {!captchaOk && (
                 <p className="text-center text-xs text-muted-foreground">
                   {t("auth.captchaRequired")}
                 </p>
@@ -337,32 +353,40 @@ export function AuthDialog({
               <TabsContent value="signin">
                 <form
                   className="grid gap-3 pt-2"
+                  noValidate
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (siValid && !pending) signin();
+                    if (!pending && captchaOk && siForm.check(e.currentTarget)) signin();
                   }}
                 >
-                  <IconInput
-                    icon={Mail}
-                    type="email"
-                    required
-                    maxLength={254}
-                    value={siEmail}
-                    onChange={(e) => setSiEmail(e.target.value)}
-                    placeholder={t("auth.emailPlaceholder")}
-                    autoComplete="email"
-                  />
-                  <IconInput
-                    icon={Lock}
-                    type="password"
-                    required
-                    minLength={PW_MIN}
-                    maxLength={PW_MAX}
-                    value={siPw}
-                    onChange={(e) => setSiPw(e.target.value)}
-                    placeholder={t("auth.passwordPlaceholder")}
-                    autoComplete="current-password"
-                  />
+                  <FormField id="auth-si-email" error={siForm.show("email")}>
+                    <IconInput
+                      {...fieldProps("auth-si-email", siForm.show("email"))}
+                      onBlur={() => siForm.touch("email")}
+                      icon={Mail}
+                      type="email"
+                      maxLength={254}
+                      value={siEmail}
+                      onChange={(e) => setSiEmail(e.target.value)}
+                      placeholder={t("auth.emailPlaceholder")}
+                      aria-label={t("auth.emailPlaceholder")}
+                      autoComplete="email"
+                    />
+                  </FormField>
+                  <FormField id="auth-si-pw" error={siForm.show("password")}>
+                    <IconInput
+                      {...fieldProps("auth-si-pw", siForm.show("password"))}
+                      onBlur={() => siForm.touch("password")}
+                      icon={Lock}
+                      type="password"
+                      maxLength={PW_MAX}
+                      value={siPw}
+                      onChange={(e) => setSiPw(e.target.value)}
+                      placeholder={t("auth.passwordPlaceholder")}
+                      aria-label={t("auth.passwordPlaceholder")}
+                      autoComplete="current-password"
+                    />
+                  </FormField>
                   <Turnstile
                     action="signin"
                     resetKey={captchaKey}
@@ -370,12 +394,12 @@ export function AuthDialog({
                   />
                   <Button
                     type="submit"
-                    disabled={!siValid || !captchaOk || pending}
+                    disabled={!captchaOk || pending}
                   >
                     {pending && <Loader2 className="size-4 animate-spin" />}
                     {t("auth.signIn")}
                   </Button>
-                  {siValid && !captchaOk && (
+                  {!captchaOk && (
                     <p className="text-center text-xs text-muted-foreground">
                       {t("auth.captchaRequired")}
                     </p>
@@ -400,32 +424,40 @@ export function AuthDialog({
               <TabsContent value="signup">
                 <form
                   className="grid gap-3 pt-2"
+                  noValidate
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (suValid && !pending) signup();
+                    if (!pending && captchaOk && suForm.check(e.currentTarget)) signup();
                   }}
                 >
-                  <IconInput
-                    icon={Mail}
-                    type="email"
-                    required
-                    maxLength={254}
-                    value={suEmail}
-                    onChange={(e) => setSuEmail(e.target.value)}
-                    placeholder={t("auth.emailPlaceholder")}
-                    autoComplete="email"
-                  />
-                  <IconInput
-                    icon={Lock}
-                    type="password"
-                    required
-                    minLength={PW_MIN}
-                    maxLength={PW_MAX}
-                    value={suPw}
-                    onChange={(e) => setSuPw(e.target.value)}
-                    placeholder={t("auth.passwordPlaceholder")}
-                    autoComplete="new-password"
-                  />
+                  <FormField id="auth-su-email" error={suForm.show("email")}>
+                    <IconInput
+                      {...fieldProps("auth-su-email", suForm.show("email"))}
+                      onBlur={() => suForm.touch("email")}
+                      icon={Mail}
+                      type="email"
+                      maxLength={254}
+                      value={suEmail}
+                      onChange={(e) => setSuEmail(e.target.value)}
+                      placeholder={t("auth.emailPlaceholder")}
+                      aria-label={t("auth.emailPlaceholder")}
+                      autoComplete="email"
+                    />
+                  </FormField>
+                  <FormField id="auth-su-pw" error={suForm.show("password")}>
+                    <IconInput
+                      {...fieldProps("auth-su-pw", suForm.show("password"))}
+                      onBlur={() => suForm.touch("password")}
+                      icon={Lock}
+                      type="password"
+                      maxLength={PW_MAX}
+                      value={suPw}
+                      onChange={(e) => setSuPw(e.target.value)}
+                      placeholder={t("auth.passwordPlaceholder")}
+                      aria-label={t("auth.passwordPlaceholder")}
+                      autoComplete="new-password"
+                    />
+                  </FormField>
                   <Turnstile
                     action="signup"
                     resetKey={captchaKey}
@@ -433,12 +465,12 @@ export function AuthDialog({
                   />
                   <Button
                     type="submit"
-                    disabled={!suValid || !captchaOk || pending}
+                    disabled={!captchaOk || pending}
                   >
                     {pending && <Loader2 className="size-4 animate-spin" />}
                     {t("auth.createAccount")}
                   </Button>
-                  {suValid && !captchaOk && (
+                  {!captchaOk && (
                     <p className="text-center text-xs text-muted-foreground">
                       {t("auth.captchaRequired")}
                     </p>

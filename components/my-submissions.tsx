@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -28,7 +28,10 @@ import {
 } from "@/components/ui/dialog";
 import { PricingSelect } from "@/components/pricing-select";
 import { TaxonomyProposal } from "@/components/taxonomy-proposal";
+import { FormField } from "@/components/form-field";
 import { ResourceGridSkeleton } from "@/components/skeletons";
+import { normalizeWebUrl } from "@/lib/company-input";
+import { fieldProps } from "@/lib/use-form-errors";
 import { useSubmissions } from "@/lib/submissions";
 import { cn, favicon } from "@/lib/utils";
 import { slugify } from "@/lib/slug";
@@ -168,6 +171,7 @@ function SubmissionDialog({
   const [pending, setPending] = useState(false);
   const [editing, setEditing] = useState(false);
   const [categoryChoice, setCategoryChoice] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
 
   const known = categories.some(
     (c) => c.title === submission?.suggested_category,
@@ -184,6 +188,7 @@ function SubmissionDialog({
   if (openId && openId !== seededFor) {
     setSeededFor(openId);
     setEditing(false);
+    setErrors({});
     setCategoryChoice(
       submission?.suggested_category
         ? known
@@ -198,6 +203,21 @@ function SubmissionDialog({
     if (!submission) return;
     const form = e.currentTarget;
     const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    // Same rules as /api/submit; shown inline, first invalid field focused.
+    const found: FieldErrors = {
+      name: (data.name ?? "").trim().length < 2 ? t("validation.tooShort", { min: 2 }) : undefined,
+      url: normalizeWebUrl(data.url ?? "") ? undefined : t("validation.url"),
+      customCategory:
+        data.categoryChoice === OTHER && !(data.customCategory ?? "").trim()
+          ? t("validation.required")
+          : undefined,
+    };
+    setErrors(found);
+    if (Object.values(found).some(Boolean)) {
+      requestAnimationFrame(() => form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus());
+      return;
+    }
+    data.url = normalizeWebUrl(data.url)!;
     const suggestedCategory =
       data.categoryChoice === OTHER
         ? (data.customCategory ?? "").trim()
@@ -266,8 +286,18 @@ function SubmissionDialog({
             </DialogHeader>
 
             {editing ? (
-              <form onSubmit={onSubmit} className="space-y-4">
+              <form
+                onSubmit={onSubmit}
+                noValidate
+                className="space-y-4"
+                // Editing a field clears its error.
+                onChange={(e) => {
+                  const name = (e.target as unknown as HTMLInputElement).name as keyof FieldErrors;
+                  if (errors[name]) setErrors((x) => ({ ...x, [name]: undefined }));
+                }}
+              >
                 <FormFields
+                  errors={errors}
                   submission={s}
                   categories={categories}
                   categoryChoice={categoryChoice}
@@ -413,13 +443,17 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 /** Shared edit fields for the resubmit form. */
+type FieldErrors = Partial<Record<"name" | "url" | "customCategory", string>>;
+
 function FormFields({
+  errors,
   submission,
   categories,
   categoryChoice,
   setCategoryChoice,
   known,
 }: {
+  errors: FieldErrors;
   submission: Submission;
   categories: Category[];
   categoryChoice: string;
@@ -427,37 +461,30 @@ function FormFields({
   known: boolean;
 }) {
   const { t } = useTranslation();
+  const id = useId();
   return (
     <>
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.name")} *
-        </label>
+      <FormField id={`${id}-name`} label={t("submit.name")} required error={errors.name}>
         <IconInput
+          {...fieldProps(`${id}-name`, errors.name ?? null)}
           icon={Type}
           name="name"
-          required
           defaultValue={submission.name ?? ""}
           maxLength={200}
         />
-      </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.url")} *
-        </label>
+      </FormField>
+      <FormField id={`${id}-url`} label={t("submit.url")} required error={errors.url}>
         <IconInput
+          {...fieldProps(`${id}-url`, errors.url ?? null)}
           icon={Globe}
           name="url"
-          type="url"
-          required
+          inputMode="url"
           defaultValue={submission.url ?? ""}
         />
-      </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.category")}
-        </label>
+      </FormField>
+      <FormField id={`${id}-category`} label={t("submit.category")} error={errors.customCategory}>
         <select
+          id={`${id}-category`}
           name="categoryChoice"
           value={categoryChoice}
           onChange={(e) => setCategoryChoice(e.target.value)}
@@ -476,16 +503,17 @@ function FormFields({
         {categoryChoice === OTHER && (
           <div className="mt-2">
             <IconInput
+              {...fieldProps(`${id}-custom`, errors.customCategory ?? null)}
+              aria-label={t("submit.customCategoryPlaceholder")}
               icon={Type}
               name="customCategory"
-              required
               maxLength={60}
               defaultValue={known ? "" : (submission.suggested_category ?? "")}
               placeholder={t("submit.customCategoryPlaceholder")}
             />
           </div>
         )}
-      </div>
+      </FormField>
       <div>
         <label className="mb-1.5 block text-sm font-medium">
           {t("submit.pricing")}
