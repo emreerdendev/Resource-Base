@@ -7,7 +7,6 @@ import { ArrowUpRight, Boxes, Building2, FileText, Hash, Search } from "lucide-r
 import {
   Command,
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -18,6 +17,7 @@ import { loadCvListing } from "@/lib/cv-listing";
 import { createResourceSearch } from "@/lib/resource-search";
 import { createSearch } from "@/lib/search";
 import type { CvListing, SearchIndex } from "@/lib/types";
+import { trackClick } from "@/lib/track-click";
 
 /** Fired by the header search button to open the palette from anywhere. */
 export const OPEN_COMMAND_EVENT = "open-command-palette";
@@ -131,14 +131,27 @@ export function CommandPalette() {
           onValueChange={setQuery}
         />
         <CommandList>
-        <CommandEmpty>{index ? t("command.empty") : t("command.loading")}</CommandEmpty>
+        {/* The "Go To" group is always there, so cmdk's own empty state would
+            never show: say "loading" / "no matches" ourselves. */}
+        {!index ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">{t("command.loading")}</p>
+        ) : (
+          query.trim() &&
+          results.length + companyResults.length + cvResults.length === 0 && (
+            <p className="py-6 text-center text-sm text-muted-foreground">{t("command.empty")}</p>
+          )
+        )}
         {results.length > 0 && (
         <CommandGroup heading={query ? t("command.results") : t("command.featured")}>
           {results.map((r) => (
             <CommandItem
               key={r._id}
               value={r._id}
-              onSelect={() => go(r.url, true)}
+              onSelect={() => {
+                // Opening a resource counts as a click, as on its card.
+                trackClick(r._id);
+                go(r.url, true);
+              }}
               className="flex items-center gap-2"
             >
               <Search className="size-4 shrink-0 opacity-60" />

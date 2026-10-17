@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowUpRight, Database, FileText, KeyRound, UserPen, UserRound } from "lucide-react";
@@ -37,16 +36,18 @@ export function ProfileSettings() {
   const params = useSearchParams();
   const { user, loading, openAuth } = useAuth();
   const { profile } = useProfile();
+  // The tab follows the URL, so links like the menu's "Share Your CV"
+  // (?tab=cv) switch it even when this page is already open.
   const fromUrl = params.get("tab");
-  const [tab, setTab] = useState<TabId>(isTab(fromUrl) ? fromUrl : "profile");
+  const tab: TabId = isTab(fromUrl) ? fromUrl : "profile";
 
   function select(next: TabId) {
-    setTab(next);
-    // Shallow URL update: shareable, without a server round-trip.
+    // Shallow URL update (Next keeps useSearchParams in sync): shareable,
+    // without a server round-trip.
     const url = new URL(window.location.href);
     if (next === "profile") url.searchParams.delete("tab");
     else url.searchParams.set("tab", next);
-    window.history.replaceState(null, "", url);
+    window.history.replaceState(window.history.state, "", url);
   }
 
   const header = (

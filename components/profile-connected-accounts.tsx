@@ -35,7 +35,9 @@ export function ProfileConnectedAccounts() {
   }, []);
 
   useEffect(() => {
-    load();
+    // Loads from the auth API (an external system); state is set when it answers.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
   }, [load]);
 
   if (linked === null) return null;

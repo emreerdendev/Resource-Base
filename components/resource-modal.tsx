@@ -109,15 +109,16 @@ export function ResourceModal({
       )
     : undefined;
 
-  // Reset the inline forms whenever the modal closes.
-  useEffect(() => {
-    if (!open) {
+  // Closing resets the inline forms.
+  const change = (o: boolean) => {
+    if (!o) {
       setFixOpen(false);
       setFixUrl("");
       setTaxOpen(false);
       setTaxViewOpen(false);
     }
-  }, [open]);
+    onOpenChange(o);
+  };
 
   async function submitFix(e: React.FormEvent) {
     e.preventDefault();
@@ -171,7 +172,7 @@ export function ResourceModal({
     : undefined;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={change}>
       <DialogContent
         className={cn(
           "max-h-[85vh] gap-6 overflow-y-auto p-4 sm:max-w-md",
@@ -346,7 +347,7 @@ export function ResourceModal({
             {/* Where the user follows this suggestion's review. */}
             <Link
               href="/submissions"
-              onClick={() => onOpenChange(false)}
+              onClick={() => change(false)}
               className="inline-flex items-center gap-1 self-end text-xs font-medium text-amber-700 underline-offset-4 hover:underline dark:text-amber-400"
             >
               {t("taxonomy.track")} <ArrowRight className="size-3" />
@@ -365,7 +366,7 @@ export function ResourceModal({
                       <Link
                         key={cat._id}
                         href={`/category/${cat.slug}`}
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => change(false)}
                         className={PILL}
                       >
                         <CategoryIcon className="size-3.5" />
@@ -386,7 +387,7 @@ export function ResourceModal({
                       <Link
                         key={tag._id}
                         href={`/tag/${tag.slug}`}
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => change(false)}
                         className={PILL}
                       >
                         {tag.title}
@@ -420,7 +421,7 @@ export function ResourceModal({
             {contributor && (
               <Link
                 href={profilePath(contributor.username)}
-                onClick={() => onOpenChange(false)}
+                onClick={() => change(false)}
                 className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
               >
                 {contributor.avatar_url ? (
@@ -442,7 +443,7 @@ export function ResourceModal({
           <div className="grid grid-cols-3 gap-2">
             {resource.slug ? (
               <Button asChild variant="outline" size="lg">
-                <Link href={`/resource/${resource.slug}`} onClick={() => onOpenChange(false)}>
+                <Link href={`/resource/${resource.slug}`} onClick={() => change(false)}>
                   <Info />
                   {t("modal.details")}
                 </Link>

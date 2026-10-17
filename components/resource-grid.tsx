@@ -25,11 +25,6 @@ export function ResourceGrid({ resources }: { resources: Resource[] }) {
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  // Snap back to page 1 if the underlying set shrinks (e.g. favorites change).
-  useEffect(() => {
-    setPage(1);
-  }, [resources]);
-
   if (resources.length === 0) {
     return (
       <p className="py-16 text-center text-muted-foreground">
@@ -39,6 +34,8 @@ export function ResourceGrid({ resources }: { resources: Resource[] }) {
   }
 
   const totalPages = Math.max(1, Math.ceil(resources.length / pageSize));
+  // Clamped, so a shrinking set (e.g. un-favoriting the last item on the last
+  // page) lands on the new last page instead of an empty one.
   const currentPage = Math.min(page, totalPages);
   const paged = resources.slice(
     (currentPage - 1) * pageSize,
