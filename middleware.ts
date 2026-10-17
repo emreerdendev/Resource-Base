@@ -4,6 +4,9 @@ import { getSessionCookie } from "better-auth/cookies";
 import { clientIp } from "@/lib/client-ip";
 import { isProtectedPage } from "@/lib/protected-routes";
 
+/** Filters of the old resource browser at "/" (see the redirect below). */
+const LEGACY_BROWSE_PARAMS = ["category", "tags", "pricing", "lang", "sort"];
+
 /** Mirrors AUTH_HINT_COOKIE in lib/auth-hint.ts (a client module). */
 const AUTH_HINT_COOKIE = "rb_auth";
 
@@ -48,6 +51,16 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  // "/" used to be the resource browser: forward its old filtered links
+  // (/?category=…&tags=…) to /resources. Done here rather than as a
+  // next.config redirect: OpenNext matched those `has: query` conditions on
+  // every request, sending the home page itself to /resources.
+  if (pathname === "/" && LEGACY_BROWSE_PARAMS.some((k) => request.nextUrl.searchParams.has(k))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/resources";
+    return NextResponse.redirect(url, 308);
+  }
 
   // Abuse shield: a client sending more than a person ever could is turned
   // away here, before any render, query or Sanity request is spent on it.
