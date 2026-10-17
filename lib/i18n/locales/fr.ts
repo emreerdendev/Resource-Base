@@ -376,6 +376,7 @@ export const fr = {
   theme: {
     toLight: "Passer au thème clair",
     toDark: "Passer au thème sombre",
+    toggle: "Changer de thème",
   },
 
   companies: {

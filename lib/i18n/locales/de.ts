@@ -376,6 +376,7 @@ export const de = {
   theme: {
     toLight: "Zum hellen Design wechseln",
     toDark: "Zum dunklen Design wechseln",
+    toggle: "Design wechseln",
   },
 
   companies: {

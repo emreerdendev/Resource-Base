@@ -374,6 +374,7 @@ export const tr = {
   theme: {
     toLight: "Açık temaya geç",
     toDark: "Koyu temaya geç",
+    toggle: "Temayı değiştir",
   },
 
   companies: {

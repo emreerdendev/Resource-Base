@@ -36,7 +36,9 @@ export function ThemeToggle() {
   );
 
   const isDark = resolvedTheme === "dark";
-  const label = isDark ? t("theme.toLight") : t("theme.toDark");
+  // The server can't know the theme, so the label is neutral until mounted
+  // (a specific one would mismatch on hydration).
+  const label = !mounted ? t("theme.toggle") : isDark ? t("theme.toLight") : t("theme.toDark");
 
   if (!mounted || reducedMotion) {
     return (
