@@ -3,6 +3,7 @@ import { AuthRequiredPrompt } from "@/components/auth/auth-required-prompt";
 import { ClickCountsProvider } from "@/components/click-counts-provider";
 import { CommandPalette } from "@/components/command-palette";
 import { CompanyTrackerProvider } from "@/components/company-tracker-provider";
+import { CvLikesProvider } from "@/components/cv-likes-provider";
 import { ConsentGate } from "@/components/consent";
 import { ContributorsProvider } from "@/components/contributors-provider";
 import { FavoriteCountsProvider } from "@/components/favorite-counts-provider";
@@ -47,25 +48,25 @@ export default async function SiteLayout({
                 <FavoriteCountsProvider>
                   <FavoritesProvider>
                     <CompanyTrackerProvider>
-                      <ClickCountsProvider>
-                        <ContributorsProvider>
-                          <div className="flex min-h-screen flex-col">
-                            <ScrollToTop />
-                            <SiteHeader />
-                            <CommandPalette />
-                            <Suspense>
-                              <AuthRequiredPrompt />
-                            </Suspense>
-                            {/* Clear the floating header (top-3 + h-14 ≈ 4.25rem) so
-                      page content never renders behind it. */}
-                            <main className="flex-1 px-4 pb-12 pt-10">
-                              {children}
-                            </main>
-                            <SiteFooter />
-                          </div>
-                          <ConsentGate gaId={process.env.NEXT_PUBLIC_GA_ID} />
-                        </ContributorsProvider>
-                      </ClickCountsProvider>
+                      <CvLikesProvider>
+                        <ClickCountsProvider>
+                          <ContributorsProvider>
+                            <div className="flex min-h-screen flex-col">
+                              <ScrollToTop />
+                              <SiteHeader />
+                              <CommandPalette />
+                              <Suspense>
+                                <AuthRequiredPrompt />
+                              </Suspense>
+                              {/* Clear the floating header (top-3 + h-14 ≈ 4.25rem) so
+                                  page content never renders behind it. */}
+                              <main className="flex-1 px-4 pb-12 pt-10">{children}</main>
+                              <SiteFooter />
+                            </div>
+                            <ConsentGate gaId={process.env.NEXT_PUBLIC_GA_ID} />
+                          </ContributorsProvider>
+                        </ClickCountsProvider>
+                      </CvLikesProvider>
                     </CompanyTrackerProvider>
                   </FavoritesProvider>
                 </FavoriteCountsProvider>

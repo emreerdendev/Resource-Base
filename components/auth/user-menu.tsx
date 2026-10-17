@@ -6,10 +6,12 @@ import {
   Bell,
   BriefcaseBusiness,
   Building2,
+  FileText,
+  Heart,
   LogOut,
   Plus,
   Send,
-  Settings,
+  UserPen,
   Star,
   User as UserIcon,
 } from "lucide-react";
@@ -110,11 +112,22 @@ export function UserMenu() {
             <Star className="size-4" /> {t("nav.favorites")}
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/liked-cvs">
+            <Heart className="size-4" /> {t("nav.likedCvs")}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {/* Contributions: what you've sent, then ways to add more. */}
+        {/* What you've sent, then (below its own separator) ways to add more. */}
         <DropdownMenuItem asChild>
           <Link href="/submissions">
             <Send className="size-4" /> {t("nav.submissions")}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/profile/edit?tab=cv">
+            <FileText className="size-4" /> {t("cvs.share")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -148,7 +161,7 @@ export function UserMenu() {
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/profile/edit">
-            <Settings className="size-4" /> {t("nav.settings")}
+            <UserPen className="size-4" /> {t("profile.editTitle")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

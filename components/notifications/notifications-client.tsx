@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-const KINDS = ["new", "fix", "taxonomy", "company"];
+const KINDS = ["new", "fix", "taxonomy", "company", "cv"];
 
 /**
  * Title + body in the reader's language. Notifications carry a structured
@@ -26,7 +26,9 @@ function useMessage(n: Notification): { title: string; body: string | null } {
       title: t(`notifications.approvedTitle.${d.kind}`),
       body: t(`notifications.approvedBody.${d.kind}`, { name: d.name }),
     };
-  const hint = t(`notifications.resubmitHint.${d.kind === "company" ? "company" : "other"}`);
+  const hint = t(
+    `notifications.resubmitHint.${d.kind === "company" || d.kind === "cv" ? d.kind : "other"}`,
+  );
   return {
     title: t("notifications.rejectedTitle"),
     body: d.reason

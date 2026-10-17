@@ -7,6 +7,7 @@ import {
   Boxes,
   BriefcaseBusiness,
   Building2,
+  FileText,
   Search,
   Send,
 } from "lucide-react";
@@ -107,7 +108,7 @@ export function HomeOnboarding({
         )}
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <DirectoryCard
           href="/companies"
           icon={Building2}
@@ -125,6 +126,15 @@ export function HomeOnboarding({
           body={t("home.resourcesBody")}
           cta={t("favorites.browse")}
           className={`${ENTER} delay-150`}
+        />
+        <DirectoryCard
+          href="/cvs"
+          icon={FileText}
+          title={t("nav.cvs")}
+          stat={t("home.cvsStat")}
+          body={t("home.cvsBody")}
+          cta={t("cvs.browse")}
+          className={`${ENTER} delay-200 sm:col-span-2 lg:col-span-1`}
         />
       </section>
 

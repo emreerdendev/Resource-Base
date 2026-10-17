@@ -80,13 +80,18 @@ export function SiteHeader() {
       active ? "font-medium text-foreground" : "text-muted-foreground",
     );
 
-  // On the company side, "+" suggests a company; everywhere else a resource.
-  // Hidden on the homepage, which is just the entry point to both sides.
+  // "+" adds to the directory you're in: a company, a CV or a resource.
+  // Hidden on the homepage, which is just the entry point to all of them.
   const companySide =
     pathname.startsWith("/compan") || pathname.startsWith("/applications");
+  const cvSide = pathname.startsWith("/cvs") || pathname.startsWith("/liked-cvs");
   const showSubmit = pathname !== "/";
-  const submitHref = companySide ? "/submit?type=company" : "/submit";
-  const submitLabel = companySide ? t("nav.suggestCompany") : t("nav.submit");
+  const submitHref = companySide ? "/submit?type=company" : cvSide ? "/profile/edit?tab=cv" : "/submit";
+  const submitLabel = companySide
+    ? t("nav.suggestCompany")
+    : cvSide
+      ? t("cvs.share")
+      : t("nav.submit");
 
   const rowRef = useRef<HTMLDivElement>(null);
   const labelsRef = useRef<HTMLSpanElement>(null);
@@ -169,6 +174,12 @@ export function SiteHeader() {
               {t("nav.categories")}
             </NavLink>
           </div>
+          <span aria-hidden className="text-border">
+            •
+          </span>
+          <NavLink href="/cvs" className={navLink(pathname.startsWith("/cvs"))}>
+            {t("nav.cvs")}
+          </NavLink>
           {showSubmit && (
             <span aria-hidden className="text-border">
               •
@@ -308,6 +319,9 @@ function MobileMenu({
             >
               <ChevronRight className="-ml-4 mr-1 size-3 text-muted-foreground/60" />
               {t("nav.categories")}
+            </Link>
+            <Link href="/cvs" onClick={close} className={item(pathname.startsWith("/cvs"))}>
+              {t("nav.cvs")}
             </Link>
             {submit && (
               <button
