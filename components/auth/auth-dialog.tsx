@@ -499,5 +499,13 @@ export function AuthDialog({
 
 /** A same-site path ("/x"), never another origin ("//evil.com", "https://…"). */
 export function isSafePath(p: string): boolean {
-  return p.startsWith("/") && !p.startsWith("//") && !p.startsWith("/\\");
+  // Same-site paths only. Browsers drop tabs/newlines and treat "\\" as "/",
+  // so "/\t/evil.com" or "/\\evil.com" would leave the site: reject any control
+  // character or backslash outright.
+  return (
+    typeof p === "string" &&
+    p.startsWith("/") &&
+    !p.startsWith("//") &&
+    !/[\\\u0000-\u001f\u007f]/.test(p)
+  );
 }

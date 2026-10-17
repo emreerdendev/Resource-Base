@@ -82,8 +82,8 @@ const scriptSrc = isDev
 // In dev, Next.js needs a WebSocket (ws:) to the local server for HMR; without
 // it the browser blocks the connection and the console floods with CSP errors.
 const connectSrc = isDev
-  ? `connect-src 'self' ws: wss: https://*.sanity.io ${GA_CONNECT} ${TURNSTILE}`
-  : `connect-src 'self' https://*.sanity.io ${GA_CONNECT} ${TURNSTILE}`;
+  ? `connect-src 'self' ws: wss: ${GA_CONNECT} ${TURNSTILE}`
+  : `connect-src 'self' ${GA_CONNECT} ${TURNSTILE}`;
 
 const csp = [
   "default-src 'self'",

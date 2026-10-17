@@ -7,6 +7,7 @@ import type { CompanyWithRelated } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { companyBySlugQuery } from "@/sanity/lib/queries";
 import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
+import { jsonLd } from "@/lib/json-ld";
 
 export async function generateStaticParams() {
   const slugs = await listSlugs("company");
@@ -54,7 +55,7 @@ export default async function CompanyPage({
   const company = await load(slug);
   if (!company) notFound();
 
-  const jsonLd = {
+  const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: company.name,
@@ -67,7 +68,7 @@ export default async function CompanyPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
       />
       <CompanyPageView company={company} />
     </>

@@ -6,6 +6,7 @@ import { resourceBySlugQuery } from "@/sanity/lib/queries";
 import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
 import type { ResourceWithRelated } from "@/lib/types";
 import { siteUrl, siteName } from "@/lib/site";
+import { jsonLd } from "@/lib/json-ld";
 
 export async function generateStaticParams() {
   const slugs = await listSlugs("resource");
@@ -56,7 +57,7 @@ export default async function ResourcePage({
   const resource = await load(slug);
   if (!resource) notFound();
 
-  const jsonLd = {
+  const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: resource.name,
@@ -69,7 +70,7 @@ export default async function ResourcePage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
       />
       <ResourceDetail resource={resource} />
     </>

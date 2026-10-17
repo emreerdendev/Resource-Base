@@ -12,6 +12,7 @@ import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { jsonLd } from "@/lib/json-ld";
 
 export async function generateStaticParams() {
   const slugs = await listSlugs("category");
@@ -68,7 +69,7 @@ export default async function CategoryPage({
     : undefined;
   const children = allCategories.filter((c) => c.parentSlug === slug);
 
-  const jsonLd = {
+  const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: category.title,
@@ -84,7 +85,7 @@ export default async function CategoryPage({
     <div className="mx-auto max-w-4xl">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
       />
 
       <nav className="mb-6 flex items-center gap-1 text-sm text-muted-foreground">
