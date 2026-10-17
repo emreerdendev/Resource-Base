@@ -4,6 +4,10 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-04-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Don't inject esbuild's `__name` helper: code that serializes a function
+  // into an inline <script> (next-themes' theme script) would reference it in
+  // the browser, where it doesn't exist, and fail on every worker-rendered page.
+  "keep_names": false,
   // Disabled so the site is reachable ONLY via the custom domains below, not the
   // auto-assigned *.workers.dev (+ preview) URLs. Those served a full duplicate
   // of the site (200 OK), which Google could index as duplicate content and
