@@ -300,6 +300,7 @@ export const de = {
     resubmit: "Erneut senden",
     resubmitSuccess: "Erneut gesendet! Wieder in der Prüfung.",
     resubmitError: "Erneutes Senden fehlgeschlagen. Bitte erneut versuchen.",
+    resubmitGone: "Worauf sich dieser Vorschlag bezog, ist nicht mehr im Verzeichnis – er kann nicht erneut gesendet werden.",
     subtitle: "Alles, was du zur Prüfung eingereicht hast – neue Ressourcen, Änderungsvorschläge, Unternehmen und dein Lebenslauf – und der Prüfstatus jedes Eintrags.",
     suggestAgain: "Erneut vorschlagen",
     removal: "Entfernungsmeldung",

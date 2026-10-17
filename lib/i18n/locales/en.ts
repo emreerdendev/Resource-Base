@@ -300,6 +300,7 @@ export const en = {
     resubmit: "Resubmit",
     resubmitSuccess: "Resubmitted! It’s back in the review queue.",
     resubmitError: "Couldn’t resubmit. Please try again.",
+    resubmitGone: "What this suggestion was about is no longer in the directory, so it can’t be sent again.",
     subtitle: "Everything you’ve sent for review — New Resources, Suggestions, Companies and your CV — and the review status of each.",
     suggestAgain: "Suggest Again",
     removal: "Removal Report",

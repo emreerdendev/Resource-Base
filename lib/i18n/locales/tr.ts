@@ -300,6 +300,7 @@ export const tr = {
     resubmit: "Tekrar Gönder",
     resubmitSuccess: "Tekrar gönderildi! İnceleme sırasına alındı.",
     resubmitError: "Tekrar gönderilemedi. Lütfen tekrar dene.",
+    resubmitGone: "Bu önerinin ilgili olduğu kayıt artık dizinde yok, bu yüzden tekrar gönderilemiyor.",
     subtitle: "İncelemeye gönderdiğin her şey — yeni kaynaklar, düzenleme önerileri, şirketler ve CV'n — her birinin inceleme durumuyla.",
     suggestAgain: "Tekrar Öner",
     removal: "Kaldırma Bildirimi",

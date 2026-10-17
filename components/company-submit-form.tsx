@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -31,6 +31,7 @@ import {
 } from "@/lib/company-input";
 import { CITIES, WORK_MODELS, type City, type WorkModel } from "@/lib/company-taxonomy";
 import { useSubmissions } from "@/lib/submissions";
+import { getResubmitContext } from "@/lib/data-actions";
 import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { cn } from "@/lib/utils";
 
@@ -97,7 +98,14 @@ const splitEmails = (v: string) => v.split(/[,;\s]+/).filter(Boolean);
  * Inputs are validated as you go and tidied on blur (e.g. a LinkedIn company
  * page becomes its /jobs/ tab); the API re-checks everything.
  */
-export function CompanySubmitForm({ initialName = "" }: { initialName?: string }) {
+export function CompanySubmitForm({
+  initialName = "",
+  resubmitId,
+}: {
+  initialName?: string;
+  /** A rejected company suggestion to edit and send again (from My Submissions). */
+  resubmitId?: string;
+}) {
   const { t } = useTranslation();
   const id = useId();
   const router = useRouter();
@@ -115,6 +123,32 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
   const [otherError, setOtherError] = useState<string | null>(null);
   const [workModels, setWorkModels] = useState<WorkModel[]>([]);
   const [note, setNote] = useState("");
+  const [replaces, setReplaces] = useState<string | null>(null);
+
+  // Resubmitting: start from the rejected suggestion's values.
+  useEffect(() => {
+    if (!resubmitId) return;
+    let active = true;
+    getResubmitContext(resubmitId)
+      .then((ctx) => {
+        if (!active || ctx?.kind !== "company") return;
+        const f = ctx.fields;
+        setName(f.name);
+        setWebsite(f.website);
+        setCareerUrl(f.careerUrl);
+        setLinkedin(f.linkedin);
+        setEmails(f.emails.join(", "));
+        setCities(f.cities.filter((c): c is City => (CITIES as readonly string[]).includes(c)));
+        setOthers(f.otherLocations);
+        setWorkModels(f.workModels.filter((w): w is WorkModel => (WORK_MODELS as readonly string[]).includes(w)));
+        setNote(f.note);
+        setReplaces(resubmitId);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [resubmitId]);
 
   const urlError = (v: string) => (v.trim() && !normalizeWebUrl(v) ? t("suggest.invalidUrl") : null);
   const linkedinError =
@@ -190,6 +224,7 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           kind: "company",
+          ...(replaces && { replaces }),
           name: name.trim(),
           website: website.trim() && normalizeWebUrl(website),
           careerUrl: careerUrl.trim() && normalizeWebUrl(careerUrl),
@@ -223,6 +258,10 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
       toast.success(t("suggest.success"));
       reloadSubmissions();
       reset();
+      if (replaces) {
+        setReplaces(null);
+        router.push("/submissions");
+      }
     } catch {
       toast.error(t("submit.error"));
     } finally {

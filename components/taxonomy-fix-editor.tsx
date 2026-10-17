@@ -26,14 +26,30 @@ type Picked = { slug: string; title: string };
  * the current values, add categories/tags from existing options (searchable)
  * or type new ones, then submit an edit suggestion that an editor reviews.
  */
+/** A rejected suggestion being edited and sent again (see My Submissions). */
+export type TaxonomyResubmit = {
+  /** The rejected submission this one replaces. */
+  replaces: string;
+  name: string | null;
+  url: string | null;
+  description: string | null;
+  categories: string[];
+  tags: string[];
+  removal: boolean;
+  note: string | null;
+};
+
 export function TaxonomyFixEditor({
   resource,
   onCancel,
   onDone,
+  resubmit,
 }: {
   resource: Resource;
   onCancel: () => void;
   onDone: () => void;
+  /** Start from a rejected suggestion instead of the current values. */
+  resubmit?: TaxonomyResubmit;
 }) {
   const { t } = useTranslation();
   const id = useId();
@@ -50,17 +66,25 @@ export function TaxonomyFixEditor({
     [resource.tags],
   );
   const initialDescription = resource.description ?? "";
-  const [name, setName] = useState(resource.name);
-  const [url, setUrl] = useState(resource.url);
+  const [name, setName] = useState(resubmit?.name ?? resource.name);
+  const [url, setUrl] = useState(resubmit?.url ?? resource.url);
   // "Gone / should be removed" replaces every other change.
-  const [removal, setRemoval] = useState(false);
-  const [reason, setReason] = useState("");
+  const [removal, setRemoval] = useState(resubmit?.removal ?? false);
+  const [reason, setReason] = useState(resubmit?.removal ? (resubmit.note ?? "") : "");
+  // A resubmission starts from the proposal; titles come from the resource's
+  // own values where known (free-text entries are their own title).
+  const pick = (slugs: string[], known: Picked[]) =>
+    slugs.map((slug) => known.find((k) => k.slug === slug) ?? { slug, title: slug });
   const nameError =
     !removal && name.trim().length < 2 ? t("validation.tooShort", { min: 2 }) : null;
   const urlError = !removal && !normalizeWebUrl(url) ? t("validation.url") : null;
-  const [cats, setCats] = useState<Picked[]>(initialCats);
-  const [tagList, setTagList] = useState<Picked[]>(initialTags);
-  const [description, setDescription] = useState(initialDescription);
+  const [cats, setCats] = useState<Picked[]>(() =>
+    resubmit && !resubmit.removal ? pick(resubmit.categories, initialCats) : initialCats,
+  );
+  const [tagList, setTagList] = useState<Picked[]>(() =>
+    resubmit && !resubmit.removal ? pick(resubmit.tags, initialTags) : initialTags,
+  );
+  const [description, setDescription] = useState(resubmit?.description ?? initialDescription);
   // Uncommitted input text — the user must add (+) or clear it before submitting.
   const [catQuery, setCatQuery] = useState("");
   const [tagQuery, setTagQuery] = useState("");
@@ -76,6 +100,7 @@ export function TaxonomyFixEditor({
   const nameChanged = name.trim() !== resource.name;
   const urlChanged = (normalizeWebUrl(url) ?? url.trim()) !== resource.url;
   const dirty =
+    Boolean(resubmit) ||
     removal ||
     nameChanged ||
     urlChanged ||
@@ -105,6 +130,7 @@ export function TaxonomyFixEditor({
         body: JSON.stringify({
           kind: "taxonomy",
           targetResourceId: resource._id,
+          ...(resubmit && { replaces: resubmit.replaces }),
           name: resource.name,
           // Carry the resource URL so the submission detail can link to it.
           url: resource.url,

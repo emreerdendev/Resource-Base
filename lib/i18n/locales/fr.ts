@@ -300,6 +300,7 @@ export const fr = {
     resubmit: "Renvoyer",
     resubmitSuccess: "Renvoyée ! Elle est de nouveau en cours d'examen.",
     resubmitError: "Échec du renvoi. Veuillez réessayer.",
+    resubmitGone: "Ce que concernait cette suggestion n’est plus dans l’annuaire : elle ne peut pas être renvoyée.",
     subtitle: "Tout ce que tu as envoyé pour examen — nouvelles ressources, suggestions de modification, entreprises et ton CV — et l’état d’examen de chacun.",
     suggestAgain: "Suggérer à nouveau",
     removal: "Signalement de retrait",

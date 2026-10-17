@@ -9,17 +9,21 @@ export const metadata: Metadata = {
 };
 
 // Auth enforced in middleware (PROTECTED_PAGES); the form gates on the client
-// too. ?name= pre-fills the company name (from an empty search or an import).
+// too. ?name= pre-fills the company name (from an empty search or an import);
+// ?resubmit=<id> starts from a rejected suggestion to edit and send again.
 export default async function SubmitCompanyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ name?: string }>;
+  searchParams: Promise<{ name?: string; resubmit?: string }>;
 }) {
-  const { name } = await searchParams;
+  const { name, resubmit } = await searchParams;
   return (
     <div className="mx-auto max-w-2xl">
       <SubmitTabs active="company" />
-      <CompanySubmitForm initialName={typeof name === "string" ? name.slice(0, 120) : ""} />
+      <CompanySubmitForm
+        initialName={typeof name === "string" ? name.slice(0, 120) : ""}
+        resubmitId={typeof resubmit === "string" ? resubmit.slice(0, 100) : undefined}
+      />
     </div>
   );
 }

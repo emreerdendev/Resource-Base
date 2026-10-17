@@ -33,6 +33,7 @@ import {
 import { PricingSelect } from "@/components/pricing-select";
 import { TaxonomyProposal } from "@/components/taxonomy-proposal";
 import { CompanyEditProposal } from "@/components/company-edit-proposal";
+import { ResubmitPanel } from "@/components/resubmit-panel";
 import { FormField } from "@/components/form-field";
 import { ResourceGridSkeleton } from "@/components/skeletons";
 import { normalizeWebUrl } from "@/lib/company-input";
@@ -299,6 +300,12 @@ function SubmissionDialog({
   // taxonomy fixes are simple targeted corrections, kept read-only.
   const canEdit =
     submission?.status !== "approved" && submission?.kind === "new";
+  // Rejected edit suggestions are edited in their own editor and sent again.
+  const canResubmitEdit =
+    submission?.status === "rejected" &&
+    ["fix", "taxonomy", "companyEdit"].includes(submission.kind) &&
+    Boolean(submission.sanity_submission_id);
+  const [resubmitting, setResubmitting] = useState(false);
 
   // Reset per-open state whenever a different submission opens.
   const openId = submission?.id ?? null;
@@ -306,6 +313,7 @@ function SubmissionDialog({
   if (openId && openId !== seededFor) {
     setSeededFor(openId);
     setEditing(false);
+    setResubmitting(false);
     setErrors({});
     setCategoryChoice(
       submission?.suggested_category
@@ -437,7 +445,16 @@ function SubmissionDialog({
               <StatusBadge status={s.status} />
             </DialogHeader>
 
-            {editing ? (
+            {resubmitting ? (
+              <ResubmitPanel
+                submission={s}
+                onCancel={() => setResubmitting(false)}
+                onDone={() => {
+                  setResubmitting(false);
+                  onDone();
+                }}
+              />
+            ) : editing ? (
               <form
                 onSubmit={onSubmit}
                 noValidate
@@ -567,11 +584,16 @@ function SubmissionDialog({
                   </div>
                 )}
 
-                {s.kind === "company" && s.status === "rejected" && s.name && (
+                {s.kind === "company" && s.status === "rejected" && s.sanity_submission_id && (
                   <Button asChild variant="outline" className="w-full">
-                    <Link href={`/submit/company?name=${encodeURIComponent(s.name)}`}>
-                      {t("submissions.suggestAgain")}
+                    <Link href={`/submit/company?resubmit=${encodeURIComponent(s.sanity_submission_id)}`}>
+                      {t("submissions.editResubmit")}
                     </Link>
+                  </Button>
+                )}
+                {canResubmitEdit && (
+                  <Button variant="outline" className="w-full" onClick={() => setResubmitting(true)}>
+                    {t("submissions.editResubmit")}
                   </Button>
                 )}
                 {s.kind === "company" && s.status === "approved" && s.name && (

@@ -300,6 +300,7 @@ export const es = {
     resubmit: "Reenviar",
     resubmitSuccess: "¡Reenviada! Está de nuevo en revisión.",
     resubmitError: "No se pudo reenviar. Inténtalo de nuevo.",
+    resubmitGone: "Lo que trataba esta sugerencia ya no está en el directorio, así que no se puede reenviar.",
     subtitle: "Todo lo que enviaste a revisión —recursos nuevos, sugerencias de cambio, empresas y tu CV— y el estado de revisión de cada uno.",
     suggestAgain: "Sugerir de nuevo",
     removal: "Aviso de retirada",

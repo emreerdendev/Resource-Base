@@ -9,7 +9,7 @@ import { FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { IconInput } from "@/components/ui/icon-input";
 import { Textarea } from "@/components/ui/textarea";
-import { changedFields } from "@/lib/company-edit";
+import { changedFields, type CompanyEditFields } from "@/lib/company-edit";
 import { normalizeEmail, normalizeLinkedinJobsUrl, normalizeWebUrl } from "@/lib/company-input";
 import type { Company } from "@/lib/types";
 import { fieldProps } from "@/lib/use-form-errors";
@@ -27,10 +27,13 @@ export function CompanyEditEditor({
   company,
   onCancel,
   onDone,
+  resubmit,
 }: {
   company: Company;
   onCancel: () => void;
   onDone: () => void;
+  /** Start from a rejected suggestion, replacing it when sent. */
+  resubmit?: { replaces: string; proposed: CompanyEditFields | null; removal: boolean; note: string | null };
 }) {
   const { t } = useTranslation();
   const id = useId();
@@ -41,14 +44,16 @@ export function CompanyEditEditor({
     linkedin: company.linkedin ?? "",
     emails: company.emails,
   };
-  const [name, setName] = useState(original.name);
-  const [website, setWebsite] = useState(original.website);
-  const [careerUrl, setCareerUrl] = useState(original.careerUrl);
-  const [linkedin, setLinkedin] = useState(original.linkedin);
-  const [emails, setEmails] = useState(original.emails.join(", "));
-  const [note, setNote] = useState("");
+  // A resubmission starts from what was proposed; untouched fields from now.
+  const start = { ...original, ...(resubmit?.proposed ?? {}) };
+  const [name, setName] = useState(start.name);
+  const [website, setWebsite] = useState(start.website);
+  const [careerUrl, setCareerUrl] = useState(start.careerUrl);
+  const [linkedin, setLinkedin] = useState(start.linkedin);
+  const [emails, setEmails] = useState((start.emails ?? []).join(", "));
+  const [note, setNote] = useState(resubmit?.note ?? "");
   // "Gone / should be removed" replaces every other change.
-  const [removal, setRemoval] = useState(false);
+  const [removal, setRemoval] = useState(resubmit?.removal ?? false);
   const [pending, setPending] = useState(false);
 
   const link = (v: string, fn: (v: string) => string | null) => (v.trim() ? fn(v) : "");
@@ -97,6 +102,7 @@ export function CompanyEditEditor({
         body: JSON.stringify({
           kind: "companyEdit",
           targetCompanyId: company._id,
+          ...(resubmit && { replaces: resubmit.replaces }),
           note: note.trim(),
           ...(removal
             ? { proposeRemoval: true }

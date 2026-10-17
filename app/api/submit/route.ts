@@ -47,7 +47,39 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+/**
+ * A resubmission of a rejected suggestion is sent as a new suggestion with
+ * `replaces: <rejected submission id>`. Once the new one is accepted, the
+ * rejected one leaves the review history and the user's list (own and
+ * rejected only), so the list shows the new attempt instead of both.
+ */
 export async function POST(req: NextRequest) {
+  const replaces = await req
+    .clone()
+    .json()
+    .then((d: unknown) => {
+      const r = (d as { replaces?: unknown } | null)?.replaces;
+      return typeof r === "string" ? r : "";
+    })
+    .catch(() => "");
+  const res = await createSubmission(req);
+  if (res.ok && replaces && isPlainId(replaces)) {
+    const user = await getSessionUser();
+    if (user) await retireRejected(replaces, user.id).catch((err) => console.error("retire failed", err));
+  }
+  return res;
+}
+
+async function retireRejected(sanityId: string, userId: string) {
+  const db = getDb();
+  const own = and(eq(submissions.userId, userId), eq(submissions.sanitySubmissionId, sanityId));
+  const [row] = await db.select({ status: submissions.status }).from(submissions).where(own).limit(1);
+  if (row?.status !== "rejected") return;
+  await writeClient.delete(sanityId).catch(() => {});
+  await db.delete(submissions).where(own);
+}
+
+async function createSubmission(req: NextRequest) {
   if (!isSameOrigin(req)) {
     return new NextResponse("Forbidden", { status: 403 });
   }
