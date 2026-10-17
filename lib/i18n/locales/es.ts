@@ -16,6 +16,8 @@ export const es = {
     linkInvalid: "Usa un enlace de esta plataforma o solo tu nombre de usuario.",
     linkPlaceholder: "Usuario o {{url}}",
     linkRemove: "Quitar {{platform}}",
+    linkUp: "Subir {{platform}}",
+    linkDown: "Bajar {{platform}}",
     photoUpload: "Subir foto",
     photoRemove: "Quitar",
     photoHint: "JPG, PNG o WebP — recortada en cuadrado. Se guarda al instante.",

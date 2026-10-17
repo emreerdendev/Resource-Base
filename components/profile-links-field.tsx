@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Plus, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SOCIAL_ICONS } from "@/components/social-icons";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { IconInput } from "@/components/ui/icon-input";
 import {
   SOCIAL_PLATFORMS,
   SOCIAL_URL_MAX,
+  insertAtDefault,
   normalizeSocialLink,
   socialPlatform,
   type SocialPlatformId,
@@ -31,7 +32,9 @@ export function linkError(row: LinkRow, t: (k: string) => string) {
 /**
  * Profile links: only the platforms the user added are shown, each as one
  * input; "Add Link" lists the rest. A username works as well as a full URL
- * for profile platforms (it's expanded on blur).
+ * for profile platforms (it's expanded on blur). The rows' order is the order
+ * on the public profile: new ones take their default spot, and the arrows
+ * move a link up or down.
  */
 export function ProfileLinksField({
   rows,
@@ -59,18 +62,49 @@ export function ProfileLinksField({
   const label = (id: SocialPlatformId) => (id === "website" ? t("profile.website") : socialPlatform(id).label);
   const set = (id: SocialPlatformId, value: string) =>
     onChange(rows.map((r) => (r.id === id ? { ...r, value } : r)));
+  const move = (from: number, to: number) => {
+    const next = [...rows];
+    [next[from], next[to]] = [next[to], next[from]];
+    onChange(next);
+  };
+  const arrow =
+    "grid h-4 w-6 cursor-pointer place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30";
 
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm font-medium">{t("profile.links")}</p>
       {rows.length === 0 && <p className="text-xs text-muted-foreground">{t("profile.linksEmpty")}</p>}
-      {rows.map((row) => {
+      {rows.map((row, i) => {
         const p = socialPlatform(row.id);
         const error = showErrors(row.id) ? linkError(row, t) : null;
         const errorId = `link-${row.id}-error`;
         return (
           <div key={row.id}>
             <div className="flex items-center gap-2">
+              {rows.length > 1 && (
+                <div className="flex shrink-0 flex-col">
+                  <button
+                    type="button"
+                    disabled={i === 0}
+                    onClick={() => move(i, i - 1)}
+                    aria-label={t("profile.linkUp", { platform: label(row.id) })}
+                    title={t("profile.linkUp", { platform: label(row.id) })}
+                    className={arrow}
+                  >
+                    <ChevronUp className="size-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={i === rows.length - 1}
+                    onClick={() => move(i, i + 1)}
+                    aria-label={t("profile.linkDown", { platform: label(row.id) })}
+                    title={t("profile.linkDown", { platform: label(row.id) })}
+                    className={arrow}
+                  >
+                    <ChevronDown className="size-3.5" />
+                  </button>
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <IconInput
                   ref={(el) => {
@@ -129,7 +163,7 @@ export function ProfileLinksField({
                   key={p.id}
                   onClick={() => {
                     focusNext.current = p.id;
-                    onChange([...rows, { id: p.id, value: "" }]);
+                    onChange(insertAtDefault(rows, { id: p.id, value: "" }));
                   }}
                 >
                   <Icon className="size-4" />

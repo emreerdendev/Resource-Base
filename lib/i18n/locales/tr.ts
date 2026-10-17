@@ -16,6 +16,8 @@ export const tr = {
     linkInvalid: "Bu platforma ait bir bağlantı ya da sadece kullanıcı adını gir.",
     linkPlaceholder: "Kullanıcı adı veya {{url}}",
     linkRemove: "{{platform}} bağlantısını kaldır",
+    linkUp: "{{platform}} bağlantısını yukarı taşı",
+    linkDown: "{{platform}} bağlantısını aşağı taşı",
     photoUpload: "Fotoğraf Yükle",
     photoRemove: "Kaldır",
     photoHint: "JPG, PNG veya WebP — kare olarak kırpılır. Hemen kaydedilir.",

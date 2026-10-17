@@ -45,12 +45,9 @@ function linksObject(rows: LinkRow[]): SocialLinks {
   return out;
 }
 
-const sameLinks = (a: LinkRow[], b: LinkRow[]) => {
-  const x = linksObject(a);
-  const y = linksObject(b);
-  const keys = new Set([...Object.keys(x), ...Object.keys(y)]) as Set<keyof SocialLinks>;
-  return [...keys].every((k) => x[k] === y[k]) && a.length === b.length;
-};
+/** Same links in the same order (the order is the profile's order). */
+const sameLinks = (a: LinkRow[], b: LinkRow[]) =>
+  a.length === b.length && JSON.stringify(linksObject(a)) === JSON.stringify(linksObject(b));
 
 export function ProfileEditForm() {
   const { t } = useTranslation();

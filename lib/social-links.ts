@@ -1,19 +1,20 @@
 import { normalizeWebUrl } from "@/lib/company-input";
 
 /**
- * Profile link platforms. Adding one is a single entry here (plus an icon in
- * components/social-icons.tsx): links are stored as one JSON object on the
- * user row, so a new platform needs no migration.
+ * Profile link platforms, in their default order. Adding one is a single entry
+ * here (plus an icon in components/social-icons.tsx): links are stored as one
+ * JSON object on the user row, so a new platform needs no migration. The
+ * object's key order is the order the user chose for their profile.
  */
 export const SOCIAL_PLATFORMS = [
   { id: "website", label: "Website", hosts: null, profile: null },
+  { id: "x", label: "X (Twitter)", hosts: ["x.com", "twitter.com"], profile: "https://x.com/{}" },
   { id: "linkedin", label: "LinkedIn", hosts: ["linkedin.com"], profile: "https://www.linkedin.com/in/{}" },
   { id: "github", label: "GitHub", hosts: ["github.com"], profile: "https://github.com/{}" },
   { id: "gitlab", label: "GitLab", hosts: ["gitlab.com"], profile: "https://gitlab.com/{}" },
   { id: "codepen", label: "CodePen", hosts: ["codepen.io"], profile: "https://codepen.io/{}" },
-  { id: "x", label: "X (Twitter)", hosts: ["x.com", "twitter.com"], profile: "https://x.com/{}" },
-  { id: "instagram", label: "Instagram", hosts: ["instagram.com"], profile: "https://www.instagram.com/{}" },
   { id: "dribbble", label: "Dribbble", hosts: ["dribbble.com"], profile: "https://dribbble.com/{}" },
+  { id: "instagram", label: "Instagram", hosts: ["instagram.com"], profile: "https://www.instagram.com/{}" },
 ] as const;
 
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
@@ -50,22 +51,30 @@ export function normalizeSocialLink(id: SocialPlatformId, raw: string): string |
   return handle && p.profile ? p.profile.replace("{}", handle[1]) : null;
 }
 
-/** Keep only known platforms with valid links, in display order. */
+/** Keep only known platforms with valid links, in the order given. */
 export function cleanSocialLinks(input: unknown): SocialLinks | "invalid" {
   if (input === null || input === undefined) return {};
   if (typeof input !== "object" || Array.isArray(input)) return "invalid";
   const out: SocialLinks = {};
-  for (const p of SOCIAL_PLATFORMS) {
-    const raw = (input as Record<string, unknown>)[p.id];
-    if (raw === undefined || raw === null || raw === "") continue;
+  for (const [id, raw] of Object.entries(input as Record<string, unknown>)) {
+    if (!isSocialPlatformId(id) || raw === undefined || raw === null || raw === "") continue;
     if (typeof raw !== "string") return "invalid";
-    const link = normalizeSocialLink(p.id, raw);
+    const link = normalizeSocialLink(id, raw);
     if (!link) return "invalid";
-    out[p.id] = link;
+    out[id] = link;
   }
   return out;
 }
 
-/** The user's links as [platform, url] pairs, in display order. */
+/** The user's links as [platform, url] pairs, in the order they chose. */
 export const socialEntries = (links: SocialLinks | null | undefined) =>
-  SOCIAL_PLATFORMS.filter((p) => links?.[p.id]).map((p) => [p, links![p.id]!] as const);
+  Object.entries(links ?? {}).flatMap(([id, url]) =>
+    isSocialPlatformId(id) && url ? [[socialPlatform(id), url] as const] : [],
+  );
+
+/** Where a newly added platform goes: its default spot among the others. */
+export function insertAtDefault<T extends { id: SocialPlatformId }>(rows: T[], row: T): T[] {
+  const rank = (id: SocialPlatformId) => SOCIAL_PLATFORMS.findIndex((p) => p.id === id);
+  const at = rows.findIndex((r) => rank(r.id) > rank(row.id));
+  return at === -1 ? [...rows, row] : [...rows.slice(0, at), row, ...rows.slice(at)];
+}

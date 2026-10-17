@@ -16,6 +16,8 @@ export const en = {
     linkInvalid: "Use a link to this platform, or just your username.",
     linkPlaceholder: "Username or {{url}}",
     linkRemove: "Remove {{platform}}",
+    linkUp: "Move {{platform}} up",
+    linkDown: "Move {{platform}} down",
     photoUpload: "Upload Photo",
     photoRemove: "Remove",
     photoHint: "JPG, PNG or WebP — cropped to a square. Saved right away.",

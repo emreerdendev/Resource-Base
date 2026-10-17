@@ -3,11 +3,11 @@ ALTER TABLE `user` ADD `social_links` text;--> statement-breakpoint
 UPDATE `user` SET `social_links` = json_remove(
   json_object(
     'website', `portfolio_url`,
+    'x', `twitter_url`,
     'linkedin', `linkedin_url`,
     'github', `github_url`,
-    'x', `twitter_url`,
-    'instagram', `instagram_url`,
-    'dribbble', `dribbble_url`
+    'dribbble', `dribbble_url`,
+    'instagram', `instagram_url`
   ),
   CASE WHEN coalesce(`portfolio_url`, '') = '' THEN '$.website' ELSE '$._' END,
   CASE WHEN coalesce(`linkedin_url`, '') = '' THEN '$.linkedin' ELSE '$._' END,
