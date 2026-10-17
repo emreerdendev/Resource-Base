@@ -21,6 +21,8 @@ export type Notification = NotificationRow;
 
 type NotificationsValue = {
   items: Notification[];
+  /** True until the signed-in user's notifications have arrived. */
+  loading: boolean;
   unread: number;
   /** Unread when this page load marked them read — still shown as new. */
   isNew: (id: string) => boolean;
@@ -79,12 +81,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const value = useMemo<NotificationsValue>(
     () => ({
       items,
+      loading: Boolean(userId) && state.userId !== userId,
       unread: unreadIds.length,
       isNew: (id) => newIds.has(id),
       markAllRead,
       reload,
     }),
-    [items, unreadIds, newIds, markAllRead, reload],
+    [items, userId, state.userId, unreadIds, newIds, markAllRead, reload],
   );
 
   return createElement(NotificationsContext.Provider, { value }, children);

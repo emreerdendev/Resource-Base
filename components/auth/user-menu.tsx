@@ -110,25 +110,13 @@ export function UserMenu() {
             <Star className="size-4" /> {t("nav.favorites")}
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {/* Contributions: what you've sent, then ways to add more. */}
         <DropdownMenuItem asChild>
           <Link href="/submissions">
             <Send className="size-4" /> {t("nav.submissions")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/notifications">
-            <Bell className="size-4" /> {t("nav.notifications")}
-            {unread > 0 && (
-              <span
-                className="ml-auto rounded-full bg-emerald-500 px-1.5 text-[11px] font-medium text-white"
-                aria-label={t("nav.unread", { count: unread })}
-              >
-                {unread}
-              </span>
-            )}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/submit?type=company">
             <Building2 className="size-4" /> {t("nav.suggestCompany")}
@@ -146,10 +134,24 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
+          <Link href="/notifications">
+            <Bell className="size-4" /> {t("nav.notifications")}
+            {unread > 0 && (
+              <span
+                className="ml-auto rounded-full bg-emerald-500 px-1.5 text-[11px] font-medium text-white"
+                aria-label={t("nav.unread", { count: unread })}
+              >
+                {unread}
+              </span>
+            )}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <Link href="/profile/edit">
             <Settings className="size-4" /> {t("nav.settings")}
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>
           <LogOut className="size-4" /> {t("nav.signOut")}
         </DropdownMenuItem>

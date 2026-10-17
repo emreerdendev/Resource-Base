@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { PricingSelect } from "@/components/pricing-select";
 import { TaxonomyProposal } from "@/components/taxonomy-proposal";
+import { ResourceGridSkeleton } from "@/components/skeletons";
 import { useSubmissions } from "@/lib/submissions";
 import { cn, favicon } from "@/lib/utils";
 import { slugify } from "@/lib/slug";
@@ -84,11 +85,7 @@ export function MySubmissions({ categories }: { categories: Category[] }) {
   const [open, setOpen] = useState<Submission | null>(null);
 
   if (loading) {
-    return (
-      <div className="py-10 text-center text-muted-foreground">
-        <Loader2 className="mx-auto size-5 animate-spin" />
-      </div>
-    );
+    return <ResourceGridSkeleton count={6} />;
   }
 
   if (items.length === 0) {

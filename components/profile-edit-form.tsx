@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { AtSign, Eye, EyeOff, Globe, Loader2, Mail, User } from "lucide-react";
+import { AtSign, Eye, EyeOff, Globe, Loader2, Mail, Settings, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LinkedinIcon } from "@/components/brand-icons";
 import { IconInput } from "@/components/ui/icon-input";
+import { PageHeader } from "@/components/page-header";
+import { FormSkeleton } from "@/components/skeletons";
 import { AccountDangerZone } from "@/components/account-danger-zone";
 import { ProfileChangePassword } from "@/components/profile-change-password";
 import { ProfileConnectedAccounts } from "@/components/profile-connected-accounts";
@@ -88,11 +90,20 @@ export function ProfileEditForm() {
     );
   }
 
+  const header = (
+    <PageHeader
+      icon={Settings}
+      title={t("profile.editTitle")}
+      description={t("profile.editSubtitle")}
+    />
+  );
+
   if (loading || !profile || !fields || !baseline) {
     return (
-      <div className="py-20 text-center text-muted-foreground">
-        <Loader2 className="mx-auto size-5 animate-spin" />
-      </div>
+      <>
+        {header}
+        <FormSkeleton fields={9} tall={[3]} />
+      </>
     );
   }
 
@@ -160,7 +171,7 @@ export function ProfileEditForm() {
   return (
     <>
     <form onSubmit={onSubmit} className="space-y-4">
-      <h1 className="text-3xl font-bold tracking-tight">{t("profile.editTitle")}</h1>
+      {header}
 
       {/* Email is read-only (managed by auth) with a public-visibility toggle. */}
       <Field label={t("profile.email")}>

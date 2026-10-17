@@ -1,6 +1,8 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { PageHeader } from "@/components/page-header";
+import { RowListSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { useNotifications, type Notification } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
@@ -72,7 +74,7 @@ function NotificationItem({ n, highlight }: { n: Notification; highlight: boolea
 export function NotificationsClient() {
   const { t } = useTranslation();
   const { user, loading, openAuth } = useAuth();
-  const { items, unread, isNew, markAllRead } = useNotifications();
+  const { items, loading: listLoading, unread, isNew, markAllRead } = useNotifications();
 
   // Opening the page reads everything — including notifications that arrive
   // after mount (they load asynchronously). They stay highlighted via isNew.
@@ -94,14 +96,15 @@ export function NotificationsClient() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="mb-8 flex items-center gap-3">
-        <Bell className="size-6 text-primary" />
-        <h1 className="text-3xl font-bold tracking-tight">
-          {t("notifications.title")}
-        </h1>
-      </div>
+      <PageHeader
+        icon={Bell}
+        title={t("notifications.title")}
+        description={t("notifications.subtitle")}
+      />
 
-      {items.length === 0 ? (
+      {loading || listLoading ? (
+        <RowListSkeleton />
+      ) : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border py-20 text-center">
           <p className="text-muted-foreground">{t("notifications.empty")}</p>
           <Button asChild className="mt-4">

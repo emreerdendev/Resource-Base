@@ -21,6 +21,7 @@ export const es = {
     noContributions: "Aún no hay contribuciones.",
     companiesAdded_one: "{{count}} empresa añadida al directorio",
     companiesAdded_other: "{{count}} empresas añadidas al directorio",
+    editSubtitle: "Elige qué ven otros en tu perfil público y gestiona tu inicio de sesión y tus datos.",
   },
 
   categories: {
@@ -203,6 +204,7 @@ export const es = {
     title: "Tus favoritos",
     empty: "Aún no has guardado ningún recurso.",
     browse: "Explorar recursos",
+    subtitle: "Los recursos que marcaste con estrella, en un solo lugar. Toca la estrella de cualquier recurso para añadirlo aquí.",
   },
 
   notifications: {
@@ -229,6 +231,7 @@ export const es = {
       company: "Puedes sugerirla de nuevo con más detalles.",
       other: "Puedes editarla y volver a enviarla.",
     },
+    subtitle: "Resultados de las empresas y recursos que sugeriste: qué se aprobó, qué correcciones se publicaron y qué necesita cambios.",
   },
 
   submit: {

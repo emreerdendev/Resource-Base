@@ -5,7 +5,7 @@ import { sanityFetch } from "@/sanity/lib/fetch";
 import { allCategoriesQuery } from "@/sanity/lib/queries";
 
 export const metadata: Metadata = {
-  title: "My submissions",
+  title: "My Submissions",
   robots: { index: false, follow: false },
 };
 

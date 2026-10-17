@@ -21,6 +21,7 @@ export const de = {
     noContributions: "Noch keine Beiträge.",
     companiesAdded_one: "{{count}} Unternehmen zum Verzeichnis hinzugefügt",
     companiesAdded_other: "{{count}} Unternehmen zum Verzeichnis hinzugefügt",
+    editSubtitle: "Lege fest, was andere auf deinem öffentlichen Profil sehen, und verwalte deine Anmeldung und deine Daten.",
   },
 
   categories: {
@@ -203,6 +204,7 @@ export const de = {
     title: "Deine Favoriten",
     empty: "Du hast noch keine Ressourcen gespeichert.",
     browse: "Ressourcen durchsuchen",
+    subtitle: "Deine mit Stern markierten Ressourcen an einem Ort. Tippe bei einer Ressource auf den Stern, um sie hier hinzuzufügen.",
   },
 
   notifications: {
@@ -229,6 +231,7 @@ export const de = {
       company: "Du kannst es mit mehr Details erneut vorschlagen.",
       other: "Du kannst es bearbeiten und erneut einreichen.",
     },
+    subtitle: "Ergebnisse zu den Unternehmen und Ressourcen, die du vorgeschlagen hast – was angenommen wurde, welche Korrekturen live sind und was noch Änderungen braucht.",
   },
 
   submit: {

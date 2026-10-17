@@ -5,7 +5,7 @@ import { sanityFetch } from "@/sanity/lib/fetch";
 import { allCompaniesQuery } from "@/sanity/lib/queries";
 
 export const metadata: Metadata = {
-  title: "My applications",
+  title: "My Applications",
   description: "Track the companies you've saved and applied to.",
   robots: { index: false, follow: false },
 };

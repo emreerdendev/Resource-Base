@@ -5,7 +5,7 @@ import { allResourcesQuery } from "@/sanity/lib/queries";
 import type { Resource } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Favorites",
+  title: "Favorite Resources",
   description: "Resources you've saved.",
   robots: { index: false, follow: false },
 };

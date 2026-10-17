@@ -2,13 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { BriefcaseBusiness, Download, Loader2, NotebookPen, Search, Trash2 } from "lucide-react";
+import { BriefcaseBusiness, Download, NotebookPen, Search, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
 import { CompanyLogo } from "@/components/company-logo";
 import { CompanyModal } from "@/components/company-modal";
 import { CompanyStatusMenu, STATUS_STYLES } from "@/components/company-status-menu";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
+import { TrackerSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { TrackedCompany } from "@/lib/company-actions";
@@ -136,11 +137,7 @@ export function ApplicationsTracker({ companies }: { companies: Company[] }) {
     );
   }
   if (loading || authLoading) {
-    return (
-      <div className="py-16 text-center text-muted-foreground">
-        <Loader2 className="mx-auto size-5 animate-spin" />
-      </div>
-    );
+    return <TrackerSkeleton />;
   }
   if (items.length === 0) {
     return (

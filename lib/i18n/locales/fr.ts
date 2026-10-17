@@ -21,6 +21,7 @@ export const fr = {
     noContributions: "Aucune contribution pour le moment.",
     companiesAdded_one: "{{count}} entreprise ajoutée à l’annuaire",
     companiesAdded_other: "{{count}} entreprises ajoutées à l’annuaire",
+    editSubtitle: "Choisis ce que les autres voient sur ton profil public et gère ta connexion et tes données.",
   },
 
   categories: {
@@ -203,6 +204,7 @@ export const fr = {
     title: "Vos favoris",
     empty: "Vous n'avez encore enregistré aucune ressource.",
     browse: "Parcourir les ressources",
+    subtitle: "Les ressources que tu as mises en favori, réunies au même endroit. Touche l’étoile d’une ressource pour l’ajouter ici.",
   },
 
   notifications: {
@@ -229,6 +231,7 @@ export const fr = {
       company: "Tu peux la suggérer à nouveau avec plus de détails.",
       other: "Tu peux la modifier et la renvoyer.",
     },
+    subtitle: "Les résultats pour les entreprises et ressources que tu as suggérées : ce qui a été accepté, les corrections publiées et ce qui doit être revu.",
   },
 
   submit: {

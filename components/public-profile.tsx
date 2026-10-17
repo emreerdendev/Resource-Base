@@ -12,6 +12,7 @@ import { useCompanyTracker } from "@/components/company-tracker-provider";
 import { ResourceGrid } from "@/components/resource-grid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { contributorTier } from "@/lib/contributor-tier";
 import { initial } from "@/lib/initial";
 import { fetchPublicEmail } from "@/lib/profile";
@@ -213,11 +214,11 @@ export function PublicProfileView({
 /** Links to the owner's applications and submissions, with live counts. */
 function OwnerActivity() {
   const { t } = useTranslation();
-  const { items: tracked } = useCompanyTracker();
-  const { items: submitted } = useSubmissions();
+  const { items: tracked, loading: trackedLoading } = useCompanyTracker();
+  const { items: submitted, loading: submittedLoading } = useSubmissions();
   const cards = [
-    { href: "/applications", icon: BriefcaseBusiness, label: t("nav.applications"), count: tracked.length },
-    { href: "/submissions", icon: Send, label: t("nav.submissions"), count: submitted.length },
+    { href: "/applications", icon: BriefcaseBusiness, label: t("nav.applications"), count: trackedLoading ? null : tracked.length },
+    { href: "/submissions", icon: Send, label: t("nav.submissions"), count: submittedLoading ? null : submitted.length },
   ];
   return (
     <div className="mt-10 grid gap-3 sm:grid-cols-2">
@@ -229,7 +230,11 @@ function OwnerActivity() {
         >
           <Icon className="size-5 text-primary" />
           <span className="flex-1 font-medium">{label}</span>
-          <span className="text-lg font-semibold tabular-nums">{count}</span>
+          {count === null ? (
+            <Skeleton className="h-6 w-6" />
+          ) : (
+            <span className="text-lg font-semibold tabular-nums">{count}</span>
+          )}
           <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
         </Link>
       ))}
