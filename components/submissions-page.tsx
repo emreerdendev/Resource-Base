@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building2, Plus, Send } from "lucide-react";
+import { Building2, FileText, Plus, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MySubmissions } from "@/components/my-submissions";
@@ -22,14 +22,20 @@ export function SubmissionsPageView({ categories }: { categories: Category[] }) 
         actions={
           user && (
             <>
+              {/* Same order as everywhere: resources, companies, CVs. */}
               <Button asChild size="sm" variant="outline">
-                <Link href="/submit?type=company">
+                <Link href="/submit/resource">
+                  <Plus className="size-3.5" /> {t("nav.submit")}
+                </Link>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/submit/company">
                   <Building2 className="size-3.5" /> {t("nav.suggestCompany")}
                 </Link>
               </Button>
               <Button asChild size="sm" variant="outline">
-                <Link href="/submit">
-                  <Plus className="size-3.5" /> {t("nav.submit")}
+                <Link href="/profile/edit?tab=cv">
+                  <FileText className="size-3.5" /> {t("cvs.share")}
                 </Link>
               </Button>
             </>

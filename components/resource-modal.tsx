@@ -23,6 +23,7 @@ import type { Resource } from "@/lib/types";
 import { cn, favicon } from "@/lib/utils";
 import {
   ExternalLink,
+  X,
   Info,
   Clock,
   Loader2,
@@ -310,7 +311,16 @@ export function ResourceModal({
           <div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
             <div className="flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400">
               <Clock className="size-3.5" />
-              {t("taxonomy.yourSuggestion")}
+              <span className="flex-1">{t("taxonomy.yourSuggestion")}</span>
+              <button
+                type="button"
+                onClick={() => setTaxViewOpen(false)}
+                aria-label={t("taxonomy.close")}
+                title={t("taxonomy.close")}
+                className="-m-1 grid size-6 cursor-pointer place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <X className="size-3.5" />
+              </button>
             </div>
             <TaxonomyProposal
               categoriesLabel={t("modal.categories")}
@@ -331,14 +341,6 @@ export function ResourceModal({
               resolveCategory={titleForCat}
               resolveTag={titleForTag}
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setTaxViewOpen(false)}
-            >
-              {t("taxonomy.close")}
-            </Button>
           </div>
         ) : (
           (resource.categories?.length > 0 || resource.tags?.length > 0) && (

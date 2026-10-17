@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, EyeOff, FileText, Heart, Loader2, Upload, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, EyeOff, FileText, Heart, Loader2, Send, Upload, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
 import { FormField } from "@/components/form-field";
@@ -109,6 +109,11 @@ export function MyCvPanel() {
               <a href={`/api/cv/${cv.id}/file`} target="_blank" rel="noopener noreferrer">
                 {t("myCv.view")}
               </a>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/submissions">
+                <Send className="size-3.5" /> {t("myCv.track")}
+              </Link>
             </Button>
             {cv.status === "published" && (
               <Button size="sm" variant="outline" disabled={busy} onClick={() => setListed(false)}>
