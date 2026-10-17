@@ -12,6 +12,7 @@ import { useCompanyTracker } from "@/components/company-tracker-provider";
 import { TrackerSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SortSelect } from "@/components/ui/sort-select";
 import type { TrackedCompany } from "@/lib/company-actions";
 import { createCompanySearch } from "@/lib/company-search";
 import { toCsv } from "@/lib/csv";
@@ -185,18 +186,17 @@ export function ApplicationsTracker({ companies }: { companies: Company[] }) {
             className="pl-9"
           />
         </div>
-        <select
+        <SortSelect
           value={sort}
           onChange={(e) => setSort(e.target.value as SortKey)}
           aria-label={t("tracker.sort.label")}
-          className="h-9 cursor-pointer rounded-md border border-input bg-background px-2 text-sm"
         >
           {SORTS.map((k) => (
             <option key={k} value={k}>
               {t(`tracker.sort.${k}`)}
             </option>
           ))}
-        </select>
+        </SortSelect>
         {rows.length > 0 && (
           <Button variant="outline" onClick={exportCsv}>
             <Download className="size-4" /> {t("tracker.exportCsv")}

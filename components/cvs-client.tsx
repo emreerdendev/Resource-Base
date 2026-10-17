@@ -16,6 +16,7 @@ import { ResourceGridSkeleton } from "@/components/skeletons";
 import { SubmitCta } from "@/components/submit-cta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SortSelect } from "@/components/ui/sort-select";
 import { CV_FIELDS, CV_LANGUAGES, CV_SENIORITIES } from "@/lib/cv-taxonomy";
 import { loadCvListing } from "@/lib/cv-listing";
 import { createSearch } from "@/lib/search";
@@ -202,15 +203,14 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
                 </span>
               )}
             </Button>
-            <select
+            <SortSelect
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
               aria-label={t("cvs.sort.label")}
-              className="cursor-pointer rounded-md border border-border bg-background px-3 text-sm"
             >
               <option value="newest">{t("cvs.sort.newest")}</option>
               <option value="popular">{t("cvs.sort.popular")}</option>
-            </select>
+            </SortSelect>
           </div>
 
           {showFilters && (

@@ -8,6 +8,7 @@ import { SubmitCta } from "@/components/submit-cta";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SortSelect } from "@/components/ui/sort-select";
 import { createResourceSearch } from "@/lib/resource-search";
 import type { Category, Resource, Tag } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -242,10 +243,9 @@ export function BrowseClient({
               <SlidersHorizontal className="size-4" />
               {t("browse.filters")}
             </Button>
-            <select
+            <SortSelect
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
-              className="cursor-pointer rounded-md border border-border bg-background px-3 text-sm"
               aria-label={t("browse.sort.featured")}
             >
               <option value="featured">{t("browse.sort.featured")}</option>
@@ -254,7 +254,7 @@ export function BrowseClient({
               <option value="name">{t("browse.sort.name")}</option>
               <option value="name-desc">{t("browse.sort.nameDesc")}</option>
               <option value="recent">{t("browse.sort.recent")}</option>
-            </select>
+            </SortSelect>
           </div>
 
           {showFilters && (
