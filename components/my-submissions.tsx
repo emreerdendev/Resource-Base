@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
+  ArrowRight,
   ArrowUpRight,
   FileText,
   Building2,
@@ -91,12 +92,12 @@ const GROUPS: Group[] = ["resources", "edits", "companies", "cv"];
 const groupOf = (s: Submission): Exclude<Group, "cv"> =>
   s.kind === "company" ? "companies" : s.kind === "new" ? "resources" : "edits";
 
-/** CV statuses shown with the same badge styles as submissions. */
-const CV_BADGE: Record<string, SubmissionStatus> = {
-  pending: "pending",
-  published: "approved",
-  rejected: "rejected",
-  hidden: "approved",
+/** CV status badge colours, matching the submission ones. */
+const CV_STYLE: Record<string, string> = {
+  pending: STATUS_STYLE.pending,
+  published: STATUS_STYLE.approved,
+  rejected: STATUS_STYLE.rejected,
+  hidden: "border-border bg-muted text-muted-foreground",
 };
 
 /**
@@ -219,9 +220,10 @@ export function MySubmissions({ categories }: { categories: Category[] }) {
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {g === "cv" && cv ? (
+                // One CV per user, so it gets a wider card with its details.
                 <Link
                   href="/profile/edit?tab=cv"
-                  className="card-hover group flex items-center gap-3 rounded-xl border border-border bg-card p-4"
+                  className="card-hover group col-span-full flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center"
                 >
                   <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
                     <FileText className="size-5" />
@@ -230,14 +232,20 @@ export function MySubmissions({ categories }: { categories: Category[] }) {
                     <span className="block truncate font-medium leading-tight group-hover:underline">
                       {cv.title}
                     </span>
-                    {/* "Approved" covers listed and unlisted; say which. */}
-                    {cv.status === "hidden" && (
-                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                        {t("myCv.status.hidden")}
-                      </span>
-                    )}
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {t(`cvs.field.${cv.field}`)} · {t(`cvs.seniority.${cv.seniority}`)} ·{" "}
+                      {t(`cvs.language.${cv.language}`)}
+                    </span>
+                    <span className="mt-1.5 block text-sm text-muted-foreground">
+                      {t(`myCv.statusHint.${cv.status}`)}
+                    </span>
                   </span>
-                  <StatusBadge status={CV_BADGE[cv.status] ?? "pending"} />
+                  <span className="flex shrink-0 items-center gap-3">
+                    <Badge variant="outline" className={cn("gap-1", CV_STYLE[cv.status])}>
+                      {t(`myCv.status.${cv.status}`)}
+                    </Badge>
+                    <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                  </span>
                 </Link>
               ) : (
                 items.filter((s) => groupOf(s) === g).map(card)
