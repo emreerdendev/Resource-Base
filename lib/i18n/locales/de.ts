@@ -285,6 +285,14 @@ export const de = {
       companies: "Unternehmen",
       cv: "Lebenslauf",
     },
+    withdraw: "Vorschlag zurückziehen",
+    remove: "Aus meiner Liste entfernen",
+    withdrawConfirm: "Diesen Vorschlag zurückziehen? Er verlässt die Prüfwarteschlange und kann nicht wiederhergestellt werden.",
+    removeConfirm: "Diesen abgelehnten Vorschlag aus deiner Liste entfernen?",
+    withdrawn: "Vorschlag zurückgezogen.",
+    removed: "Aus deiner Liste entfernt.",
+    alreadyApproved: "Dieser Vorschlag wurde gerade angenommen und kann nicht mehr zurückgezogen werden.",
+    withdrawError: "Konnte nicht zurückgezogen werden. Bitte versuche es erneut.",
   },
 
   auth: {

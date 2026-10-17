@@ -285,6 +285,14 @@ export const tr = {
       companies: "Şirketler",
       cv: "CV",
     },
+    withdraw: "Öneriyi Geri Çek",
+    remove: "Listemden Kaldır",
+    withdrawConfirm: "Bu öneri geri çekilsin mi? İnceleme kuyruğundan çıkar ve geri getirilemez.",
+    removeConfirm: "Reddedilen bu öneri listenden kaldırılsın mı?",
+    withdrawn: "Öneri geri çekildi.",
+    removed: "Listenden kaldırıldı.",
+    alreadyApproved: "Bu öneri az önce onaylandı, bu yüzden geri çekilemez.",
+    withdrawError: "Geri çekilemedi. Lütfen tekrar dene.",
   },
 
   auth: {

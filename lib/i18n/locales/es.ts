@@ -285,6 +285,14 @@ export const es = {
       companies: "Empresas",
       cv: "CV",
     },
+    withdraw: "Retirar sugerencia",
+    remove: "Quitar de mi lista",
+    withdrawConfirm: "¿Retirar esta sugerencia? Sale de la cola de revisión y no se puede recuperar.",
+    removeConfirm: "¿Quitar esta sugerencia rechazada de tu lista?",
+    withdrawn: "Sugerencia retirada.",
+    removed: "Quitada de tu lista.",
+    alreadyApproved: "Esta sugerencia se acaba de aprobar, así que ya no se puede retirar.",
+    withdrawError: "No se pudo retirar. Inténtalo de nuevo.",
   },
 
   auth: {

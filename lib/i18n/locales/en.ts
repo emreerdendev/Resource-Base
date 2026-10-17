@@ -285,6 +285,14 @@ export const en = {
       companies: "Companies",
       cv: "CV",
     },
+    withdraw: "Withdraw Submission",
+    remove: "Remove from My List",
+    withdrawConfirm: "Withdraw this submission? It leaves the review queue and can’t be restored.",
+    removeConfirm: "Remove this rejected submission from your list?",
+    withdrawn: "Submission withdrawn.",
+    removed: "Removed from your list.",
+    alreadyApproved: "This submission was just approved, so it can’t be withdrawn.",
+    withdrawError: "Couldn’t withdraw it. Please try again.",
   },
 
   auth: {

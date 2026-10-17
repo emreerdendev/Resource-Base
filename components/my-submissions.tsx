@@ -7,6 +7,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   FileText,
+  Trash2,
   Building2,
   CheckCircle2,
   Clock,
@@ -36,6 +37,7 @@ import { normalizeWebUrl } from "@/lib/company-input";
 import { fieldProps } from "@/lib/use-form-errors";
 import { useAuth } from "@/components/auth/auth-provider";
 import { getMyCv, type MyCv } from "@/lib/cv-actions";
+import { withdrawSubmission } from "@/lib/data-actions";
 import { useSubmissions } from "@/lib/submissions";
 import { cn, favicon } from "@/lib/utils";
 import { slugify } from "@/lib/slug";
@@ -310,6 +312,36 @@ function SubmissionDialog({
     );
   }
 
+  const [withdrawing, setWithdrawing] = useState(false);
+  async function withdraw() {
+    if (!submission) return;
+    const pendingOne = submission.status === "pending";
+    if (!window.confirm(t(pendingOne ? "submissions.withdrawConfirm" : "submissions.removeConfirm"))) return;
+    setWithdrawing(true);
+    try {
+      const res = await withdrawSubmission(submission.id);
+      if (!res.ok) {
+        toast.error(
+          t(
+            res.error === "approved"
+              ? "submissions.alreadyApproved"
+              : res.error === "rate_limited"
+                ? "card.favoriteRateLimited"
+                : "submissions.withdrawError",
+          ),
+        );
+        if (res.error === "approved") onDone(); // refresh to show the new status
+        return;
+      }
+      toast.success(t(pendingOne ? "submissions.withdrawn" : "submissions.removed"));
+      onDone();
+    } catch {
+      toast.error(t("submissions.withdrawError"));
+    } finally {
+      setWithdrawing(false);
+    }
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!submission) return;
@@ -541,6 +573,19 @@ function SubmissionDialog({
                     {s.status === "rejected"
                       ? t("submissions.editResubmit")
                       : t("submissions.edit")}
+                  </Button>
+                )}
+                {/* Changed your mind? Pending ones leave the review queue;
+                    rejected ones just leave your list. Approved ones are live. */}
+                {s.status !== "approved" && (
+                  <Button
+                    variant="ghost"
+                    className="w-full text-destructive hover:text-destructive"
+                    disabled={withdrawing}
+                    onClick={withdraw}
+                  >
+                    {withdrawing ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                    {t(s.status === "pending" ? "submissions.withdraw" : "submissions.remove")}
                   </Button>
                 )}
               </>

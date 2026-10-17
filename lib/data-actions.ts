@@ -10,6 +10,7 @@ import {
 import { getSessionUser, requireUser } from "@/lib/authz";
 import { overLimit } from "@/lib/rate-limit";
 import { isResourceId } from "@/sanity/lib/slugs";
+import { writeClient } from "@/sanity/lib/writeClient";
 
 /* ----------------------------- favorites (own) ---------------------------- */
 
@@ -166,4 +167,37 @@ export async function listSubmissions(): Promise<SubmissionRow[]> {
     created_at: r.createdAt.toISOString(),
     updated_at: r.updatedAt ? r.updatedAt.toISOString() : null,
   }));
+}
+
+/**
+ * Withdraw a pending submission or clear a rejected one: removes it from the
+ * Sanity review queue and from the user's list. Approved submissions are live
+ * and stay. Own rows only.
+ */
+export async function withdrawSubmission(
+  id: string,
+): Promise<{ ok: true } | { ok: false; error: "invalid" | "approved" | "rate_limited" }> {
+  const me = await requireUser();
+  if (typeof id !== "string" || !/^[0-9a-f-]{36}$/.test(id)) return { ok: false, error: "invalid" };
+  if (await overLimit("RL_USER", `withdraw:${me.id}`)) return { ok: false, error: "rate_limited" };
+  const db = getDb();
+  const own = and(eq(submissions.id, id), eq(submissions.userId, me.id));
+  const [row] = await db
+    .select({ status: submissions.status, sanityId: submissions.sanitySubmissionId })
+    .from(submissions)
+    .where(own)
+    .limit(1);
+  if (!row) return { ok: false, error: "invalid" };
+  if (row.status === "approved") return { ok: false, error: "approved" };
+  if (row.sanityId) {
+    // Re-check in Sanity: an editor may have approved it a moment ago.
+    const doc = await writeClient.fetch<{ status?: string; submittedBy?: string } | null>(
+      `*[_type == "submission" && _id == $id][0]{ status, submittedBy }`,
+      { id: row.sanityId },
+    );
+    if (doc?.status === "approved") return { ok: false, error: "approved" };
+    if (doc && doc.submittedBy === me.id) await writeClient.delete(row.sanityId);
+  }
+  await db.delete(submissions).where(own);
+  return { ok: true };
 }
