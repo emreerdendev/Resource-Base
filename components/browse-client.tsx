@@ -242,6 +242,7 @@ export function BrowseClient({
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t("browse.searchPlaceholder")}
+                aria-label={t("browse.searchPlaceholder")}
                 className="pl-9"
               />
             </div>
@@ -249,6 +250,7 @@ export function BrowseClient({
               variant="outline"
               onClick={() => setShowFilters((s) => !s)}
               className={cn(showFilters && "border-primary text-primary")}
+              aria-expanded={showFilters}
             >
               <SlidersHorizontal className="size-4" />
               {t("browse.filters")}
@@ -256,7 +258,7 @@ export function BrowseClient({
             <SortSelect
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
-              aria-label={t("browse.sort.featured")}
+              aria-label={t("browse.sort.label")}
             >
               <option value="featured">{t("browse.sort.featured")}</option>
               <option value="popular">{t("browse.sort.popular")}</option>
@@ -332,13 +334,16 @@ export function BrowseClient({
                 <X className="size-3.5" /> {t("browse.clear")}
               </Button>
               {activeTags.map((slug) => (
-                <Badge
-                  key={slug}
-                  variant="secondary"
-                  className="cursor-pointer"
-                  onClick={() => toggleTag(slug)}
-                >
-                  {tags.find((x) => x.slug === slug)?.title ?? slug} ×
+                <Badge key={slug} asChild variant="secondary" className="cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => toggleTag(slug)}
+                    aria-label={t("companies.removeFilter", {
+                      filter: tags.find((x) => x.slug === slug)?.title ?? slug,
+                    })}
+                  >
+                    {tags.find((x) => x.slug === slug)?.title ?? slug} ×
+                  </button>
                 </Badge>
               ))}
             </div>

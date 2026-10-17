@@ -4,9 +4,9 @@ export const tr = {
     editTitle: "Profili Düzenle",
     signInPrompt: "Profilini düzenlemek için giriş yap.",
     email: "E-posta",
-    emailPublic: "Herkese açık",
+    emailPublic: "Herkese Açık",
     emailHidden: "Gizli",
-    username: "Kullanıcı adı",
+    username: "Kullanıcı Adı",
     fullName: "Ad Soyad",
     bio: "Biyografi",
     website: "Web Sitesi",
@@ -94,7 +94,7 @@ export const tr = {
     summary: "{{categories}} kategoride {{resources}} kaynak.",
     searchPlaceholder: "İsim, etiket, açıklamaya göre ara…",
     filters: "Filtreler",
-    sort: { featured: "Öne Çıkanlar", popular: "En Popüler", favorites: "En Çok Favorilenenler", name: "İsim A→Z", nameDesc: "İsim Z→A", recent: "Son Eklenenler" },
+    sort: { label: "Sırala", featured: "Öne Çıkanlar", popular: "En Popüler", favorites: "En Çok Favorilenenler", name: "İsim A→Z", nameDesc: "İsim Z→A", recent: "Son Eklenenler" },
     facet: { category: "Kategori", pricing: "Fiyat", language: "Dil", tags: "Etiketler" },
     results: "{{count}} sonuç",
     clear: "Temizle",
@@ -105,13 +105,13 @@ export const tr = {
     page: "Sayfa {{page}} / {{total}}",
   },
 
-  pricing: { free: "Ücretsiz", freemium: "Ücretsiz seçenek", paid: "Ücretli" },
+  pricing: { free: "Ücretsiz", freemium: "Ücretsiz Seçenek", paid: "Ücretli" },
   languages: { en: "İngilizce", tr: "Türkçe" },
 
   card: {
     addedBy: "@{{username}} ekledi",
     by: "{{author}} tarafından",
-    broken: "kırık",
+    broken: "Kırık",
     addFavorite: "Favorilere ekle",
     removeFavorite: "Favorilerden çıkar",
     signInToSave: "Kaydetmek için Giriş Yap",
@@ -123,7 +123,6 @@ export const tr = {
 
   modal: {
     close: "Kapat",
-    open: "Kaynağı Aç",
     details: "Detaylar",
     viewDetails: "Detayları Gör",
     noDescription: "Açıklama bulunmuyor.",
@@ -140,7 +139,6 @@ export const tr = {
   },
 
   taxonomy: {
-    editCta: "Düzenleme Öner",
     description: "Açıklama",
     descriptionPlaceholder: "Daha açık veya daha eksiksiz bir açıklama öner…",
     pendingSuggestion: "Önerin Beklemede",
@@ -171,7 +169,7 @@ export const tr = {
     count_one: "{{count}} katkı",
     count_other: "{{count}} katkı",
     tier: {
-      newcomer: "Yeni katkıcı",
+      newcomer: "Yeni Katkıcı",
       contributor: "Katkıcı",
       star: "Yıldız Katkıcı",
       legend: "Efsane",
@@ -270,6 +268,7 @@ export const tr = {
     title: "Kaynak Ekle",
     subtitle: "Dizinde eksik olan bir kaynağı öner. Her gönderi yayınlanmadan önce incelenir.",
     name: "İsim",
+    namePlaceholder: "örn. Tailwind CSS",
     url: "URL",
     category: "Kategori",
     selectCategory: "Bir kategori seç…",
@@ -287,7 +286,6 @@ export const tr = {
   },
 
   submissions: {
-    company: "Şirket Önerisi",
     title: "Önerilerim",
     empty: "Henüz bir şey önermedin.",
     status: { pending: "Beklemede", approved: "Onaylandı", rejected: "Reddedildi" },
@@ -299,7 +297,7 @@ export const tr = {
     taxonomyFix: "Düzenleme Önerisi",
     companyEdit: "Şirket Düzeltmesi",
     editResubmit: "Düzenle ve Tekrar Gönder",
-    resubmit: "Tekrar gönder",
+    resubmit: "Tekrar Gönder",
     resubmitSuccess: "Tekrar gönderildi! İnceleme sırasına alındı.",
     resubmitError: "Tekrar gönderilemedi. Lütfen tekrar dene.",
     subtitle: "İncelemeye gönderdiğin her şey — yeni kaynaklar, düzenleme önerileri, şirketler ve CV'n — her birinin inceleme durumuyla.",
@@ -335,7 +333,7 @@ export const tr = {
     signUp: "Kayıt Ol",
     createAccount: "Hesap Oluştur",
     emailPlaceholder: "sen@ornek.com",
-    usernamePlaceholder: "Kullanıcı adı",
+    usernamePlaceholder: "Kullanıcı Adı",
     usernameInvalid: "Kullanıcı adı 3–20 harf veya rakamdan oluşmalı (boşluk ve sembol olmadan).",
     passwordPlaceholder: "Şifre",
     welcomeBack: "Tekrar hoş geldin!",
@@ -345,7 +343,6 @@ export const tr = {
     userExists: "Bu e-postayla bir hesap zaten var. Giriş yapmayı dene.",
     disposableEmail: "Lütfen kalıcı bir e-posta adresi kullan — geçici e-posta adresleri kabul edilmiyor.",
     signupsPaused: "Yeni kayıtlar kısa bir süreliğine durduruldu. Lütfen daha sonra tekrar dene.",
-    usernameTaken: "Bu kullanıcı adı zaten alınmış",
     forgotPassword: "Şifreni mi unuttun?",
     forgotTitle: "Şifreni Sıfırla",
     forgotSubtitle: "E-postanı gir, sana bir sıfırlama bağlantısı gönderelim.",
@@ -390,8 +387,6 @@ export const tr = {
     setPasswordHint:
       "Sosyal bir sağlayıcıyla kayıt oldun. E-postanla da giriş yapabilmek için bir şifre ekle — sosyal girişlerin çalışmaya devam eder.",
     passwordSet: "Şifre oluşturuldu. Artık e-postanla da giriş yapabilirsin.",
-    noPasswordSet:
-      "Bir sosyal sağlayıcı ile giriş yapıyorsun, bu yüzden değiştirilecek bir şifre yok.",
     connectedAccounts: "Bağlı Hesaplar",
     connectedAccountsHint:
       "Sağlayıcıları bağlayarak herhangi biriyle giriş yapabilirsin. E-posta/şifre de bir yöntem sayılır.",
@@ -417,7 +412,7 @@ export const tr = {
   consent: {
     message:
       "Siteyi geliştirmek için anonim analitik amacıyla çerez kullanıyoruz. Ayrıntılar:",
-    accept: "Kabul et",
+    accept: "Kabul Et",
     decline: "Reddet",
   },
 
@@ -439,7 +434,7 @@ export const tr = {
   theme: {
     toLight: "Açık temaya geç",
     toDark: "Koyu temaya geç",
-    toggle: "Temayı değiştir",
+    toggle: "Temayı Değiştir",
   },
 
   companies: {
@@ -492,7 +487,7 @@ export const tr = {
       cybersecurity: "Siber güvenlik",
       defense: "Savunma",
       consulting: "Danışmanlık / Dış Kaynak",
-      recruitment: "İşe alım / İK",
+      recruitment: "İşe Alım / İK",
       telecom: "Telekom",
       health: "Sağlık",
       media: "Medya",
@@ -596,6 +591,7 @@ export const tr = {
     removedTitle: "Artık Listede Yok ({{count}})",
     removedHint: "Bu şirketler dizinden kaldırıldı. Durumların ve notların sen kaldırana kadar saklanır.",
     exportCsv: "CSV Olarak Dışa Aktar",
+    csv: {company: "Şirket", status: "Durum", note: "Not", updated: "Güncellendi"},
   },
 
   suggest: {
@@ -612,6 +608,7 @@ export const tr = {
     title: "Şirket Öner",
     subtitle: "Dizinde eksik olan bir şirketi, nasıl başvurulacağıyla birlikte öner. Her öneri yayınlanmadan önce incelenir.",
     name: "Şirket Adı",
+    namePlaceholder: "örn. Acme Teknoloji",
     waysHint: "En az birini ekle: başvuru e-postası, kariyer sayfası, LinkedIn veya web sitesi.",
     emails: "Başvuru E-postaları",
     emailsPlaceholder: "Başvuru e-postaları, virgülle ayır (ör. kariyer@acme.com)",
@@ -629,7 +626,6 @@ export const tr = {
   },
 
   cvs: {
-    title: "CV'ler",
     subtitle: "Topluluğun paylaştığı CV'ler. Başvurduğun role yakın örnekler bulmak için alana, seviyeye, dile veya teknolojiye göre filtrele.",
     searchPlaceholder: "Rol veya teknolojiye göre ara…",
     filter: {
@@ -693,14 +689,12 @@ export const tr = {
     download: "İndir",
     report: "Bildir",
     similar: "Benzer CV'ler",
-    close: "Kapat",
     previewError: "CV burada gösterilemedi — yeni sekmede aç veya indir.",
     disclaimer: "CV'ler sahipleri tarafından paylaşılır ve Resource Base tarafından doğrulanmaz. Örnek olarak kullan; birinin CV'sini kopyalamak veya sahibine spam amaçlı ulaşmak yasaktır.",
     badge: "{{count}} CV",
   },
 
   myCv: {
-    title: "CV'm",
     subtitle: "CV'ni paylaş, başkaları da faydalansın. Listelenmeden önce incelenir, yalnızca giriş yapan kullanıcılar açabilir ve istediğin zaman listeden kaldırabilir ya da silebilirsin.",
     status: {
       pending: "İncelemede",
@@ -758,7 +752,6 @@ export const tr = {
     required: "Bu alan zorunlu.",
     choose: "Lütfen bir seçenek seç.",
     tooShort: "En az {{min}} karakter gir.",
-    tooLong: "En fazla {{max}} karakter girebilirsin.",
     url: "Geçerli bir web adresi gir, örn. https://example.com",
     email: "Geçerli bir e-posta adresi gir.",
     username: "3–20 harf veya rakam, sembol yok. Emre ile emre aynı ad sayılır.",

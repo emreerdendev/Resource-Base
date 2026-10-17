@@ -14,6 +14,7 @@ import { TaxonomyProposal } from "@/components/taxonomy-proposal";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -210,6 +211,10 @@ export function ResourceModal({
                 {t("card.by", { author: resource.author })}
               </p>
             )}
+            {/* For screen readers; the description is shown in the body. */}
+            <DialogDescription className="sr-only">
+              {resource.description || resource.name}
+            </DialogDescription>
           </div>
         </DialogHeader>
 
@@ -429,6 +434,7 @@ export function ResourceModal({
                   <img
                     src={contributor.avatar_url}
                     alt={contributor.username}
+                    referrerPolicy="no-referrer"
                     className="size-4 rounded-full object-cover"
                   />
                 ) : null}
@@ -455,7 +461,7 @@ export function ResourceModal({
             {user && submissionsLoading ? (
               <Button variant="outline" size="lg" disabled>
                 <Loader2 className="animate-spin" />
-                {t("taxonomy.editCta")}
+                <span className="truncate">{t("taxonomy.editShort")}</span>
               </Button>
             ) : pendingTaxFix ? (
               <Button

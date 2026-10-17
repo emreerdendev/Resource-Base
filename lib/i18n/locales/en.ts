@@ -23,7 +23,7 @@ export const en = {
     photoHint: "JPG, PNG or WebP — cropped to a square. Saved right away.",
     photoSaved: "Profile photo updated.",
     photoRemoved: "Profile photo removed.",
-    photoError: "Couldn't update your photo. Please try again.",
+    photoError: "Couldn’t update your photo. Please try again.",
     photoInvalid: "Choose an image file (JPG, PNG or WebP, up to 10 MB).",
     save: "Save Profile",
     saved: "Profile saved.",
@@ -94,7 +94,7 @@ export const en = {
     summary: "{{resources}} resources across {{categories}} categories.",
     searchPlaceholder: "Search by name, tag, description…",
     filters: "Filters",
-    sort: { featured: "Featured", popular: "Most Popular", favorites: "Most Favorited", name: "Name A→Z", nameDesc: "Name Z→A", recent: "Recently Added" },
+    sort: { label: "Sort", featured: "Featured", popular: "Most Popular", favorites: "Most Favorited", name: "Name A→Z", nameDesc: "Name Z→A", recent: "Recently Added" },
     facet: { category: "Category", pricing: "Pricing", language: "Language", tags: "Tags" },
     results: "{{count}} results",
     clear: "Clear",
@@ -105,17 +105,17 @@ export const en = {
     page: "Page {{page}} of {{total}}",
   },
 
-  pricing: { free: "Free", freemium: "Free option", paid: "Paid" },
+  pricing: { free: "Free", freemium: "Free Option", paid: "Paid" },
   languages: { en: "English", tr: "Turkish" },
 
   card: {
     addedBy: "added by @{{username}}",
     by: "by {{author}}",
-    broken: "broken",
+    broken: "Broken",
     addFavorite: "Add favorite",
     removeFavorite: "Remove favorite",
     signInToSave: "Sign In to Save",
-    favoriteError: "Couldn't update favorite. Please try again.",
+    favoriteError: "Couldn’t update favorite. Please try again.",
     favoriteRateLimited: "Slow down a moment, then try again.",
     favorite: "Favorite",
     favorited: "Favorited",
@@ -123,7 +123,6 @@ export const en = {
 
   modal: {
     close: "Close",
-    open: "Open Resource",
     details: "Details",
     viewDetails: "View Details",
     noDescription: "No description available.",
@@ -132,7 +131,7 @@ export const en = {
     fixLabel: "Correct URL",
     fixSubmit: "Submit Fix",
     fixSuccess: "Thanks! Your fix is in the review queue.",
-    fixError: "Couldn't submit your fix. Please try again.",
+    fixError: "Couldn’t submit your fix. Please try again.",
     categories: "Categories",
     tags: "Tags",
     addedOn: "Added {{date}}",
@@ -140,7 +139,6 @@ export const en = {
   },
 
   taxonomy: {
-    editCta: "Suggest Edit",
     description: "Description",
     descriptionPlaceholder: "Suggest a clearer or more complete description…",
     pendingSuggestion: "Suggestion Pending",
@@ -154,7 +152,7 @@ export const en = {
     atLeastOne: "Add at least one category or tag.",
     pendingText: "Add or clear the text in the input first.",
     success: "Thanks! Your suggestion is in the review queue.",
-    error: "Couldn't submit your suggestion. Please try again.",
+    error: "Couldn’t submit your suggestion. Please try again.",
     removal: "This resource no longer exists or should be removed",
     removalHint: "Reports it to the editors instead of suggesting changes.",
     removalReason: "Why? (optional)",
@@ -180,12 +178,12 @@ export const en = {
 
   cta: {
     company: {
-      title: "Know a company we're missing?",
+      title: "Know a company we’re missing?",
       subtitle: "Suggest it with how to apply. Every suggestion is reviewed before it’s published.",
       submit: "Suggest a Company",
       emptyPrompt: "Can’t find it? Suggest it so others can find it too.",
     },
-    title: "Know a resource we're missing?",
+    title: "Know a resource we’re missing?",
     subtitle: "Add it to the directory. Every submission is reviewed before it’s published.",
     submit: "Add a Resource",
     emptyPrompt: "Can’t find it? Add it so others can find it too.",
@@ -270,6 +268,7 @@ export const en = {
     title: "Add a Resource",
     subtitle: "Suggest a resource that’s missing from the directory. Every submission is reviewed before it’s published.",
     name: "Name",
+    namePlaceholder: "e.g. Tailwind CSS",
     url: "URL",
     category: "Category",
     selectCategory: "Select a category…",
@@ -287,12 +286,11 @@ export const en = {
   },
 
   submissions: {
-    company: "Company Suggestion",
     title: "My Submissions",
     empty: "You haven’t suggested anything yet.",
     status: { pending: "Pending", approved: "Approved", rejected: "Rejected" },
     reasonLabel: "Reason",
-    noReason: "This submission wasn't approved.",
+    noReason: "This submission wasn’t approved.",
     edit: "Edit",
     cancel: "Cancel",
     urlFix: "URL Fix",
@@ -300,8 +298,8 @@ export const en = {
     companyEdit: "Company Edit",
     editResubmit: "Edit & Resubmit",
     resubmit: "Resubmit",
-    resubmitSuccess: "Resubmitted! It's back in the review queue.",
-    resubmitError: "Couldn't resubmit. Please try again.",
+    resubmitSuccess: "Resubmitted! It’s back in the review queue.",
+    resubmitError: "Couldn’t resubmit. Please try again.",
     subtitle: "Everything you’ve sent for review — New Resources, Suggestions, Companies and your CV — and the review status of each.",
     suggestAgain: "Suggest Again",
     removal: "Removal Report",
@@ -345,10 +343,9 @@ export const en = {
     userExists: "An account with this email already exists. Sign in instead.",
     disposableEmail: "Please use a permanent email address — temporary inboxes aren’t accepted.",
     signupsPaused: "New sign-ups are paused for a moment. Please try again later.",
-    usernameTaken: "That username is already taken",
     forgotPassword: "Forgot password?",
     forgotTitle: "Reset Your Password",
-    forgotSubtitle: "Enter your email and we'll send you a reset link.",
+    forgotSubtitle: "Enter your email and we’ll send you a reset link.",
     backToSignIn: "← Back to Sign In",
     sendResetLink: "Send Reset Link",
     emailInvalid: "Enter a valid email address",
@@ -356,14 +353,14 @@ export const en = {
     // Email verification
     verifyCheckInbox: "Check Your Inbox",
     verifyEmailSent:
-      "We've sent a confirmation link to your email. Click it to activate your account.",
+      "We’ve sent a confirmation link to your email. Click it to activate your account.",
     verifyEmailHint:
-      "Didn't get it? Check your spam folder, or try signing in to get a fresh link.",
+      "Didn’t get it? Check your spam folder, or try signing in to get a fresh link.",
     emailNotVerified:
-      "Verify your email first. We've sent you a new confirmation link.",
+      "Verify your email first. We’ve sent you a new confirmation link.",
     verifyTitle: "Verify Your Email",
     verifyExpired: "This confirmation link is invalid or has expired.",
-    verifySubtitle: "Enter your email and we'll send a new confirmation link.",
+    verifySubtitle: "Enter your email and we’ll send a new confirmation link.",
     resendVerification: "Resend Confirmation Link",
     verificationResent: "If that account exists, a new link is on its way.",
     // Bot protection / rate limiting
@@ -377,12 +374,12 @@ export const en = {
     confirmPasswordPlaceholder: "Confirm new password",
     setNewPassword: "Set New Password",
     passwordTooShort: "Password must be at least 8 characters",
-    passwordMismatch: "Passwords don't match",
+    passwordMismatch: "Passwords don’t match",
     passwordReset: "Password updated. You can sign in now.",
     accountNotLinked:
       "An account with this email already exists. Sign in with your email and password, then connect this provider from Profile → Connected accounts.",
     linkEmailMismatch:
-      "That provider's email doesn't match your account email, so it can't be linked. Sign in to the provider with the same email as your account, then try again.",
+      "That provider’s email doesn’t match your account email, so it can’t be linked. Sign in to the provider with the same email as your account, then try again.",
     // Change password (profile)
     changePassword: "Change Password",
     currentPassword: "Current password",
@@ -391,8 +388,6 @@ export const en = {
     setPasswordHint:
       "You signed up with a social provider. Add a password to also sign in with your email — your social logins keep working.",
     passwordSet: "Password set. You can now sign in with your email too.",
-    noPasswordSet:
-      "You sign in with a social provider, so there's no password to change.",
     // Connected accounts (profile)
     connectedAccounts: "Connected Accounts",
     connectedAccountsHint:
@@ -400,9 +395,9 @@ export const en = {
     link: "Connect",
     unlink: "Disconnect",
     linked: "Connected",
-    cannotUnlinkLast: "You can't disconnect your only sign-in method.",
-    linkFailed: "Couldn't connect that provider.",
-    unlinkFailed: "Couldn't disconnect that provider.",
+    cannotUnlinkLast: "You can’t disconnect your only sign-in method.",
+    linkFailed: "Couldn’t connect that provider.",
+    unlinkFailed: "Couldn’t disconnect that provider.",
   },
 
   footer: {
@@ -427,7 +422,7 @@ export const en = {
     reauthRequired: "For your security, sign out and sign back in, then try again.",
     title: "Your Data",
     export: "Export My Data",
-    exportError: "Couldn't export your data. Please try again.",
+    exportError: "Couldn’t export your data. Please try again.",
     delete: "Delete Account",
     deleted: "Your account has been deleted.",
     deleteError: "Could not delete your account. Please try again.",
@@ -441,7 +436,7 @@ export const en = {
   theme: {
     toLight: "Switch to light theme",
     toDark: "Switch to dark theme",
-    toggle: "Toggle theme",
+    toggle: "Toggle Theme",
   },
 
   companies: {
@@ -509,7 +504,7 @@ export const en = {
     copied: "Email copied",
     copyEmail: "Copy Email",
     linkedin: "LinkedIn Page & Jobs",
-    noContact: "We don't have contact info for this company yet. These searches usually find their career page:",
+    noContact: "We don’t have contact info for this company yet. These searches usually find their career page:",
     searchLinkedin: "Search on LinkedIn",
     searchWeb: "Search the Web",
     tipMessage: "Tip: a short, direct message got replies here.",
@@ -560,7 +555,7 @@ export const en = {
       emptyHint: "Already tracking somewhere else? Use “Import” above.",
     },
     title: "My Applications",
-    subtitle: "Every company you've saved, with where each application stands. Only you can see this.",
+    subtitle: "Every company you’ve saved, with where each application stands. Only you can see this.",
     save: "Save",
     changeStatus: "Change application status",
     statusLabel: "Application Status",
@@ -572,7 +567,7 @@ export const en = {
       rejected: "Rejected",
     },
     remove: "Remove from My List",
-    error: "Couldn't update your tracker. Please try again.",
+    error: "Couldn’t update your tracker. Please try again.",
     note: "My Note",
     notePlaceholder: "Who you talked to, which role, next steps…",
     notePrivate: "Private — only you can see your notes.",
@@ -583,7 +578,7 @@ export const en = {
     noteSavedShort: "Saved",
     signInHint: "Sign in to save companies, track your application status and keep private notes.",
     signInPrompt: "Sign in to track your applications.",
-    empty: "You haven't saved any companies yet.",
+    empty: "You haven’t saved any companies yet.",
     browse: "Browse Companies",
     all: "All",
     searchPlaceholder: "Search your list…",
@@ -598,6 +593,7 @@ export const en = {
     removedTitle: "No Longer Listed ({{count}})",
     removedHint: "These companies were removed from the directory. Your statuses and notes stay until you remove them.",
     exportCsv: "Export CSV",
+    csv: {company: "Company", status: "Status", note: "Note", updated: "Updated"},
   },
 
   suggest: {
@@ -614,6 +610,7 @@ export const en = {
     title: "Suggest a Company",
     subtitle: "Suggest a company that’s missing, with how to apply to it. Every suggestion is reviewed before it’s published.",
     name: "Company Name",
+    namePlaceholder: "e.g. Acme Technology",
     waysHint: "Add at least one: an application email, career page, LinkedIn or website.",
     emails: "Application Emails",
     emailsPlaceholder: "Application emails, comma-separated (e.g. careers@acme.com)",
@@ -631,7 +628,6 @@ export const en = {
   },
 
   cvs: {
-    title: "CVs",
     subtitle: "CVs shared by the community. Filter by field, seniority, language or technology to find examples close to the role you’re applying for.",
     searchPlaceholder: "Search by role or technology…",
     filter: {
@@ -695,14 +691,12 @@ export const en = {
     download: "Download",
     report: "Report",
     similar: "Similar CVs",
-    close: "Close",
     previewError: "Couldn’t show this CV here — open it in a new tab or download it.",
     disclaimer: "CVs are shared by their owners and aren’t verified by Resource Base. Use them as examples; copying someone’s CV or contacting its owner for spam isn’t allowed.",
     badge: "{{count}} CVs",
   },
 
   myCv: {
-    title: "My CV",
     subtitle: "Share your CV so others can learn from it. It’s reviewed before it’s listed, only signed-in users can open it, and you can unlist or delete it any time.",
     status: {
       pending: "In Review",
@@ -760,7 +754,6 @@ export const en = {
     required: "This field is required.",
     choose: "Please choose an option.",
     tooShort: "Use at least {{min}} characters.",
-    tooLong: "Use at most {{max}} characters.",
     url: "Enter a valid web address, e.g. https://example.com",
     email: "Enter a valid email address.",
     username: "3–20 letters or numbers, no symbols. Emre and emre count as the same name.",

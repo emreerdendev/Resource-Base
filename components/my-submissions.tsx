@@ -698,16 +698,15 @@ function FormFields({
         )}
       </FormField>
       <div>
-        <label className="mb-1.5 block text-sm font-medium">
-          {t("submit.pricing")}
-        </label>
+        <p className="mb-1.5 block text-sm font-medium">{t("submit.pricing")}</p>
         <PricingSelect defaultValue={submission.pricing ?? undefined} />
       </div>
       <div>
-        <label className="mb-1.5 block text-sm font-medium">
+        <label htmlFor="resubmit-tags" className="mb-1.5 block text-sm font-medium">
           {t("submit.tags")}
         </label>
         <IconInput
+          id="resubmit-tags"
           icon={Hash}
           name="tags"
           defaultValue={submission.tags.join(", ")}
@@ -715,10 +714,11 @@ function FormFields({
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-sm font-medium">
+        <label htmlFor="resubmit-note" className="mb-1.5 block text-sm font-medium">
           {t("submit.note")}
         </label>
         <Textarea
+          id="resubmit-note"
           name="note"
           rows={3}
           defaultValue={submission.note ?? ""}

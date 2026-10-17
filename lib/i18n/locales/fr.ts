@@ -94,7 +94,7 @@ export const fr = {
     summary: "{{resources}} ressources dans {{categories}} catégories.",
     searchPlaceholder: "Rechercher par nom, tag, description…",
     filters: "Filtres",
-    sort: { featured: "En vedette", popular: "Les plus populaires", favorites: "Les plus favoris", name: "Nom A→Z", nameDesc: "Nom Z→A", recent: "Récemment ajoutés" },
+    sort: { label: "Trier", featured: "En vedette", popular: "Les plus populaires", favorites: "Les plus favoris", name: "Nom A→Z", nameDesc: "Nom Z→A", recent: "Récemment ajoutés" },
     facet: { category: "Catégorie", pricing: "Tarif", language: "Langue", tags: "Tags" },
     results: "{{count}} résultats",
     clear: "Effacer",
@@ -123,7 +123,6 @@ export const fr = {
 
   modal: {
     close: "Fermer",
-    open: "Ouvrir la ressource",
     details: "Détails",
     viewDetails: "Voir les détails",
     noDescription: "Aucune description disponible.",
@@ -140,7 +139,6 @@ export const fr = {
   },
 
   taxonomy: {
-    editCta: "Suggérer une modification",
     description: "Description",
     descriptionPlaceholder: "Proposez une description plus claire ou complète…",
     pendingSuggestion: "Suggestion en attente",
@@ -270,6 +268,7 @@ export const fr = {
     title: "Ajouter une ressource",
     subtitle: "Suggère une ressource qui manque à l’annuaire. Chaque envoi est vérifié avant publication.",
     name: "Nom",
+    namePlaceholder: "ex. Tailwind CSS",
     url: "URL",
     category: "Catégorie",
     selectCategory: "Choisir une catégorie…",
@@ -287,7 +286,6 @@ export const fr = {
   },
 
   submissions: {
-    company: "Suggestion d’entreprise",
     title: "Mes propositions",
     empty: "Tu n’as encore rien suggéré.",
     status: { pending: "En attente", approved: "Approuvée", rejected: "Refusée" },
@@ -345,7 +343,6 @@ export const fr = {
     userExists: "Un compte existe déjà avec cet e-mail. Connectez-vous plutôt.",
     disposableEmail: "Utilisez une adresse e-mail permanente — les adresses jetables ne sont pas acceptées.",
     signupsPaused: "Les inscriptions sont momentanément suspendues. Réessayez plus tard.",
-    usernameTaken: "Ce nom d'utilisateur est déjà pris",
     forgotPassword: "Mot de passe oublié ?",
     forgotTitle: "Réinitialiser votre mot de passe",
     forgotSubtitle: "Entrez votre e-mail et nous vous enverrons un lien de réinitialisation.",
@@ -392,8 +389,6 @@ export const fr = {
       "Vous vous êtes inscrit avec un fournisseur social. Ajoutez un mot de passe pour vous connecter aussi par e-mail — vos connexions sociales continuent de fonctionner.",
     passwordSet:
       "Mot de passe défini. Vous pouvez désormais aussi vous connecter par e-mail.",
-    noPasswordSet:
-      "Vous vous connectez via un fournisseur social, il n'y a donc pas de mot de passe à changer.",
     connectedAccounts: "Comptes connectés",
     connectedAccountsHint:
       "Connectez des fournisseurs pour vous connecter avec n'importe lequel. E-mail/mot de passe compte comme un.",
@@ -598,6 +593,7 @@ export const fr = {
     removedTitle: "Plus répertoriées ({{count}})",
     removedHint: "Ces entreprises ont été retirées de l’annuaire. Tes statuts et notes restent jusqu’à ce que tu les retires.",
     exportCsv: "Exporter en CSV",
+    csv: {company: "Entreprise", status: "Statut", note: "Note", updated: "Mis à jour"},
   },
 
   suggest: {
@@ -614,6 +610,7 @@ export const fr = {
     title: "Suggérer une entreprise",
     subtitle: "Suggère une entreprise manquante, avec la façon d’y postuler. Chaque suggestion est vérifiée avant publication.",
     name: "Nom de l’entreprise",
+    namePlaceholder: "ex. Acme Technologie",
     waysHint: "Ajoutez-en au moins un : e-mail de candidature, page carrières, LinkedIn ou site web.",
     emails: "E-mails de candidature",
     emailsPlaceholder: "E-mails de candidature, séparés par des virgules (ex. careers@acme.com)",
@@ -631,7 +628,6 @@ export const fr = {
   },
 
   cvs: {
-    title: "CV",
     subtitle: "Des CV partagés par la communauté. Filtre par domaine, niveau, langue ou technologie pour trouver des exemples proches du poste visé.",
     searchPlaceholder: "Rechercher par poste ou technologie…",
     filter: {
@@ -695,14 +691,12 @@ export const fr = {
     download: "Télécharger",
     report: "Signaler",
     similar: "CV similaires",
-    close: "Fermer",
     previewError: "Impossible d’afficher ce CV ici — ouvre-le dans un nouvel onglet ou télécharge-le.",
     disclaimer: "Les CV sont partagés par leurs auteurs et ne sont pas vérifiés par Resource Base. Sers-t’en comme exemples ; copier le CV de quelqu’un ou contacter son auteur pour du spam est interdit.",
     badge: "{{count}} CV",
   },
 
   myCv: {
-    title: "Mon CV",
     subtitle: "Partage ton CV pour que d’autres puissent s’en inspirer. Il est vérifié avant d’être publié, seuls les utilisateurs connectés peuvent l’ouvrir, et tu peux le masquer ou le supprimer à tout moment.",
     status: {
       pending: "En cours d’examen",
@@ -760,7 +754,6 @@ export const fr = {
     required: "Ce champ est obligatoire.",
     choose: "Choisis une option.",
     tooShort: "Au moins {{min}} caractères.",
-    tooLong: "Au maximum {{max}} caractères.",
     url: "Saisis une adresse web valide, ex. https://example.com",
     email: "Saisis une adresse e-mail valide.",
     username: "3 à 20 lettres ou chiffres, sans symboles. Emre et emre comptent comme le même nom.",

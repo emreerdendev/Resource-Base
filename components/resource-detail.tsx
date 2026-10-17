@@ -327,6 +327,7 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
               <img
                 src={contributor.avatar_url}
                 alt={contributor.username}
+                referrerPolicy="no-referrer"
                 className="size-4 rounded-full object-cover"
               />
             ) : null}

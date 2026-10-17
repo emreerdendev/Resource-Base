@@ -104,7 +104,16 @@ export function ApplicationsTracker({ companies }: { companies: Company[] }) {
 
   function exportCsv() {
     const csv = toCsv([
-      ["Company", "Status", "Note", "Updated", "Website", "Career page", "LinkedIn", "Emails"],
+      [
+        t("tracker.csv.company"),
+        t("tracker.csv.status"),
+        t("tracker.csv.note"),
+        t("tracker.csv.updated"),
+        t("suggest.website"),
+        t("suggest.career"),
+        "LinkedIn",
+        t("suggest.emails"),
+      ],
       ...rows.map((r) => {
         const c = byId.get(r.companyId)!;
         return [

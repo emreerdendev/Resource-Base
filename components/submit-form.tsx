@@ -124,7 +124,7 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
           maxLength={200}
           onChange={(e) => setName(e.target.value)}
           onBlur={() => form.touch("name")}
-          placeholder="e.g. Tailwind CSS"
+          placeholder={t("submit.namePlaceholder")}
         />
       </FormField>
       <FormField id={`${id}-url`} label={t("submit.url")} required error={form.show("url")}>

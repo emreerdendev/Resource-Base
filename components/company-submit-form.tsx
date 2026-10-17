@@ -80,7 +80,11 @@ function Field({ error, children }: { error?: string | null; children: React.Rea
   return (
     <div>
       {children}
-      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-1 text-xs text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -247,7 +251,7 @@ export function CompanySubmitForm({ initialName = "" }: { initialName?: string }
           onChange={(e) => setName(e.target.value)}
           onBlur={() => touch("name")}
           maxLength={120}
-          placeholder="e.g. Acme Teknoloji"
+          placeholder={t("suggest.namePlaceholder")}
         />
       </FormField>
 

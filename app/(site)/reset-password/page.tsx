@@ -62,6 +62,7 @@ function ResetForm() {
         value={pw}
         onChange={(e) => setPw(e.target.value)}
         placeholder={t("auth.newPasswordPlaceholder")}
+        aria-label={t("auth.newPasswordPlaceholder")}
         autoComplete="new-password"
         autoFocus
       />
@@ -74,6 +75,7 @@ function ResetForm() {
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
         placeholder={t("auth.confirmPasswordPlaceholder")}
+        aria-label={t("auth.confirmPasswordPlaceholder")}
         autoComplete="new-password"
       />
       {confirm.length > 0 && pw !== confirm && (

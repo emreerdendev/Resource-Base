@@ -11,7 +11,7 @@ import { CompanyEditProposal } from "@/components/company-edit-proposal";
 import { CompanyLogo } from "@/components/company-logo";
 import { CompanyStatusMenu } from "@/components/company-status-menu";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useSubmissions } from "@/lib/submissions";
 import type { Company } from "@/lib/types";
@@ -55,6 +55,7 @@ export function CompanyModal({
           <DialogTitle className="min-w-0 flex-1 text-base leading-snug">
             <CompanyTitle company={company} url={url} />
           </DialogTitle>
+          <DialogDescription className="sr-only">{t("company.howToApply")}</DialogDescription>
         </DialogHeader>
 
         <CompanyDetails company={company} onNavigate={close} />

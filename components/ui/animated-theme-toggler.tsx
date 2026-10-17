@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Moon, Sun } from "lucide-react"
 import { flushSync } from "react-dom"
 
@@ -159,6 +160,7 @@ export const AnimatedThemeToggler = ({
   onThemeChange,
   ...props
 }: AnimatedThemeTogglerProps) => {
+  const { t } = useTranslation()
   const shape = variant ?? "circle"
   const isControlled = theme !== undefined
   const [internalIsDark, setInternalIsDark] = useState(false)
@@ -324,7 +326,7 @@ export const AnimatedThemeToggler = ({
       {...props}
     >
       {isDark ? <Sun /> : <Moon />}
-      <span className="sr-only">Toggle theme</span>
+      <span className="sr-only">{t("theme.toggle")}</span>
     </button>
   )
 }

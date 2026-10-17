@@ -94,7 +94,7 @@ export const de = {
     summary: "{{resources}} Ressourcen in {{categories}} Kategorien.",
     searchPlaceholder: "Nach Name, Tag, Beschreibung suchen…",
     filters: "Filter",
-    sort: { featured: "Empfohlen", popular: "Beliebteste", favorites: "Meiste Favoriten", name: "Name A→Z", nameDesc: "Name Z→A", recent: "Zuletzt hinzugefügt" },
+    sort: { label: "Sortieren", featured: "Empfohlen", popular: "Beliebteste", favorites: "Meiste Favoriten", name: "Name A→Z", nameDesc: "Name Z→A", recent: "Zuletzt hinzugefügt" },
     facet: { category: "Kategorie", pricing: "Preis", language: "Sprache", tags: "Tags" },
     results: "{{count}} Ergebnisse",
     clear: "Zurücksetzen",
@@ -123,7 +123,6 @@ export const de = {
 
   modal: {
     close: "Schließen",
-    open: "Ressource öffnen",
     details: "Details",
     viewDetails: "Details anzeigen",
     noDescription: "Keine Beschreibung verfügbar.",
@@ -140,7 +139,6 @@ export const de = {
   },
 
   taxonomy: {
-    editCta: "Änderung vorschlagen",
     description: "Beschreibung",
     descriptionPlaceholder: "Schlage eine klarere oder vollständigere Beschreibung vor…",
     pendingSuggestion: "Vorschlag ausstehend",
@@ -270,6 +268,7 @@ export const de = {
     title: "Ressource hinzufügen",
     subtitle: "Schlage eine Ressource vor, die im Verzeichnis fehlt. Jede Einreichung wird vor der Veröffentlichung geprüft.",
     name: "Name",
+    namePlaceholder: "z. B. Tailwind CSS",
     url: "URL",
     category: "Kategorie",
     selectCategory: "Kategorie auswählen…",
@@ -287,7 +286,6 @@ export const de = {
   },
 
   submissions: {
-    company: "Unternehmensvorschlag",
     title: "Meine Einreichungen",
     empty: "Du hast noch nichts vorgeschlagen.",
     status: { pending: "Ausstehend", approved: "Genehmigt", rejected: "Abgelehnt" },
@@ -345,7 +343,6 @@ export const de = {
     userExists: "Mit dieser E-Mail gibt es bereits ein Konto. Melde dich stattdessen an.",
     disposableEmail: "Bitte nutze eine dauerhafte E-Mail-Adresse — Wegwerfadressen werden nicht akzeptiert.",
     signupsPaused: "Neue Registrierungen sind kurz pausiert. Bitte versuche es später erneut.",
-    usernameTaken: "Dieser Benutzername ist bereits vergeben",
     forgotPassword: "Passwort vergessen?",
     forgotTitle: "Passwort zurücksetzen",
     forgotSubtitle: "Gib deine E-Mail ein und wir senden dir einen Reset-Link.",
@@ -392,8 +389,6 @@ export const de = {
       "Du hast dich mit einem sozialen Anbieter registriert. Lege ein Passwort fest, um dich auch per E-Mail anzumelden — deine sozialen Logins bleiben aktiv.",
     passwordSet:
       "Passwort festgelegt. Du kannst dich jetzt auch per E-Mail anmelden.",
-    noPasswordSet:
-      "Du meldest dich über einen Social-Anbieter an, daher gibt es kein Passwort zu ändern.",
     connectedAccounts: "Verbundene Konten",
     connectedAccountsHint:
       "Verbinde Anbieter, um dich mit jedem davon anzumelden. E-Mail/Passwort zählt als einer.",
@@ -598,6 +593,7 @@ export const de = {
     removedTitle: "Nicht mehr gelistet ({{count}})",
     removedHint: "Diese Unternehmen wurden aus dem Verzeichnis entfernt. Status und Notizen bleiben, bis du sie entfernst.",
     exportCsv: "Als CSV exportieren",
+    csv: {company: "Unternehmen", status: "Status", note: "Notiz", updated: "Aktualisiert"},
   },
 
   suggest: {
@@ -614,6 +610,7 @@ export const de = {
     title: "Unternehmen vorschlagen",
     subtitle: "Schlage ein fehlendes Unternehmen mit seinem Bewerbungsweg vor. Jeder Vorschlag wird vor der Veröffentlichung geprüft.",
     name: "Name des Unternehmens",
+    namePlaceholder: "z. B. Acme Technologie",
     waysHint: "Mindestens eins: Bewerbungs-E-Mail, Karriereseite, LinkedIn oder Website.",
     emails: "Bewerbungs-E-Mails",
     emailsPlaceholder: "Bewerbungs-E-Mails, kommagetrennt (z. B. careers@acme.com)",
@@ -631,7 +628,6 @@ export const de = {
   },
 
   cvs: {
-    title: "Lebensläufe",
     subtitle: "Lebensläufe aus der Community. Filtere nach Bereich, Erfahrung, Sprache oder Technologie, um Beispiele für die Rolle zu finden, auf die du dich bewirbst.",
     searchPlaceholder: "Nach Rolle oder Technologie suchen…",
     filter: {
@@ -695,14 +691,12 @@ export const de = {
     download: "Herunterladen",
     report: "Melden",
     similar: "Ähnliche Lebensläufe",
-    close: "Schließen",
     previewError: "Der Lebenslauf kann hier nicht angezeigt werden – öffne ihn in einem neuen Tab oder lade ihn herunter.",
     disclaimer: "Lebensläufe werden von ihren Inhaber:innen geteilt und von Resource Base nicht geprüft. Nutze sie als Beispiele; Kopieren oder Spam an die Inhaber:innen ist nicht erlaubt.",
     badge: "{{count}} Lebensläufe",
   },
 
   myCv: {
-    title: "Mein Lebenslauf",
     subtitle: "Teile deinen Lebenslauf, damit andere davon lernen können. Er wird vor dem Listen geprüft, nur angemeldete Nutzer:innen können ihn öffnen, und du kannst ihn jederzeit ausblenden oder löschen.",
     status: {
       pending: "In Prüfung",
@@ -760,7 +754,6 @@ export const de = {
     required: "Dieses Feld ist erforderlich.",
     choose: "Bitte wähle eine Option.",
     tooShort: "Mindestens {{min}} Zeichen.",
-    tooLong: "Höchstens {{max}} Zeichen.",
     url: "Gib eine gültige Webadresse ein, z. B. https://example.com",
     email: "Gib eine gültige E-Mail-Adresse ein.",
     username: "3–20 Buchstaben oder Ziffern, keine Sonderzeichen. Emre und emre gelten als derselbe Name.",
