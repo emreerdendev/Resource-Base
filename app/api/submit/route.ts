@@ -7,7 +7,7 @@ import { getSessionUser } from "@/lib/authz";
 import { parseCompanySuggestion } from "@/lib/company-submission";
 import { normalizeWebUrl } from "@/lib/company-input";
 import { slugify } from "@/lib/slug";
-import { DAILY_CAPS, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
+import { dailyCap, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isPlainId, isResourceId, listCompanyIds } from "@/sanity/lib/slugs";
 import { changedFields, parseCompanyEdit, type CompanyEditFields } from "@/lib/company-edit";
 import { isSameOrigin } from "@/lib/request";
@@ -35,7 +35,7 @@ async function submitLimited(userId: string): Promise<boolean> {
   if (open >= MAX_PENDING) return true;
   if (await isRateLimited(`submit-day:${userId}`, MAX_PER_DAY, 86400)) return true;
   // Site-wide: however many accounts a spammer has, the dataset can't fill up.
-  return dailyCapReached("submissions", DAILY_CAPS.submissions);
+  return dailyCapReached("submissions", dailyCap("submissions"));
 }
 
 function isValidUrl(url: string): boolean {

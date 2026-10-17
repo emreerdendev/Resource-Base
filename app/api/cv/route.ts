@@ -6,7 +6,7 @@ import { parseCvMeta } from "@/lib/cv-input";
 import { CV_MAX_BYTES } from "@/lib/cv-taxonomy";
 import { getDb } from "@/lib/db";
 import { cvs } from "@/lib/db/schema";
-import { DAILY_CAPS, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
+import { dailyCap, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/request";
 import { writeClient } from "@/sanity/lib/writeClient";
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   // Counted only for valid uploads, so a rejected file doesn't use up the day.
   if (await isRateLimited(`cv-day:${user.id}`, UPLOADS_PER_DAY, 86400))
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  if (await dailyCapReached("cv-uploads", DAILY_CAPS.cvUploads))
+  if (await dailyCapReached("cv-uploads", dailyCap("cvUploads")))
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
 
   const db = getDb();

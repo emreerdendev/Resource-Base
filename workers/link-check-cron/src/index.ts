@@ -145,7 +145,7 @@ async function cleanupDatabase(env: Env): Promise<void> {
 }
 
 /** Decided submissions are removed from Sanity after this many days. */
-const SUBMISSION_RETENTION_DAYS = 90;
+const SUBMISSION_RETENTION_DAYS = 30;
 
 /**
  * Keeps the Sanity dataset under the free plan's document limit: approved and

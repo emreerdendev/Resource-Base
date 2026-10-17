@@ -102,15 +102,42 @@ export function isPaused(flag: "SUBMISSIONS_PAUSED" | "UPLOADS_PAUSED"): boolean
   }
 }
 
-/** Site-wide daily ceilings (see dailyCapReached). Far above real use. */
-export const DAILY_CAPS = {
-  /** New Sanity documents from users (keeps the free plan's 10k documents safe). */
-  submissions: 150,
-  /** CV uploads (R2 writes + a Sanity document each). */
-  cvUploads: 50,
-  /** Avatar changes (R2 writes). */
-  avatars: 200,
+/**
+ * Site-wide daily ceilings (see dailyCapReached): what any amount of abuse can
+ * cost in a day. Far above real use for a growing community — and each can be
+ * raised from the dashboard without a deploy (Worker → Settings → Variables):
+ * DAILY_CAP_SUBMISSIONS, DAILY_CAP_CV_UPLOADS, DAILY_CAP_AVATARS.
+ */
+const DEFAULT_CAPS = {
+  /**
+   * New Sanity documents from users. The free plan holds 10,000 documents;
+   * decided submissions are pruned after 30 days, so this keeps even a
+   * sustained attack well inside it.
+   */
+  submissions: 300,
+  /** CV uploads (an R2 write and a Sanity document each; one CV per user). */
+  cvUploads: 100,
+  /** Profile photo changes (~20 KB R2 writes). */
+  avatars: 1000,
 } as const;
+
+const CAP_VARS: Record<keyof typeof DEFAULT_CAPS, string> = {
+  submissions: "DAILY_CAP_SUBMISSIONS",
+  cvUploads: "DAILY_CAP_CV_UPLOADS",
+  avatars: "DAILY_CAP_AVATARS",
+};
+
+/** The daily ceiling for `name`: the dashboard override if set, else the default. */
+export function dailyCap(name: keyof typeof DEFAULT_CAPS): number {
+  try {
+    const raw = (getCloudflareContext().env as unknown as Record<string, string | undefined>)[CAP_VARS[name]];
+    const n = Number(raw);
+    if (raw && Number.isFinite(n) && n > 0) return Math.floor(n);
+  } catch {
+    /* no context: use the default */
+  }
+  return DEFAULT_CAPS[name];
+}
 
 type Limiter = "RL_PUBLIC" | "RL_USER" | "RL_SUBMIT";
 

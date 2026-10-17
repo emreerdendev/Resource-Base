@@ -4,7 +4,7 @@ import { AVATAR_MAX_BYTES, avatarBucket, avatarUrl, deleteAvatarFile, sniffImage
 import { getSessionUser } from "@/lib/authz";
 import { getDb } from "@/lib/db";
 import { user as userTable } from "@/lib/db/schema";
-import { DAILY_CAPS, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
+import { dailyCap, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/request";
 
 export const runtime = "nodejs";
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   // Counted only for valid uploads, so a rejected file doesn't use up the day.
   if (await isRateLimited(`avatar-day:${me.id}`, CHANGES_PER_DAY, 86400))
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  if (await dailyCapReached("avatars", DAILY_CAPS.avatars))
+  if (await dailyCapReached("avatars", dailyCap("avatars")))
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
 
   const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
