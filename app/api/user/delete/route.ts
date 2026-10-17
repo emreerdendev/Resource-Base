@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { cvs, user } from "@/lib/db/schema";
 import { cvBucket } from "@/lib/cv-files";
+import { deleteAvatarFile } from "@/lib/avatar";
 import { getAuth } from "@/lib/auth";
 import { requireFreshUser } from "@/lib/authz";
 import { isSameOrigin } from "@/lib/request";
@@ -64,10 +65,11 @@ export async function POST(req: NextRequest) {
   }
 
   // 2) Delete the user row (cascades sessions, favorites, notifications, the
-  //    tracker and the CV row; nulls submissions.user_id), then the CV file in
-  //    R2 — only once the row that points at it is gone.
+  //    tracker and the CV row; nulls submissions.user_id), then the CV file and
+  //    a hosted avatar in R2 — only once the row that points at them is gone.
   const db = getDb();
   const [cv] = await db.select({ fileKey: cvs.fileKey }).from(cvs).where(eq(cvs.userId, userId)).limit(1);
+  const [row] = await db.select({ image: user.image }).from(user).where(eq(user.id, userId)).limit(1);
   try {
     await db.delete(user).where(eq(user.id, userId));
   } catch (err) {
@@ -75,6 +77,7 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Server error", { status: 500 });
   }
   if (cv) await cvBucket().delete(cv.fileKey).catch((err) => console.error("cv file delete failed", err));
+  await deleteAvatarFile(row?.image);
 
   // 3) Sign the now-orphaned session out (clears cookies).
   try {
