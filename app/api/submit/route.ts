@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { submissions } from "@/lib/db/schema";
 import { getSessionUser } from "@/lib/authz";
 import { parseCompanySuggestion } from "@/lib/company-submission";
+import { normalizeWebUrl } from "@/lib/company-input";
 import { slugify } from "@/lib/slug";
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isPlainId, isResourceId } from "@/sanity/lib/slugs";
@@ -125,18 +126,33 @@ export async function POST(req: NextRequest) {
           .filter(Boolean),
       ),
     ).slice(0, cap);
-  const proposedCategories = cleanList(data.proposedCategories, 12);
-  const proposedTags = cleanList(data.proposedTags, 20);
-  // Proposed description (taxonomy fixes only): trimmed, capped, null when empty.
+  // "Gone / should be removed" replaces every other proposed change.
+  const proposeRemoval = kind === "taxonomy" && data.proposeRemoval === true;
+  const proposedCategories = proposeRemoval ? [] : cleanList(data.proposedCategories, 12);
+  const proposedTags = proposeRemoval ? [] : cleanList(data.proposedTags, 20);
+  // Proposed description (edit suggestions only): trimmed, capped, null when empty.
   const rawDescription = data.proposedDescription;
   const proposedDescription =
-    kind === "taxonomy" && typeof rawDescription === "string"
+    kind === "taxonomy" && !proposeRemoval && typeof rawDescription === "string"
       ? rawDescription.trim().slice(0, 1000) || null
       : null;
-  // A taxonomy suggestion must change SOMETHING — categories, tags, or the
-  // description.
+  // Proposed name / link — the link must be a real http(s) address.
+  const proposedName =
+    kind === "taxonomy" && !proposeRemoval ? str(data.proposedName).slice(0, 200) || null : null;
+  const rawProposedUrl = kind === "taxonomy" && !proposeRemoval ? str(data.proposedUrl) : "";
+  const proposedUrl = rawProposedUrl ? normalizeWebUrl(rawProposedUrl) : null;
+  if (rawProposedUrl && !proposedUrl) {
+    return new NextResponse("Invalid proposed link", { status: 400 });
+  }
+  if (proposedName !== null && proposedName.length < 2) {
+    return new NextResponse("Invalid proposed name", { status: 400 });
+  }
+  // An edit suggestion must propose SOMETHING.
   if (
     kind === "taxonomy" &&
+    !proposeRemoval &&
+    !proposedName &&
+    !proposedUrl &&
     !proposedCategories.length &&
     !proposedTags.length &&
     !proposedDescription
@@ -151,24 +167,31 @@ export async function POST(req: NextRequest) {
   let originalCategories: string[] = [];
   let originalTags: string[] = [];
   let originalDescription: string | null = null;
+  // The resource's current name/link, read here rather than trusted from the body.
+  let currentName = name;
+  let currentUrl = url;
   if (kind === "taxonomy") {
     const snap = await writeClient.fetch<{
+      name?: string;
+      url?: string;
       categories?: string[];
       tags?: string[];
       description?: string | null;
     } | null>(
-      `*[_type == "resource" && _id == $id][0]{ "categories": categories[]->slug.current, "tags": tags[]->slug.current, description }`,
+      `*[_type == "resource" && _id == $id][0]{ name, url, "categories": categories[]->slug.current, "tags": tags[]->slug.current, description }`,
       { id: targetResourceId },
       { perspective: "published" },
     );
     originalCategories = (snap?.categories ?? []).filter(Boolean);
     originalTags = (snap?.tags ?? []).filter(Boolean);
     originalDescription = snap?.description ?? null;
+    currentName = snap?.name ?? name;
+    currentUrl = snap?.url ?? url;
   }
 
   const fields = {
-    name: name.slice(0, 200),
-    url,
+    name: currentName.slice(0, 200),
+    url: currentUrl,
     suggestedCategory: str(data.suggestedCategory).slice(0, 100),
     pricing,
     tags,
@@ -262,6 +285,9 @@ export async function POST(req: NextRequest) {
             originalCategories,
             originalTags,
             originalDescription,
+            ...(proposedName && proposedName !== currentName && { proposedName }),
+            ...(proposedUrl && proposedUrl !== currentUrl && { proposedUrl }),
+            ...(proposeRemoval && { proposeRemoval: true }),
           }
         : {}),
       email: email.slice(0, 200),
@@ -292,6 +318,9 @@ export async function POST(req: NextRequest) {
         originalCategories,
         originalTags,
         originalDescription,
+        proposedName: proposedName && proposedName !== currentName ? proposedName : null,
+        proposedUrl: proposedUrl && proposedUrl !== currentUrl ? proposedUrl : null,
+        proposeRemoval,
         note: fields.note,
         status: "pending",
       });

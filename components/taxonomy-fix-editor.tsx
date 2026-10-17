@@ -1,13 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Plus, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "@/components/form-field";
 import { useTaxonomy } from "@/components/taxonomy-provider";
+import { normalizeWebUrl } from "@/lib/company-input";
+import { fieldProps } from "@/lib/use-form-errors";
 import { cn } from "@/lib/utils";
 import type { Resource } from "@/lib/types";
 
@@ -18,9 +21,10 @@ import type { Resource } from "@/lib/types";
 type Picked = { slug: string; title: string };
 
 /**
- * Inline editor for proposing a resource's categories/tags. Users start from
- * the resource's current values, add from existing options (searchable) or
- * type new ones, then submit as a `taxonomy` fix that an editor reviews.
+ * Inline editor for suggesting changes to a resource: its name, link,
+ * description, categories and tags — or reporting it as gone. Users start from
+ * the current values, add categories/tags from existing options (searchable)
+ * or type new ones, then submit an edit suggestion that an editor reviews.
  */
 export function TaxonomyFixEditor({
   resource,
@@ -32,6 +36,7 @@ export function TaxonomyFixEditor({
   onDone: () => void;
 }) {
   const { t } = useTranslation();
+  const id = useId();
   const { categories, tags } = useTaxonomy();
   const [pending, setPending] = useState(false);
 
@@ -45,6 +50,14 @@ export function TaxonomyFixEditor({
     [resource.tags],
   );
   const initialDescription = resource.description ?? "";
+  const [name, setName] = useState(resource.name);
+  const [url, setUrl] = useState(resource.url);
+  // "Gone / should be removed" replaces every other change.
+  const [removal, setRemoval] = useState(false);
+  const [reason, setReason] = useState("");
+  const nameError =
+    !removal && name.trim().length < 2 ? t("validation.tooShort", { min: 2 }) : null;
+  const urlError = !removal && !normalizeWebUrl(url) ? t("validation.url") : null;
   const [cats, setCats] = useState<Picked[]>(initialCats);
   const [tagList, setTagList] = useState<Picked[]>(initialTags);
   const [description, setDescription] = useState(initialDescription);
@@ -60,21 +73,29 @@ export function TaxonomyFixEditor({
     return a.every((p) => bs.has(p.slug));
   };
   const descriptionChanged = description.trim() !== initialDescription.trim();
+  const nameChanged = name.trim() !== resource.name;
+  const urlChanged = (normalizeWebUrl(url) ?? url.trim()) !== resource.url;
   const dirty =
+    removal ||
+    nameChanged ||
+    urlChanged ||
     !sameSet(cats, initialCats) ||
     !sameSet(tagList, initialTags) ||
     descriptionChanged;
 
   async function submit() {
     if (!dirty) return;
-    // Categories/tags can both be emptied as long as a description is proposed.
-    if (!cats.length && !tagList.length && !description.trim()) {
-      toast.error(t("taxonomy.atLeastOne"));
-      return;
-    }
-    if (hasPendingText) {
-      toast.error(t("taxonomy.pendingText"));
-      return;
+    if (!removal) {
+      if (nameError || urlError) return; // shown inline
+      // Categories/tags can both be emptied as long as a description is proposed.
+      if (!cats.length && !tagList.length && !description.trim()) {
+        toast.error(t("taxonomy.atLeastOne"));
+        return;
+      }
+      if (hasPendingText) {
+        toast.error(t("taxonomy.pendingText"));
+        return;
+      }
     }
     setPending(true);
     try {
@@ -89,12 +110,16 @@ export function TaxonomyFixEditor({
           url: resource.url,
           // Send slugs for existing, raw title for free-text — the webhook
           // resolves either against slug or title on approval.
-          proposedCategories: cats.map((c) => c.slug),
-          proposedTags: tagList.map((tg) => tg.slug),
-          // Only send a description when the user actually changed it.
-          ...(descriptionChanged
-            ? { proposedDescription: description.trim() }
-            : {}),
+          ...(removal
+            ? { proposeRemoval: true, note: reason.trim() }
+            : {
+                proposedCategories: cats.map((c) => c.slug),
+                proposedTags: tagList.map((tg) => tg.slug),
+                // Only send what the user actually changed.
+                ...(descriptionChanged && { proposedDescription: description.trim() }),
+                ...(nameChanged && { proposedName: name.trim() }),
+                ...(urlChanged && { proposedUrl: normalizeWebUrl(url) }),
+              }),
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -107,10 +132,61 @@ export function TaxonomyFixEditor({
     }
   }
 
+  const label = "text-xs font-medium tracking-wide text-muted-foreground uppercase";
+
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/30 p-3">
+      <label className="flex cursor-pointer items-start gap-2 rounded-md border border-destructive/20 bg-destructive/5 p-2.5 text-sm">
+        <input
+          type="checkbox"
+          checked={removal}
+          onChange={(e) => setRemoval(e.target.checked)}
+          className="mt-0.5 size-4 shrink-0 cursor-pointer accent-destructive"
+        />
+        <span>
+          <span className="font-medium">{t("taxonomy.removal")}</span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">{t("taxonomy.removalHint")}</span>
+        </span>
+      </label>
+      {removal && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={`${id}-reason`} className={label}>
+            {t("taxonomy.removalReason")}
+          </label>
+          <Textarea
+            id={`${id}-reason`}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={2}
+            maxLength={1000}
+            placeholder={t("taxonomy.removalReasonPlaceholder")}
+          />
+        </div>
+      )}
+      {/* Every other field is locked while the resource is reported as gone. */}
+      <fieldset disabled={removal} className={cn("flex flex-col gap-4", removal && "opacity-50")}>
+      <FormField id={`${id}-name`} label={t("submit.name")} error={nameError}>
+        <Input
+          {...fieldProps(`${id}-name`, nameError)}
+          value={name}
+          maxLength={200}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </FormField>
+      <FormField id={`${id}-url`} label={t("submit.url")} error={urlError}>
+        <Input
+          {...fieldProps(`${id}-url`, urlError)}
+          inputMode="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onBlur={() => {
+            const n = normalizeWebUrl(url);
+            if (n) setUrl(n);
+          }}
+        />
+      </FormField>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        <p className={label}>
           {t("taxonomy.description")}
         </p>
         <Textarea
@@ -142,6 +218,7 @@ export function TaxonomyFixEditor({
       {hasPendingText && (
         <p className="text-xs text-destructive">{t("taxonomy.pendingText")}</p>
       )}
+      </fieldset>
       <div className="flex gap-2">
         <Button
           type="button"
@@ -156,7 +233,7 @@ export function TaxonomyFixEditor({
           type="button"
           size="sm"
           className="flex-1"
-          disabled={pending || hasPendingText || !dirty}
+          disabled={pending || !dirty || (!removal && (hasPendingText || Boolean(nameError || urlError)))}
           onClick={submit}
         >
           {pending && <Loader2 className="size-4 animate-spin" />}

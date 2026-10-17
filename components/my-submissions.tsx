@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
   ArrowUpRight,
+  FileText,
   Building2,
   CheckCircle2,
   Clock,
@@ -32,6 +33,8 @@ import { FormField } from "@/components/form-field";
 import { ResourceGridSkeleton } from "@/components/skeletons";
 import { normalizeWebUrl } from "@/lib/company-input";
 import { fieldProps } from "@/lib/use-form-errors";
+import { useAuth } from "@/components/auth/auth-provider";
+import { getMyCv, type MyCv } from "@/lib/cv-actions";
 import { useSubmissions } from "@/lib/submissions";
 import { cn, favicon } from "@/lib/utils";
 import { slugify } from "@/lib/slug";
@@ -82,16 +85,57 @@ function StatusBadge({ status }: { status: SubmissionStatus }) {
  * (like the home resource cards) showing status + everything submitted, with
  * an inline edit/resubmit form for items still in the queue or rejected.
  */
+type Group = "resources" | "edits" | "companies" | "cv";
+const GROUPS: Group[] = ["resources", "edits", "companies", "cv"];
+
+const groupOf = (s: Submission): Exclude<Group, "cv"> =>
+  s.kind === "company" ? "companies" : s.kind === "new" ? "resources" : "edits";
+
+/** CV statuses shown with the same badge styles as submissions. */
+const CV_BADGE: Record<string, SubmissionStatus> = {
+  pending: "pending",
+  published: "approved",
+  rejected: "rejected",
+  hidden: "approved",
+};
+
+/**
+ * Everything the user has sent for review, kept apart by type — new
+ * resources, edit suggestions (link fixes, edits, removal reports), companies
+ * and their CV — with a filter row on top and one section per type.
+ */
 export function MySubmissions({ categories }: { categories: Category[] }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { items, loading, reload } = useSubmissions();
   const [open, setOpen] = useState<Submission | null>(null);
+  const [group, setGroup] = useState<Group | "all">("all");
+  // The CV lives in its own table; undefined while loading.
+  const [cv, setCv] = useState<MyCv | null | undefined>(undefined);
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    getMyCv()
+      .then((v) => active && setCv(v))
+      .catch(() => active && setCv(null));
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
-  if (loading) {
+  if (loading || cv === undefined) {
     return <ResourceGridSkeleton count={6} />;
   }
 
-  if (items.length === 0) {
+  const counts: Record<Group, number> = {
+    resources: items.filter((s) => groupOf(s) === "resources").length,
+    edits: items.filter((s) => groupOf(s) === "edits").length,
+    companies: items.filter((s) => groupOf(s) === "companies").length,
+    cv: cv ? 1 : 0,
+  };
+  const total = items.length + counts.cv;
+
+  if (total === 0) {
     return (
       <p className="rounded-xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
         {t("submissions.empty")}
@@ -99,48 +143,108 @@ export function MySubmissions({ categories }: { categories: Category[] }) {
     );
   }
 
+  const shownGroups = GROUPS.filter((g) => counts[g] > 0 && (group === "all" || group === g));
+
+  const card = (s: Submission) => {
+    const icon = s.url ? favicon(s.url) : undefined;
+    const sub =
+      s.kind === "company"
+        ? null
+        : s.kind === "fix"
+          ? t("submissions.urlFix")
+          : s.kind === "taxonomy"
+            ? t(s.propose_removal ? "submissions.removal" : "submissions.taxonomyFix")
+            : null;
+    return (
+      <button
+        key={s.id}
+        type="button"
+        onClick={() => setOpen(s)}
+        className="card-hover group flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card p-4 text-left"
+      >
+        <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted/50">
+          {s.kind === "company" ? (
+            <Building2 className="size-5 text-muted-foreground" />
+          ) : icon ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={icon} alt="" className="size-5" loading="lazy" />
+          ) : null}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-medium leading-tight group-hover:underline">
+            {s.name}
+          </span>
+          {sub && (
+            <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Wrench className="size-3" />
+              {sub}
+            </span>
+          )}
+        </span>
+        <StatusBadge status={s.status} />
+      </button>
+    );
+  };
+
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((s) => {
-          const icon = s.url ? favicon(s.url) : undefined;
-          return (
+      {/* Filter by type — only types the user actually has. */}
+      <div className="mb-6 flex flex-wrap gap-1.5" role="group" aria-label={t("submissions.title")}>
+        {(["all", ...GROUPS] as const)
+          .filter((g) => g === "all" || counts[g] > 0)
+          .map((g) => (
             <button
-              key={s.id}
+              key={g}
               type="button"
-              onClick={() => setOpen(s)}
-              className="card-hover group flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card p-4 text-left"
+              aria-pressed={group === g}
+              onClick={() => setGroup(g)}
+              className={cn(
+                "cursor-pointer rounded-full border px-3 py-1 text-sm transition-colors",
+                group === g
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:bg-muted",
+              )}
             >
-              <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted/50">
-                {icon ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={icon} alt="" className="size-5" loading="lazy" />
-                ) : null}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate font-medium leading-tight group-hover:underline">
-                  {s.name}
-                </span>
-                {s.kind === "company" ? (
-                  <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <Building2 className="size-3" />
-                    {t("submissions.company")}
+              {t(`submissions.groups.${g}`)}
+              <span className="ml-1.5 opacity-60">{g === "all" ? total : counts[g]}</span>
+            </button>
+          ))}
+      </div>
+
+      <div className="flex flex-col gap-8">
+        {shownGroups.map((g) => (
+          <section key={g}>
+            <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+              {t(`submissions.groups.${g}`)}
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {g === "cv" && cv ? (
+                <Link
+                  href="/profile/edit?tab=cv"
+                  className="card-hover group flex items-center gap-3 rounded-xl border border-border bg-card p-4"
+                >
+                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+                    <FileText className="size-5" />
                   </span>
-                ) : s.kind !== "new" && (
-                  <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <Wrench className="size-3" />
-                    {t(
-                      s.kind === "fix"
-                        ? "submissions.urlFix"
-                        : "submissions.taxonomyFix",
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium leading-tight group-hover:underline">
+                      {cv.title}
+                    </span>
+                    {/* "Approved" covers listed and unlisted; say which. */}
+                    {cv.status === "hidden" && (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        {t("myCv.status.hidden")}
+                      </span>
                     )}
                   </span>
-                )}
-              </span>
-              <StatusBadge status={s.status} />
-            </button>
-          );
-        })}
+                  <StatusBadge status={CV_BADGE[cv.status] ?? "pending"} />
+                </Link>
+              ) : (
+                items.filter((s) => groupOf(s) === g).map(card)
+              )}
+            </div>
+          </section>
+        ))}
       </div>
 
       <SubmissionDialog
@@ -325,7 +429,10 @@ function SubmissionDialog({
                 {s.kind === "taxonomy" &&
                   (s.proposed_categories.length > 0 ||
                     s.proposed_tags.length > 0 ||
-                    !!s.proposed_description) && (
+                    !!s.proposed_description ||
+                    !!s.proposed_name ||
+                    !!s.proposed_url ||
+                    s.propose_removal) && (
                     <TaxonomyProposal
                       categoriesLabel={t("modal.categories")}
                       tagsLabel={t("modal.tags")}
@@ -336,6 +443,12 @@ function SubmissionDialog({
                       originalCategories={s.original_categories}
                       originalTags={s.original_tags}
                       originalDescription={s.original_description}
+                      originalName={s.name}
+                      originalUrl={s.url}
+                      proposedName={s.proposed_name}
+                      proposedUrl={s.proposed_url}
+                      proposeRemoval={s.propose_removal}
+                      removalNote={s.note}
                       resolveCategory={(c) =>
                         categories.find((x) => x.slug === c)?.title ?? c
                       }

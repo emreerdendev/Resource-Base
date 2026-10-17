@@ -223,35 +223,66 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // On approval of a taxonomy fix, resolve the proposed categories/tags to
-  // references and set them on the resource. Free-text values that don't match
-  // an existing doc are recorded back on the submission for the editor.
+  // On approval of an edit suggestion, apply it to the resource. The proposal
+  // is read from the submission itself (editors may have adjusted it before
+  // approving, and the webhook projection doesn't carry every field).
+  // Categories/tags resolve to references; free-text values that match no doc
+  // are noted back on the submission for the editor.
+  let removal = false;
+  if (isTaxonomyFix) {
+    const flag = await writeClient.fetch<boolean | null>(
+      `*[_type == "submission" && _id == $id][0].proposeRemoval`,
+      { id: body._id },
+    );
+    removal = flag === true;
+  }
   if (approved && isTaxonomyFix && targetResourceId) {
     try {
-      const [cats, tags] = await Promise.all([
-        resolveRefs("category", body.proposedCategories ?? []),
-        resolveRefs("tag", body.proposedTags ?? []),
-      ]);
-      const patch: Record<string, unknown> = {};
-      if (cats.refs.length) patch.categories = cats.refs;
-      if (tags.refs.length) patch.tags = tags.refs;
-      // Apply a proposed description verbatim (it was reviewed before approval).
-      const proposedDescription = body.proposedDescription?.trim();
-      if (proposedDescription) patch.description = proposedDescription;
-      if (Object.keys(patch).length) {
-        await writeClient.patch(targetResourceId).set(patch).commit();
-      }
-      const unresolved = [...cats.unresolved, ...tags.unresolved];
-      if (unresolved.length) {
-        await writeClient
-          .patch(body._id)
-          .set({
-            note: `Unresolved proposals to add manually: ${unresolved.join(", ")}`,
-          })
-          .commit();
+      const proposal = await writeClient.fetch<{
+        proposedCategories?: string[];
+        proposedTags?: string[];
+        proposedDescription?: string;
+        proposedName?: string;
+        proposedUrl?: string;
+      } | null>(
+        `*[_type == "submission" && _id == $id][0]{ proposedCategories, proposedTags, proposedDescription, proposedName, proposedUrl }`,
+        { id: body._id },
+      );
+      if (removal) {
+        // Hidden, not deleted: set it back to Published in the Studio to undo.
+        await writeClient.patch(targetResourceId).set({ submissionStatus: "removed" }).commit();
+      } else {
+        const [cats, tags] = await Promise.all([
+          resolveRefs("category", proposal?.proposedCategories ?? []),
+          resolveRefs("tag", proposal?.proposedTags ?? []),
+        ]);
+        const patch: Record<string, unknown> = {};
+        if (cats.refs.length) patch.categories = cats.refs;
+        if (tags.refs.length) patch.tags = tags.refs;
+        // Text proposals are applied verbatim (they were reviewed before approval).
+        const description = proposal?.proposedDescription?.trim();
+        if (description) patch.description = description;
+        const newName = proposal?.proposedName?.trim();
+        if (newName) patch.name = newName.slice(0, 200);
+        if (proposal?.proposedUrl) {
+          patch.url = proposal.proposedUrl;
+          patch.linkStatus = "unchecked"; // the daily checker re-verifies it
+        }
+        if (Object.keys(patch).length) {
+          await writeClient.patch(targetResourceId).set(patch).commit();
+        }
+        const unresolved = [...cats.unresolved, ...tags.unresolved];
+        if (unresolved.length) {
+          await writeClient
+            .patch(body._id)
+            .set({
+              note: `Unresolved proposals to add manually: ${unresolved.join(", ")}`,
+            })
+            .commit();
+        }
       }
     } catch (err) {
-      console.error("taxonomy fix apply failed", err);
+      console.error("edit suggestion apply failed", err);
     }
   }
 
@@ -259,7 +290,17 @@ export async function POST(req: NextRequest) {
   // The status is part of the key so an approve-after-reject still notifies.
   // `data` lets the UI render the message in the reader's language; title and
   // body keep an English fallback.
-  const kind = isCv ? "cv" : isCompany ? "company" : isUrlFix ? "fix" : isTaxonomyFix ? "taxonomy" : "new";
+  const kind = isCv
+    ? "cv"
+    : isCompany
+      ? "company"
+      : isUrlFix
+        ? "fix"
+        : removal
+          ? "removal"
+          : isTaxonomyFix
+            ? "taxonomy"
+            : "new";
   const resubmitHint = isCv
     ? "You can upload an updated CV."
     : isCompany
@@ -282,8 +323,10 @@ export async function POST(req: NextRequest) {
       body: approved
         ? isUrlFix
           ? `Thanks! ${label} now points to the corrected link.`
-          : isTaxonomyFix
-            ? `Thanks! The categories/tags for ${label} were updated.`
+          : removal
+            ? `Thanks! ${label} was removed from the directory.`
+            : isTaxonomyFix
+            ? `Thanks! Your suggested changes to ${label} were applied.`
             : isCv
               ? `“${name}” is now in the CV directory.`
               : isCompany

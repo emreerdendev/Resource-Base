@@ -150,6 +150,8 @@ export const resource = defineType({
           { title: 'Published', value: 'published' },
           { title: 'Pending', value: 'pending' },
           { title: 'Rejected', value: 'rejected' },
+          // Reported as gone and confirmed; hidden but kept so it can be restored.
+          { title: 'Removed', value: 'removed' },
         ],
         layout: 'radio',
       },

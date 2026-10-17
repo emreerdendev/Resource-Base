@@ -60,6 +60,29 @@ export const submission = defineType({
       hidden: ({ parent }) => parent?.kind !== 'taxonomy',
     }),
     defineField({
+      name: 'proposeRemoval',
+      title: 'Reported as gone / should be removed',
+      type: 'boolean',
+      description:
+        'The submitter says this resource no longer exists. Approving hides it from the directory (status → Removed); undo by setting it back to Published.',
+      readOnly: true,
+      hidden: ({ parent }) => parent?.kind !== 'taxonomy' || !parent?.proposeRemoval,
+    }),
+    defineField({
+      name: 'proposedName',
+      title: 'Proposed name',
+      type: 'string',
+      description: 'Applied to the resource on approval.',
+      hidden: ({ parent }) => parent?.kind !== 'taxonomy' || !parent?.proposedName,
+    }),
+    defineField({
+      name: 'proposedUrl',
+      title: 'Proposed link',
+      type: 'url',
+      description: 'Applied to the resource on approval (its link status is reset).',
+      hidden: ({ parent }) => parent?.kind !== 'taxonomy' || !parent?.proposedUrl,
+    }),
+    defineField({
       name: 'proposedDescription',
       title: 'Proposed description',
       type: 'text',

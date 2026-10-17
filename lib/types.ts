@@ -107,6 +107,9 @@ export interface Submission {
   proposed_categories: string[]
   proposed_tags: string[]
   proposed_description: string | null
+  proposed_name: string | null
+  proposed_url: string | null
+  propose_removal: boolean
   original_categories: string[]
   original_tags: string[]
   original_description: string | null

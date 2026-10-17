@@ -22,7 +22,8 @@ import { useTaxonomy } from "@/components/taxonomy-provider";
 import type { Resource } from "@/lib/types";
 import { cn, favicon } from "@/lib/utils";
 import {
-  ArrowUpRight,
+  ExternalLink,
+  Info,
   Clock,
   Loader2,
   PencilLine,
@@ -175,7 +176,7 @@ export function ResourceModal({
         )}
       >
         {/* Header — icon top-aligned so long, wrapping names read naturally */}
-        <DialogHeader className="flex-row items-start gap-3.5 pr-6 items-center">
+        <DialogHeader className="flex-row items-center gap-3.5 pr-6">
           <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-border bg-muted/50">
             {icon ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -190,10 +191,14 @@ export function ResourceModal({
                 rel="noopener noreferrer"
                 onClick={onNavigate}
                 onAuxClick={onNavigate}
-                className="hover:underline"
+                className="group underline-offset-4"
               >
-                {resource.name}
-                <ArrowUpRight className="ml-1 inline size-3.5 shrink-0 align-baseline opacity-60" />
+                {/* Name and "Open Page" are one link, sitting on one baseline. */}
+                <span className="group-hover:underline">{resource.name}</span>{" "}
+                <span className="ml-1 inline-flex items-baseline gap-1 text-xs font-normal whitespace-nowrap text-muted-foreground transition-colors group-hover:text-foreground group-hover:underline">
+                  {t("company.openPage")}
+                  <ExternalLink className="size-3 self-center" />
+                </span>
               </a>
             </DialogTitle>
             {resource.author && (
@@ -317,6 +322,12 @@ export function ResourceModal({
               originalCategories={pendingTaxFix.original_categories}
               originalTags={pendingTaxFix.original_tags}
               originalDescription={pendingTaxFix.original_description}
+              originalName={pendingTaxFix.name}
+              originalUrl={pendingTaxFix.url}
+              proposedName={pendingTaxFix.proposed_name}
+              proposedUrl={pendingTaxFix.proposed_url}
+              proposeRemoval={pendingTaxFix.propose_removal}
+              removalNote={pendingTaxFix.note}
               resolveCategory={titleForCat}
               resolveTag={titleForTag}
             />
@@ -413,13 +424,56 @@ export function ResourceModal({
             )}
           </div>
 
-          {/* Actions — favorite · details · suggest edit · open. Suggest edit
-              becomes a clickable "pending" chip once the user has an open
+          {/* Actions — details · suggest edit · favorite, equal widths. Suggest
+              edit turns into a "pending" button once the user has an open
               suggestion; the editor/read-only view render above this row. */}
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-3 gap-2">
+            {resource.slug ? (
+              <Button asChild variant="outline" size="lg">
+                <Link href={`/resource/${resource.slug}`} onClick={() => onOpenChange(false)}>
+                  <Info />
+                  {t("modal.details")}
+                </Link>
+              </Button>
+            ) : (
+              <span />
+            )}
+
+            {user && submissionsLoading ? (
+              <Button variant="outline" size="lg" disabled>
+                <Loader2 className="animate-spin" />
+                {t("taxonomy.editCta")}
+              </Button>
+            ) : pendingTaxFix ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => setTaxViewOpen((o) => !o)}
+                aria-pressed={taxViewOpen}
+                title={t("taxonomy.pendingSuggestion")}
+                className="min-w-0 text-amber-600 dark:text-amber-400"
+              >
+                <Clock />
+                <span className="truncate">{t("taxonomy.pending")}</span>
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => (user ? setTaxOpen((o) => !o) : openAuth())}
+                aria-pressed={taxOpen}
+                className="min-w-0"
+              >
+                <PencilLine />
+                <span className="truncate">{t("taxonomy.editShort")}</span>
+              </Button>
+            )}
+
             <Button
               variant="outline"
-              size="icon-lg"
+              size="lg"
               onClick={() => {
                 // Favorites are account-only — prompt sign-in for guests.
                 if (!user) {
@@ -428,73 +482,11 @@ export function ResourceModal({
                 }
                 toggle(resource._id);
               }}
-              aria-label={
-                !user
-                  ? t("card.signInToSave")
-                  : fav
-                    ? t("card.removeFavorite")
-                    : t("card.addFavorite")
-              }
+              aria-pressed={fav}
+              className={cn("min-w-0", fav && "border-primary/50 text-primary")}
             >
               <Star className={cn(fav && "fill-primary text-primary")} />
-            </Button>
-            {resource.slug && (
-              <Button asChild variant="outline" size="lg">
-                <Link
-                  href={`/resource/${resource.slug}`}
-                  onClick={() => onOpenChange(false)}
-                >
-                  {t("modal.details")}
-                </Link>
-              </Button>
-            )}
-
-            {/* Suggest edit (categories / tags / description) — icon-only so a
-                long "pending" label never pushes the row past the modal width.
-                Hidden while the editor or read-only view is already open. */}
-            {!taxOpen &&
-              !taxViewOpen &&
-              (resource.categories?.length > 0 || resource.tags?.length > 0) &&
-              (user && submissionsLoading ? (
-                <Button variant="outline" size="icon-lg" disabled>
-                  <Loader2 className="animate-spin" />
-                </Button>
-              ) : pendingTaxFix ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-lg"
-                  onClick={() => setTaxViewOpen(true)}
-                  title={t("taxonomy.pendingSuggestion")}
-                  aria-label={t("taxonomy.pendingSuggestion")}
-                  className="text-amber-600 dark:text-amber-400"
-                >
-                  <Clock />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-lg"
-                  onClick={() => (user ? setTaxOpen(true) : openAuth())}
-                  title={t("taxonomy.editCta")}
-                  aria-label={t("taxonomy.editCta")}
-                >
-                  <PencilLine />
-                </Button>
-              ))}
-
-            <Button asChild size="lg" className="flex-1">
-              <a
-                href={resource.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={onNavigate}
-                onAuxClick={onNavigate}
-              >
-                {t("modal.open")}
-                <ArrowUpRight />
-              </a>
+              <span className="truncate">{t(fav ? "card.favorited" : "card.favorite")}</span>
             </Button>
           </div>
         </div>

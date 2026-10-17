@@ -121,6 +121,9 @@ export type SubmissionRow = {
   proposed_categories: string[];
   proposed_tags: string[];
   proposed_description: string | null;
+  proposed_name: string | null;
+  proposed_url: string | null;
+  propose_removal: boolean;
   original_categories: string[];
   original_tags: string[];
   original_description: string | null;
@@ -152,6 +155,9 @@ export async function listSubmissions(): Promise<SubmissionRow[]> {
     proposed_categories: r.proposedCategories,
     proposed_tags: r.proposedTags,
     proposed_description: r.proposedDescription,
+    proposed_name: r.proposedName,
+    proposed_url: r.proposedUrl,
+    propose_removal: r.proposeRemoval,
     original_categories: r.originalCategories,
     original_tags: r.originalTags,
     original_description: r.originalDescription,

@@ -212,6 +212,10 @@ export const submissions = sqliteTable(
       .notNull()
       .default([]),
     proposedDescription: text("proposed_description"),
+    // Edit suggestions can also rename, re-link or report a resource as gone.
+    proposedName: text("proposed_name"),
+    proposedUrl: text("proposed_url"),
+    proposeRemoval: integer("propose_removal", { mode: "boolean" }).notNull().default(false),
     originalCategories: text("original_categories", { mode: "json" })
       .$type<string[]>()
       .notNull()

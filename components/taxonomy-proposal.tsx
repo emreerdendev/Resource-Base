@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 type ChipState = "kept" | "added" | "removed";
 
 /**
- * Read-only view of a taxonomy suggestion. Diffs the proposed set against the
+ * Read-only view of an edit suggestion: name/link changes as old → new, a
+ * removal report on its own, and for taxonomy Diffs the proposed set against the
  * original (snapshot at submit time) and marks each value:
  *   - added   → primary border + dot
  *   - removed → destructive border + strikethrough (shown even though it's no
@@ -26,6 +27,12 @@ export function TaxonomyProposal({
   originalDescription,
   resolveCategory = (s) => s,
   resolveTag = (s) => s,
+  originalName,
+  originalUrl,
+  proposedName,
+  proposedUrl,
+  proposeRemoval = false,
+  removalNote,
 }: {
   categoriesLabel: string;
   tagsLabel: string;
@@ -38,6 +45,13 @@ export function TaxonomyProposal({
   originalDescription?: string | null;
   resolveCategory?: (slug: string) => string;
   resolveTag?: (slug: string) => string;
+  originalName?: string | null;
+  originalUrl?: string | null;
+  proposedName?: string | null;
+  proposedUrl?: string | null;
+  /** Reported as gone — shown instead of any other change. */
+  proposeRemoval?: boolean;
+  removalNote?: string | null;
 }) {
   const { t } = useTranslation();
   // A description change is shown only when one was actually proposed and it
@@ -71,13 +85,40 @@ export function TaxonomyProposal({
   const tagRows = diff(proposedTags, originalTags);
   const all = [...catRows, ...tagRows];
   const anyAdded =
-    all.some((r) => r.state === "added") || descriptionChanged;
+    all.some((r) => r.state === "added") || descriptionChanged || !!proposedName || !!proposedUrl;
   const anyRemoved =
     all.some((r) => r.state === "removed") ||
     (descriptionChanged && !!(originalDescription ?? "").trim());
 
+  if (proposeRemoval) {
+    return (
+      <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
+        <p className="font-medium">{t("taxonomy.removalProposed")}</p>
+        {removalNote && <p className="mt-1 text-xs text-muted-foreground">{removalNote}</p>}
+      </div>
+    );
+  }
+
+  /** Old value struck through above the proposed one. */
+  const change = (label: string, from: string | null | undefined, to: string) => (
+    <Section label={label}>
+      <div className="flex w-full flex-col gap-1.5">
+        {from && (
+          <p className="break-all rounded-md border border-destructive/40 bg-destructive/5 px-2.5 py-1.5 text-xs text-muted-foreground line-through">
+            {from}
+          </p>
+        )}
+        <p className="break-all rounded-md border border-emerald-500/50 bg-emerald-500/10 px-2.5 py-1.5 text-xs text-foreground">
+          {to}
+        </p>
+      </div>
+    </Section>
+  );
+
   return (
     <div className="flex flex-col gap-3">
+      {proposedName && change(t("submit.name"), originalName, proposedName)}
+      {proposedUrl && change(t("submit.url"), originalUrl, proposedUrl)}
       {descriptionChanged && descriptionLabel && (
         <Section label={descriptionLabel}>
           <div className="flex flex-col gap-1.5">
