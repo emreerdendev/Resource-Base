@@ -1,5 +1,10 @@
-import { ListPageSkeleton } from "@/components/skeletons";
+import { PageHeaderSkeleton, TrackerSkeleton } from "@/components/skeletons";
 
 export default function Loading() {
-  return <ListPageSkeleton />;
+  return (
+    <div className="mx-auto max-w-4xl">
+      <PageHeaderSkeleton actions={1} />
+      <TrackerSkeleton />
+    </div>
+  );
 }

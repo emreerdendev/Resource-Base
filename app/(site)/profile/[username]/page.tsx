@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { and, count, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { submissions } from "@/lib/db/schema";
-import { fetchPublicProfile } from "@/lib/profile-actions";
+import { getPublicProfile } from "@/lib/public-profile";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { resourcesBySubmitterQuery } from "@/sanity/lib/queries";
 import { PublicProfileView } from "@/components/public-profile";
-import type { PublicProfile, Resource } from "@/lib/types";
+import type { Resource } from "@/lib/types";
 
 // Profiles are reachable only via contributor links — keep them out of search.
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default async function PublicProfilePage({
 }) {
   const { username } = await params;
 
-  const profile = (await fetchPublicProfile(username)) as PublicProfile | null;
+  const profile = await getPublicProfile(username);
   if (!profile) notFound();
 
   // Contributions: published resources (Sanity, tag-cached) plus approved

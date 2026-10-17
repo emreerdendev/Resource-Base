@@ -11,7 +11,7 @@ import { hasSlug, listSlugs } from "@/sanity/lib/slugs";
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
   const slugs = await listSlugs("category");
@@ -19,11 +19,9 @@ export async function generateStaticParams() {
 }
 
 /**
- * Only `/category/<slug>` is a page. The catch-all exists for legacy nested
- * URLs (`/category/<parent>/<child>`), which redirect when the chain is real.
- * Anything else 404s before any per-slug fetch: every distinct URL that
- * rendered a page used to be cached in KV, so arbitrary prefixes
- * (`/category/x/videos`, `/category/y/videos`, …) grew storage without bound.
+ * Only `/category/<slug>` is a page; layout.tsx redirects legacy nested URLs
+ * and 404s everything else before this runs. Re-checked here so the
+ * per-slug fetch never runs for a made-up slug.
  */
 async function load(slugParts: string[]) {
   const slug = slugParts[0];
@@ -52,26 +50,13 @@ export async function generateMetadata({
   };
 }
 
-async function redirectLegacyPath(parentSlug: string, childSlug: string) {
-  const all = await sanityFetch<Category[]>({
-    query: allCategoriesQuery,
-    tags: ["category"],
-  });
-  if (all.some((c) => c.slug === childSlug && c.parentSlug === parentSlug))
-    permanentRedirect(`/category/${childSlug}`);
-}
-
 export default async function CategoryPage({
   params,
 }: {
   params: Promise<{ slug: string[] }>;
 }) {
-  const parts = (await params).slug;
-  const { slug, category } = await load(parts);
-  if (!category) {
-    if (parts.length === 2) await redirectLegacyPath(parts[0], parts[1]);
-    notFound();
-  }
+  const { slug, category } = await load((await params).slug);
+  if (!category) notFound();
 
   const allCategories = await sanityFetch<Category[]>({
     query: allCategoriesQuery,
