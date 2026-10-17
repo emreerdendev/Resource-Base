@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SUPPORTED_LANGUAGES } from "@/lib/i18n";
+import { SUPPORTED_LANGUAGES, setLanguage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function LanguageToggle() {
@@ -33,7 +33,7 @@ export function LanguageToggle() {
           return (
             <DropdownMenuItem
               key={code}
-              onClick={() => i18n.changeLanguage(code)}
+              onClick={() => void setLanguage(code)}
               className={cn("justify-between", !active && "text-muted-foreground")}
             >
               {label}
