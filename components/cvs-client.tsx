@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { Heart, Search, SlidersHorizontal, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -16,6 +15,7 @@ import { ResourceGridSkeleton } from "@/components/skeletons";
 import { SubmitCta } from "@/components/submit-cta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { UrlParams } from "@/components/url-params";
 import { SortSelect } from "@/components/ui/sort-select";
 import { CV_FIELDS, CV_LANGUAGES, CV_SENIORITIES } from "@/lib/cv-taxonomy";
 import { loadCvListing } from "@/lib/cv-listing";
@@ -45,15 +45,51 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
   const { t } = useTranslation();
   const { user, loading: authLoading, openAuth } = useAuth();
   const likes = useCvLikes();
-  const params = useSearchParams();
   const [all, setAll] = useState<CvListing[] | null>(null);
   const [failed, setFailed] = useState(false);
-  // ?q= pre-fills the search (the ⌘K palette links CVs this way).
-  const [q, setQ] = useState(() => params.get("q")?.slice(0, 100) ?? "");
+  const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Selection>(EMPTY);
   const [showFilters, setShowFilters] = useState(false);
   const [sort, setSort] = useState<Sort>("newest");
-  const [page, setPage] = useState(1);
+  // Shareable URLs: ?q=, ?sort= and the facets (?field=…&tech=…) — the ⌘K
+  // palette links CVs with ?q=. Read after hydration, written with the
+  // History API (no server request), like Resources and Companies.
+  const urlRead = useRef(false);
+  const applyParams = useCallback((p: URLSearchParams) => {
+    urlRead.current = true;
+    setQ(p.get("q")?.slice(0, 100) ?? "");
+    const s = p.get("sort");
+    setSort(s === "popular" ? "popular" : "newest");
+    const next = Object.fromEntries(
+      FACETS.map((k) => [k, [...new Set(p.getAll(k).filter(Boolean))].slice(0, 20)]),
+    ) as Selection;
+    setSelected((cur) => (JSON.stringify(cur) === JSON.stringify(next) ? cur : next));
+    if (FACETS.some((k) => next[k].length > 0)) setShowFilters(true);
+  }, []);
+  useEffect(() => {
+    if (!urlRead.current) return; // never wipe a shared link's filters
+    const sp = new URLSearchParams();
+    if (q) sp.set("q", q);
+    if (sort !== "newest") sp.set("sort", sort);
+    for (const k of FACETS) for (const v of selected[k]) sp.append(k, v);
+    const qs = sp.toString();
+    const path = window.location.pathname;
+    const next = qs ? `${path}?${qs}` : path;
+    if (next !== path + window.location.search) window.history.replaceState(window.history.state, "", next);
+  }, [q, sort, selected]);
+  // The page belongs to one set of filters and sort: changing either starts at
+  // page 1 (derived, no reset effect).
+  const filterKey = JSON.stringify([q, selected, sort]);
+  const [paging, setPaging] = useState({ key: filterKey, page: 1 });
+  const page = paging.key === filterKey ? paging.page : 1;
+  const setPage = (p: number) => setPaging({ key: filterKey, page: p });
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const goToPage = (p: number) => {
+    setPage(p);
+    requestAnimationFrame(() =>
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  };
 
   useEffect(() => {
     let active = true;
@@ -170,6 +206,7 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
 
   return (
     <div className="mx-auto max-w-4xl">
+      <UrlParams onChange={applyParams} />
       {header}
 
       {/* Search bar — floating island that docks under the header */}
@@ -283,6 +320,7 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
         </div>
       ) : (
         <>
+          <div ref={resultsRef} className="scroll-mt-28" />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {shown.map((cv) => (
               <CvCard key={cv.id} cv={cv} pool={all ?? undefined} />
@@ -292,7 +330,7 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
             <Pagination
               page={current}
               totalPages={totalPages}
-              onChange={setPage}
+              onChange={goToPage}
               prevLabel={t("browse.prev")}
               nextLabel={t("browse.next")}
               firstLabel={t("browse.first")}

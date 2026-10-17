@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { BrowseClient } from "@/components/browse-client";
 import { HomeIntro } from "@/components/home-intro";
 import { sanityFetch } from "@/sanity/lib/fetch";
@@ -25,14 +24,12 @@ export default async function ResourcesPage() {
   ]);
 
   return (
-    <Suspense>
-      <BrowseClient
-        resources={resources}
-        categories={categories}
-        tags={tags}
-        basePath="/resources"
-        intro={<HomeIntro count={resources.length} />}
-      />
-    </Suspense>
+    <BrowseClient
+      resources={resources}
+      categories={categories}
+      tags={tags}
+      basePath="/resources"
+      intro={<HomeIntro count={resources.length} />}
+    />
   );
 }

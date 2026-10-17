@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { CvsClient } from "@/components/cvs-client";
-import Loading from "./loading";
 
 export const metadata: Metadata = {
   title: "CVs",
@@ -10,12 +8,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/cvs" },
 };
 
-// Static shell; the listing loads from the edge-cached /api/cvs.
+// Static shell (intro in the HTML); the listing loads from the edge-cached
+// /api/cvs and URL filters apply after hydration.
 export default function CvsPage() {
-  // Suspense: the search is pre-filled from ?q= on the client.
-  return (
-    <Suspense fallback={<Loading />}>
-      <CvsClient mode="all" />
-    </Suspense>
-  );
+  return <CvsClient mode="all" />;
 }

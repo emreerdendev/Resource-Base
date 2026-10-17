@@ -9,21 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SortSelect } from "@/components/ui/sort-select";
+import { UrlParams } from "@/components/url-params";
 import { createResourceSearch } from "@/lib/resource-search";
 import type { Category, Resource, Tag } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-type Sort =
-  | "featured"
-  | "popular"
-  | "favorites"
-  | "name"
-  | "name-desc"
-  | "recent";
+const SORTS = ["featured", "popular", "favorites", "name", "name-desc", "recent"] as const;
+type Sort = (typeof SORTS)[number];
 
 const PRICING_VALUES = ["free", "freemium", "paid"] as const;
 const LANG_VALUES = ["en", "tr"] as const;
@@ -46,8 +41,6 @@ export function BrowseClient({
   const { t } = useTranslation();
   const { get: getClicks } = useClickCounts();
   const { get: getFavorites } = useFavoriteCounts();
-  const router = useRouter();
-  const params = useSearchParams();
 
   const PRICING = PRICING_VALUES.map((value) => ({
     value,
@@ -58,20 +51,36 @@ export function BrowseClient({
     label: t(`languages.${value}`),
   }));
 
-  const [q, setQ] = useState(params.get("q") ?? "");
-  const [cat, setCat] = useState(params.get("category") ?? "");
-  const [activeTags, setActiveTags] = useState<string[]>(
-    params.get("tags")?.split(",").filter(Boolean) ?? [],
-  );
-  const [lang, setLang] = useState(params.get("lang") ?? "");
-  const [pricing, setPricing] = useState(params.get("pricing") ?? "");
-  const [sort, setSort] = useState<Sort>(
-    (params.get("sort") as Sort) ?? "featured",
-  );
+  // Filters start empty so the server renders the full list; the URL's
+  // filters (shared links, in-app links like ?category=…) apply after
+  // hydration via <UrlParams>.
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState("");
+  const [activeTags, setActiveTags] = useState<string[]>([]);
+  const [lang, setLang] = useState("");
+  const [pricing, setPricing] = useState("");
+  const [sort, setSort] = useState<Sort>("featured");
+  const urlRead = useRef(false);
+  const applyParams = useCallback((p: URLSearchParams) => {
+    urlRead.current = true;
+    setQ(p.get("q")?.slice(0, 100) ?? "");
+    setCat(p.get("category") ?? "");
+    const nextTags = p.get("tags")?.split(",").filter(Boolean) ?? [];
+    setActiveTags((cur) => (cur.join(",") === nextTags.join(",") ? cur : nextTags));
+    setLang(p.get("lang") ?? "");
+    setPricing(p.get("pricing") ?? "");
+    const s = p.get("sort") as Sort | null;
+    setSort(s && (SORTS as readonly string[]).includes(s) ? s : "featured");
+  }, []);
   const [showFilters, setShowFilters] = useState(false);
 
   // Pagination — 90 per page on desktop (30×3), 30 on mobile.
-  const [page, setPage] = useState(1);
+  // The page belongs to one set of filters: any filter change starts again at
+  // page 1 (derived, so there's no extra render).
+  const filterKey = [q, cat, activeTags.join(","), lang, pricing, sort].join("|");
+  const [paging, setPaging] = useState({ key: filterKey, page: 1 });
+  const page = paging.key === filterKey ? paging.page : 1;
+  const setPage = (p: number) => setPaging({ key: filterKey, page: p });
   const [pageSize, setPageSize] = useState(90);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 640px)");
@@ -81,8 +90,11 @@ export function BrowseClient({
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  // Keep the URL in sync so filtered views are shareable.
+  // Keep the URL in sync so filtered views are shareable. The History API, not
+  // router.replace: a router navigation is a server request per keystroke.
+  // Waits until the URL was read, so it never wipes a shared link's filters.
   useEffect(() => {
+    if (!urlRead.current) return;
     const sp = new URLSearchParams();
     if (q) sp.set("q", q);
     if (cat) sp.set("category", cat);
@@ -91,8 +103,10 @@ export function BrowseClient({
     if (pricing) sp.set("pricing", pricing);
     if (sort !== "featured") sp.set("sort", sort);
     const qs = sp.toString();
-    router.replace(qs ? `${basePath}?${qs}` : basePath, { scroll: false });
-  }, [q, cat, activeTags, lang, pricing, sort, router, basePath]);
+    const next = qs ? `${basePath}?${qs}` : basePath;
+    if (next !== window.location.pathname + window.location.search)
+      window.history.replaceState(window.history.state, "", next);
+  }, [q, cat, activeTags, lang, pricing, sort, basePath]);
 
   const search = useMemo(() => createResourceSearch(resources), [resources]);
 
@@ -149,11 +163,6 @@ export function BrowseClient({
     return counts;
   }, [baseFiltered]);
 
-  // Reset to the first page whenever the result set changes.
-  useEffect(() => {
-    setPage(1);
-  }, [q, cat, activeTags, lang, pricing, sort]);
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const paged = filtered.slice(
@@ -208,6 +217,7 @@ export function BrowseClient({
 
   return (
     <div className="mx-auto max-w-4xl">
+      <UrlParams onChange={applyParams} />
       {intro ?? (
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">

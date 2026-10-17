@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { connection } from "next/server";
 import { CompaniesClient } from "@/components/companies-client";
 import { CompaniesIntro } from "@/components/companies-intro";
-import { shuffle } from "@/lib/company-utils";
 import type { Company } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { allCompaniesQuery } from "@/sanity/lib/queries";
@@ -15,29 +12,17 @@ export const metadata: Metadata = {
   alternates: { canonical: "/companies" },
 };
 
-export default async function CompaniesPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const params = await searchParams;
-
-  // Render per request so every visit gets a fresh random order. The Sanity
-  // read itself stays tag-cached, so this is a cheap in-memory shuffle.
-  await connection();
+/**
+ * Static: rendered once and served from the cache until a company changes
+ * (the "company-list" tag). The random order is applied in the browser.
+ */
+export default async function CompaniesPage() {
   const companies = await sanityFetch<Company[]>({
     query: allCompaniesQuery,
     tags: ["company-list"],
   });
 
   return (
-    <Suspense>
-      {/* Keyed by sector so in-app sector links (?sector=…) start fresh. */}
-      <CompaniesClient
-        key={typeof params.sector === "string" ? params.sector : ""}
-        companies={shuffle(companies)}
-        intro={<CompaniesIntro count={companies.length} />}
-      />
-    </Suspense>
+    <CompaniesClient companies={companies} intro={<CompaniesIntro count={companies.length} />} />
   );
 }

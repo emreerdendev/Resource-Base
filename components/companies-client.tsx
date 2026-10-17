@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search, Shuffle, SlidersHorizontal, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { UrlParams } from "@/components/url-params";
 import { useAuth } from "@/components/auth/auth-provider";
 import { CompanyCard } from "@/components/company-card";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 type Mine = "" | "tracked" | "untracked";
 type FacetKey = "city" | "work" | "channel" | "sector";
 type Selection = Record<FacetKey, string[]>;
+const EMPTY_SELECTION: Selection = { city: [], work: [], channel: [], sector: [] };
 
 /** Channels that map to concrete links/addresses on the listing. */
 const FILTER_CHANNELS = ["email", "career", "linkedin"] as const;
@@ -77,9 +78,10 @@ function readFacet(params: URLSearchParams, key: FacetKey): string[] {
 }
 
 /**
- * The company directory. Arrives already shuffled from the server (a fresh
- * order on every visit — there's deliberately no ranking), then searched and
- * filtered entirely client-side; the set is small enough to stay instant.
+ * The company directory. The page is static (cached once, not rendered per
+ * visit); the order is shuffled here after hydration — a fresh order on every
+ * visit, there's deliberately no ranking — then searched and filtered entirely
+ * client-side; the set is small enough to stay instant.
  */
 export function CompaniesClient({
   companies: initial,
@@ -89,27 +91,39 @@ export function CompaniesClient({
   intro?: React.ReactNode;
 }) {
   const { t } = useTranslation();
-  const params = useSearchParams();
   const { user } = useAuth();
   const { get: getTracked } = useCompanyTracker();
 
   const [companies, setCompanies] = useState(initial);
-  const [q, setQ] = useState(params.get("q") ?? "");
-  const [selected, setSelected] = useState<Selection>(() => ({
-    city: readFacet(params, "city"),
-    work: readFacet(params, "work"),
-    channel: readFacet(params, "channel"),
-    sector: readFacet(params, "sector"),
-  }));
-  const [mineParam, setMine] = useState<Mine>(() => {
-    const m = params.get("mine");
-    return m === "tracked" || m === "untracked" ? m : "";
-  });
+  // Shuffle once in the browser (a random order can't be part of the cached
+  // HTML without a mismatch on hydration).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only randomness
+    setCompanies((c) => shuffle(c));
+  }, []);
+  // Filters start empty so the server renders the full list; the URL's
+  // filters apply after hydration via <UrlParams>.
+  const [q, setQ] = useState("");
+  const [selected, setSelected] = useState<Selection>(EMPTY_SELECTION);
+  const [mineParam, setMine] = useState<Mine>("");
   // "My tracker" only means something when signed in.
   const mine: Mine = user ? mineParam : "";
-  const [showFilters, setShowFilters] = useState(
-    () => FACETS.some((k) => params.getAll(k).length > 0) || Boolean(params.get("mine")),
-  );
+  const [showFilters, setShowFilters] = useState(false);
+  const urlRead = useRef(false);
+  const applyParams = useCallback((params: URLSearchParams) => {
+    urlRead.current = true;
+    setQ(params.get("q")?.slice(0, 100) ?? "");
+    const next: Selection = {
+      city: readFacet(params, "city"),
+      work: readFacet(params, "work"),
+      channel: readFacet(params, "channel"),
+      sector: readFacet(params, "sector"),
+    };
+    setSelected((cur) => (JSON.stringify(cur) === JSON.stringify(next) ? cur : next));
+    const m = params.get("mine");
+    setMine(m === "tracked" || m === "untracked" ? m : "");
+    if (FACETS.some((k) => next[k].length > 0) || m) setShowFilters(true);
+  }, []);
 
   // 60 per page on desktop (20×3), 30 on mobile.
   const [pageSize, setPageSize] = useState(60);
@@ -122,15 +136,18 @@ export function CompaniesClient({
   }, []);
 
   // Shareable, filterable URLs (the order itself is never persisted). Uses the
-  // History API rather than router.replace: the page renders per request, so a
-  // router navigation would cost a server render on every keystroke.
+  // History API rather than router.replace: a router navigation would cost a
+  // server request on every keystroke.
   useEffect(() => {
+    if (!urlRead.current) return; // never wipe a shared link's filters
     const sp = new URLSearchParams();
     if (q) sp.set("q", q);
     for (const k of FACETS) for (const v of selected[k]) sp.append(k, v);
     if (mineParam) sp.set("mine", mineParam);
     const qs = sp.toString();
-    window.history.replaceState(null, "", qs ? `/companies?${qs}` : "/companies");
+    const next = qs ? `/companies?${qs}` : "/companies";
+    if (next !== window.location.pathname + window.location.search)
+      window.history.replaceState(window.history.state, "", next);
   }, [q, selected, mineParam]);
 
   const search = useMemo(() => createCompanySearch(companies), [companies]);
@@ -248,6 +265,7 @@ export function CompaniesClient({
 
   return (
     <div className="mx-auto max-w-4xl">
+      <UrlParams onChange={applyParams} />
       {intro}
 
       {/* Search bar — floating island that docks under the header */}
