@@ -250,7 +250,7 @@ export function CompaniesClient({
       {intro}
 
       {/* Search bar — floating island that docks under the header */}
-      <div className="sticky top-[86px] z-20 mb-6 rounded-b-xl bg-background">
+      <div className="sticky top-[88px] z-20 mb-6 rounded-b-xl bg-background">
         <div className="rounded-xl border border-border/70 bg-background/95 p-3 shadow-md shadow-black/5 ring-1 ring-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-background/85">
           <div className="flex gap-2">
             <div className="relative flex-1">
