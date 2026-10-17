@@ -114,21 +114,21 @@ export function HomeOnboarding({
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <DirectoryCard
-          href="/companies"
-          icon={Building2}
-          title={t("nav.companies")}
-          stat={t("home.companiesStat", { count: companies })}
-          body={t("home.companiesBody")}
-          cta={t("tracker.browse")}
-          className={`${ENTER} delay-75`}
-        />
-        <DirectoryCard
           href="/resources"
           icon={Boxes}
           title={t("nav.resources")}
           stat={t("home.resourcesStat", { count: resources, categories })}
           body={t("home.resourcesBody")}
           cta={t("favorites.browse")}
+          className={`${ENTER} delay-75`}
+        />
+        <DirectoryCard
+          href="/companies"
+          icon={Building2}
+          title={t("nav.companies")}
+          stat={t("home.companiesStat", { count: companies })}
+          body={t("home.companiesBody")}
+          cta={t("tracker.browse")}
           className={`${ENTER} delay-150`}
         />
         <DirectoryCard
