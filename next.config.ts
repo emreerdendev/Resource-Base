@@ -50,7 +50,7 @@ const RESOURCE_BROWSE_PARAMS = ["category", "tags", "pricing", "lang", "sort"];
 
 /**
  * Content Security Policy. Whitelists exactly the origins the app talks to:
- *  - scripts: self + Google Analytics (@next/third-parties).
+ *  - scripts: self + Google Analytics (loaded after consent) + Turnstile.
  *    Next.js injects inline hydration scripts, so 'unsafe-inline' is required
  *    here (nonce-based CSP needs per-request middleware wiring — out of scope).
  *  - styles: self + 'unsafe-inline' (Tailwind/Next inject inline styles) + Google Fonts.
@@ -114,11 +114,6 @@ const securityHeaders = [
 const STUDIO_URL = "https://resourcebase.sanity.studio";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "www.google.com", pathname: "/s2/**" },
-    ],
-  },
   async headers() {
     // Apply to everything except CV files, which get their own (below).
     return [

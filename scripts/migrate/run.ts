@@ -5,8 +5,10 @@
  *   pnpm migrate:dry   # parse + summarise, write nothing
  *   pnpm migrate       # parse + import into Sanity
  *
- * Idempotent: deterministic doc ids (hashed by url/slug) mean re-running upserts
- * rather than duplicating.
+ * Deterministic doc ids (hashed by url/slug) mean re-running doesn't duplicate —
+ * but it REPLACES each document (createOrReplace), wiping every edit made in
+ * the Studio since, link statuses and contributor credits. It was a one-time
+ * import: don't run it against the live dataset again.
  */
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'

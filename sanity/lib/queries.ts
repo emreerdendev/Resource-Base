@@ -27,7 +27,7 @@ export const allResourcesQuery = groq`
   }
 `
 
-/** Published resources contributed by a given Supabase user id. */
+/** Published resources contributed by a given user id. */
 export const resourcesBySubmitterQuery = groq`
   *[${PUBLISHED} && submittedBy == $userId] | order(addedAt desc) {
     ${RESOURCE_FIELDS}

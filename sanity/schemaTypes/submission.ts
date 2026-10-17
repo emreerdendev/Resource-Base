@@ -278,7 +278,7 @@ export const submission = defineType({
     defineField({ name: 'email', type: 'string' }),
     defineField({
       name: 'submittedBy',
-      title: 'Submitted by (Supabase user id)',
+      title: 'Submitted by (user id)',
       type: 'string',
       description:
         'Set automatically when a signed-in user submits. Used to notify them on approval.',

@@ -111,7 +111,10 @@ export function buildDocuments(parsed: ParsedResource[]): BuildResult {
   return { categories, tags: [...tagsBySlug.values()], resources }
 }
 
-/** Push all documents in batched transactions (createOrReplace = idempotent). */
+/**
+ * Push all documents in batched transactions. createOrReplace overwrites any
+ * existing document with the same id — including later Studio edits.
+ */
 export async function importDocuments(
   client: SanityClient,
   { categories, tags, resources }: BuildResult

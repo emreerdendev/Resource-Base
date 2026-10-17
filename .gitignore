@@ -52,3 +52,6 @@ next-env.d.ts
 
 .env*
 .pw/
+
+# Claude Code local settings
+.claude/
