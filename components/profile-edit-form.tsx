@@ -12,6 +12,7 @@ import { IconInput } from "@/components/ui/icon-input";
 import { FormField } from "@/components/form-field";
 import { normalizeSocialLink, socialEntries, type SocialLinks, type SocialPlatformId } from "@/lib/social-links";
 import type { Profile } from "@/lib/types";
+import { isValidUsername } from "@/lib/username";
 import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { FormSkeleton } from "@/components/skeletons";
 import { cn } from "@/lib/utils";
@@ -76,7 +77,7 @@ export function ProfileEditForm() {
   const errors = {
     username: !fields?.username.trim()
       ? t("validation.required")
-      : /^[a-zA-Z0-9_-]{3,20}$/.test(fields.username.trim())
+      : isValidUsername(fields.username.trim())
         ? null
         : t("validation.username"),
   };
@@ -107,7 +108,7 @@ export function ProfileEditForm() {
     setPending(true);
     try {
       // Username goes through the validated RPC if it changed.
-      const nextUsername = fields.username.trim().toLowerCase();
+      const nextUsername = fields.username.trim();
       if (nextUsername && nextUsername !== profile!.username) {
         const { error } = await setUsername(nextUsername);
         if (error) {

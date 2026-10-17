@@ -41,6 +41,7 @@ import { useTranslation } from "react-i18next";
 import { Separator } from "./ui/separator";
 import { normalizeWebUrl } from "@/lib/company-input";
 import { fieldProps } from "@/lib/use-form-errors";
+import { profilePath } from "@/lib/username";
 
 /** Pill shared with the resource card — accent background, rounded, hover. */
 const PILL =
@@ -418,7 +419,7 @@ export function ResourceModal({
             {addedOn && <span>{t("modal.addedOn", { date: addedOn })}</span>}
             {contributor && (
               <Link
-                href={`/profile/${contributor.username}`}
+                href={profilePath(contributor.username)}
                 onClick={() => onOpenChange(false)}
                 className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
               >

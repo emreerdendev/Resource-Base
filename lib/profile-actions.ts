@@ -8,6 +8,7 @@ import { getAuth } from "@/lib/auth";
 import { getSessionUser, requireFreshUser, requireUser } from "@/lib/authz";
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
 import { cleanSocialLinks } from "@/lib/social-links";
+import { isValidUsername } from "@/lib/username";
 
 const PW_MIN = 8;
 const PW_MAX = 64;
@@ -45,7 +46,6 @@ export async function setMyPassword(
   return { error: null };
 }
 
-const USERNAME_RE = /^[a-z0-9_-]{3,20}$/;
 
 const EDITABLE = ["fullName", "bio", "socialLinks", "showEmail"] as const;
 
@@ -55,8 +55,9 @@ export async function setUsername(
 ): Promise<{ error: string | null }> {
   const me = await requireUser();
   if (typeof next !== "string") return { error: "invalid_username" };
-  const cleaned = next.trim().toLowerCase();
-  if (!USERNAME_RE.test(cleaned)) return { error: "invalid_username" };
+  // Case is kept as typed; it never makes a name distinct (see lib/username).
+  const cleaned = next.trim();
+  if (!isValidUsername(cleaned)) return { error: "invalid_username" };
   // A human changes their handle rarely; cap at 5/hour to stop a script from
   // hammering the uniqueness query + write. Far above any real use.
   if (await isRateLimited(`username:${me.id}`, 5, 3600))
@@ -66,7 +67,7 @@ export async function setUsername(
   const clash = await db
     .select({ id: user.id })
     .from(user)
-    .where(and(sql`lower(${user.username}) = ${cleaned}`, ne(user.id, me.id)))
+    .where(and(sql`lower(${user.username}) = ${cleaned.toLowerCase()}`, ne(user.id, me.id)))
     .limit(1);
   if (clash.length > 0) return { error: "username_taken" };
 

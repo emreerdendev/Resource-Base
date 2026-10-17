@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { initial } from "@/lib/initial";
 import type { CvListing } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { profilePath } from "@/lib/username";
 
 const MAX_TECH = 5;
 
@@ -67,7 +68,7 @@ export function CvCard({ cv, pool }: { cv: CvListing; pool?: CvListing[] }) {
         {owner &&
           (cv.owner.username ? (
             <Link
-              href={`/profile/${cv.owner.username}`}
+              href={profilePath(cv.owner.username)}
               className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
             >
               <Avatar src={cv.owner.avatar} name={owner} />

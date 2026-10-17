@@ -15,6 +15,7 @@ import { ProfileEditForm } from "@/components/profile-edit-form";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/lib/profile";
 import { cn } from "@/lib/utils";
+import { profilePath } from "@/lib/username";
 
 const TABS = [
   { id: "profile", icon: UserRound },
@@ -56,7 +57,7 @@ export function ProfileSettings() {
       actions={
         profile?.username && (
           <Button asChild size="sm" variant="outline">
-            <Link href={`/profile/${profile.username}`}>
+            <Link href={profilePath(profile.username)}>
               {t("settings.viewProfile")} <ArrowUpRight className="size-3.5" />
             </Link>
           </Button>

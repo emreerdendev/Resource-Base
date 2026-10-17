@@ -29,6 +29,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useNotifications } from "@/lib/notifications";
 import { useProfile } from "@/lib/profile";
 import { initial } from "@/lib/initial";
+import { profilePath } from "@/lib/username";
 
 export function UserMenu() {
   const { t } = useTranslation();
@@ -60,7 +61,7 @@ export function UserMenu() {
   // Provider avatar URLs can expire or be blocked — fall back to the initial.
   const showAvatar = avatar && avatar !== failedAvatar;
   const profileHref = profile?.username
-    ? `/profile/${profile.username}`
+    ? profilePath(profile.username)
     : "/profile/edit";
 
   return (

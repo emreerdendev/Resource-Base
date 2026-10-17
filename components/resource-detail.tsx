@@ -33,6 +33,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { trackClick } from "@/lib/track-click";
+import { profilePath } from "@/lib/username";
 
 const PILL =
   "inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-xs text-accent-foreground transition-colors hover:bg-accent/70";
@@ -317,7 +318,7 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
         {addedOn && <span>{t("modal.addedOn", { date: addedOn })}</span>}
         {contributor && (
           <Link
-            href={`/profile/${contributor.username}`}
+            href={profilePath(contributor.username)}
             className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
           >
             {contributor.avatar_url ? (

@@ -78,6 +78,13 @@
       "when": 1792267809323,
       "tag": "0010_drop_old_social_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1792269143274,
+      "tag": "0011_clean_usernames",
+      "breakpoints": true
     }
   ]
 }

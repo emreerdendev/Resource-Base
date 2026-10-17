@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { normalizeLinkedinJobsUrl } from "@/lib/company-input";
 import { hasContact, hostLabel, searchLinks } from "@/lib/company-utils";
 import type { Company } from "@/lib/types";
+import { profilePath } from "@/lib/username";
 
 /** Pill shared with the resource modal — accent background, rounded, hover. */
 export const PILL =
@@ -280,7 +281,7 @@ export function AddedByLink({ userId, onNavigate }: { userId: string; onNavigate
   if (!who?.username) return null;
   return (
     <Link
-      href={`/profile/${who.username}`}
+      href={profilePath(who.username)}
       onClick={onNavigate}
       className="inline-flex items-center gap-1.5 self-start text-xs text-muted-foreground transition-colors hover:text-foreground"
     >

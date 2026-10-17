@@ -140,8 +140,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Public profiles live at /@username; the files sit under /profile/[username]
+  // (a folder can't start with "@" — that's a parallel route slot).
+  async rewrites() {
+    return [{ source: "/@:username", destination: "/profile/:username" }];
+  },
   async redirects() {
     return [
+      // Old profile links → /@username (the editor keeps /profile/edit).
+      {
+        source: "/profile/:username((?!edit$)[^/]+)",
+        destination: "/@:username",
+        permanent: true,
+      },
       // The contribute forms moved to their own paths. Order matters: the
       // company rule must come first (query params carry over, e.g. ?name=).
       {

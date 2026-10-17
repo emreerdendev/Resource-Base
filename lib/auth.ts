@@ -207,7 +207,7 @@ export async function getAuth() {
               try {
                 await db
                   .update(schema.user)
-                  .set({ username: `${stem}-${suffix}` })
+                  .set({ username: `${stem}${suffix}` })
                   .where(eq(schema.user.id, createdUser.id));
                 break;
               } catch (e) {
