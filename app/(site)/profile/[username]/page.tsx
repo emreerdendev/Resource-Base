@@ -10,9 +10,17 @@ import { PublicProfileView } from "@/components/public-profile";
 import type { Resource } from "@/lib/types";
 
 // Profiles are reachable only via contributor links — keep them out of search.
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const profile = await getPublicProfile((await params).username);
+  const robots = { index: false, follow: false };
+  if (!profile) return { robots };
+  const name = profile.full_name ? `${profile.full_name} (@${profile.username})` : `@${profile.username}`;
+  return { title: name, description: profile.bio ?? undefined, robots };
+}
 
 export default async function PublicProfilePage({
   params,

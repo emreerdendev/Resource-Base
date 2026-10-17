@@ -7,6 +7,7 @@ import { hasSlug } from "@/sanity/lib/slugs";
 import type { ResourceWithRelated } from "@/lib/types";
 import { siteUrl, siteName } from "@/lib/site";
 import { jsonLd } from "@/lib/json-ld";
+import { OG_IMAGE } from "@/lib/og";
 
 /**
  * Nothing is prerendered at build: each page renders on its first visit and
@@ -50,8 +51,9 @@ export async function generateMetadata({
       title: resource.name,
       description,
       url,
+      images: [OG_IMAGE],
     },
-    twitter: { card: "summary_large_image", title: resource.name, description },
+    twitter: { card: "summary_large_image", title: resource.name, description, images: [OG_IMAGE.url] },
   };
 }
 

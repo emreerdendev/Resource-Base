@@ -212,8 +212,17 @@ export const de = {
     browseCvs: "Alle Lebensläufe ansehen",
   },
 
-  category: { home: "Ressourcen", resources: "{{count}} Ressourcen" },
-  tag: { home: "Ressourcen", resources: "{{count}} Ressourcen" },
+  notFound: {
+    title: "Diese Seite hat sich verlaufen",
+    body: "Die gesuchte Seite gibt es nicht oder sie wurde verschoben. Wir bringen dich zurück.",
+    home: "Zur Startseite",
+    browse: "Ressourcen durchsuchen",
+    errorTitle: "Etwas ist schiefgelaufen",
+    errorBody: "Diese Seite konnte nicht geladen werden. Das ist meist nur vorübergehend — bitte versuche es erneut.",
+    retry: "Erneut versuchen",
+  },
+  category: { home: "Ressourcen", resources_one: "{{count}} Ressource", resources: "{{count}} Ressourcen" },
+  tag: { home: "Ressourcen", resources_one: "{{count}} Ressource", resources: "{{count}} Ressourcen" },
 
   favorites: {
     signInPrompt: "Melde dich an, um deine Favoriten zu sehen.",

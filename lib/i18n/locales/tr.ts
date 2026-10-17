@@ -212,8 +212,17 @@ export const tr = {
     browseCvs: "Tüm CV'lere Göz At",
   },
 
-  category: { home: "Kaynaklar", resources: "{{count}} kaynak" },
-  tag: { home: "Kaynaklar", resources: "{{count}} kaynak" },
+  notFound: {
+    title: "Bu sayfa kaybolmuş",
+    body: "Aradığın sayfa yok ya da taşınmış olabilir. Seni doğru yere götürelim.",
+    home: "Ana Sayfaya Dön",
+    browse: "Kaynaklara Göz At",
+    errorTitle: "Bir şeyler ters gitti",
+    errorBody: "Bu sayfa yüklenemedi. Genellikle geçicidir — lütfen tekrar dene.",
+    retry: "Tekrar Dene",
+  },
+  category: { home: "Kaynaklar", resources_one: "{{count}} kaynak", resources: "{{count}} kaynak" },
+  tag: { home: "Kaynaklar", resources_one: "{{count}} kaynak", resources: "{{count}} kaynak" },
 
   favorites: {
     signInPrompt: "Favorilerini görmek için giriş yap.",

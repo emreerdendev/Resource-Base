@@ -212,8 +212,17 @@ export const en = {
     browseCvs: "Browse All CVs",
   },
 
-  category: { home: "Resources", resources: "{{count}} resources" },
-  tag: { home: "Resources", resources: "{{count}} resources" },
+  notFound: {
+    title: "This page wandered off",
+    body: "The page you’re looking for doesn’t exist or may have moved. Let’s get you back on track.",
+    home: "Back Home",
+    browse: "Browse Resources",
+    errorTitle: "Something went wrong",
+    errorBody: "This page couldn’t load. It’s usually temporary — please try again.",
+    retry: "Try Again",
+  },
+  category: { home: "Resources", resources_one: "{{count}} resource", resources: "{{count}} resources" },
+  tag: { home: "Resources", resources_one: "{{count}} resource", resources: "{{count}} resources" },
 
   favorites: {
     signInPrompt: "Sign in to see your favorites.",

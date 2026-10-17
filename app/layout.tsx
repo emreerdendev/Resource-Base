@@ -31,18 +31,10 @@ export const metadata: Metadata = {
     template: "%s · Resource Base",
   },
   description: siteDescription,
-  openGraph: {
-    type: "website",
-    siteName,
-    title: "Resource Base — Resources, companies & CVs",
-    description: siteDescription,
-    url: "/",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Resource Base — Resources, companies & CVs",
-    description: siteDescription,
-  },
+  // Only what every page shares. Pages set their own title/description/URL
+  // (lib/og.ts); inheriting the home page's would mislabel every share.
+  openGraph: { type: "website", siteName },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({

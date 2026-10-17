@@ -1,28 +1,28 @@
+import type { Metadata } from "next";
 import { HomeOnboarding } from "@/components/home-onboarding";
-import type { Category, Company, Resource } from "@/lib/types";
+import { shareMeta } from "@/lib/og";
+import { siteDescription } from "@/lib/site";
 import { sanityFetch } from "@/sanity/lib/fetch";
-import {
-  allCategoriesQuery,
-  allCompaniesQuery,
-  allResourcesQuery,
-} from "@/sanity/lib/queries";
+import { homeCountsQuery } from "@/sanity/lib/queries";
 
-/**
- * Entry point: a short introduction to the two directories. Same tag-cached
- * queries as the site layout, so Next.js dedupes them within the request.
- */
+export const metadata: Metadata = shareMeta(
+  "Resource Base — Resources, companies & CVs",
+  siteDescription,
+  "/",
+);
+
+/** Entry point: a short introduction to the directories, with their sizes. */
 export default async function HomePage() {
-  const [companies, resources, categories] = await Promise.all([
-    sanityFetch<Company[]>({ query: allCompaniesQuery, tags: ["company-list"] }),
-    sanityFetch<Resource[]>({ query: allResourcesQuery, tags: ["resource-list"] }),
-    sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["taxonomy", "resource-list"] }),
-  ]);
+  const counts = await sanityFetch<{ resources: number; companies: number; categories: number }>({
+    query: homeCountsQuery,
+    tags: ["resource-list", "company-list", "taxonomy"],
+  });
 
   return (
     <HomeOnboarding
-      companies={companies.length}
-      resources={resources.length}
-      categories={categories.filter((c) => !c.parentSlug).length}
+      companies={counts.companies}
+      resources={counts.resources}
+      categories={counts.categories}
     />
   );
 }

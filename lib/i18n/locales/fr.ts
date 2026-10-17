@@ -212,8 +212,17 @@ export const fr = {
     browseCvs: "Parcourir tous les CV",
   },
 
-  category: { home: "Ressources", resources: "{{count}} ressources" },
-  tag: { home: "Ressources", resources: "{{count}} ressources" },
+  notFound: {
+    title: "Cette page s’est égarée",
+    body: "La page que vous cherchez n’existe pas ou a été déplacée. Revenons sur la bonne voie.",
+    home: "Retour à l’accueil",
+    browse: "Parcourir les ressources",
+    errorTitle: "Un problème est survenu",
+    errorBody: "Cette page n’a pas pu se charger. C’est généralement temporaire — réessayez.",
+    retry: "Réessayer",
+  },
+  category: { home: "Ressources", resources_one: "{{count}} ressource", resources: "{{count}} ressources" },
+  tag: { home: "Ressources", resources_one: "{{count}} ressource", resources: "{{count}} ressources" },
 
   favorites: {
     signInPrompt: "Connectez-vous pour voir vos favoris.",

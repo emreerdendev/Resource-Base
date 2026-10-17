@@ -1,4 +1,6 @@
 import { ResourceGrid } from "@/components/resource-grid";
+import { T } from "@/components/t";
+import { shareMeta } from "@/lib/og";
 import type { TagWithResources } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { tagBySlugQuery } from "@/sanity/lib/queries";
@@ -32,12 +34,12 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const tag = await load((await params).slug);
+  const { slug } = await params;
+  const tag = await load(slug);
   if (!tag) return {};
-  return {
-    title: `${tag.title} resources`,
-    description: `Resources tagged ${tag.title}.`,
-  };
+  const title = `${tag.title} resources`;
+  const description = `Resources tagged ${tag.title}.`;
+  return { title, description, ...shareMeta(title, description, `/tag/${slug}`) };
 }
 
 export default async function TagPage({
@@ -52,7 +54,7 @@ export default async function TagPage({
     <div className="mx-auto max-w-4xl">
       <nav className="mb-6 flex items-center gap-1 text-sm text-muted-foreground">
         <Link href="/resources" className="hover:text-foreground">
-          Resources
+          <T k="tag.home" />
         </Link>
         <ChevronRight className="size-3.5" />
         <span className="text-foreground">#{tag.title}</span>
@@ -65,7 +67,7 @@ export default async function TagPage({
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{tag.title}</h1>
           <p className="text-muted-foreground">
-            {tag.resources.length} resources
+            <T k="tag.resources" values={{ count: tag.resources.length }} />
           </p>
         </div>
       </div>

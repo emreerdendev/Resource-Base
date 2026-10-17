@@ -1,5 +1,6 @@
 import { CategoryIcon } from "@/components/category-icon";
 import { ResourceGrid } from "@/components/resource-grid";
+import { T } from "@/components/t";
 import { siteUrl } from "@/lib/site";
 import type { Category, CategoryWithResources } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
@@ -13,6 +14,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { jsonLd } from "@/lib/json-ld";
+import { shareMeta } from "@/lib/og";
 
 /**
  * Nothing is prerendered at build: each page renders on its first visit and
@@ -46,13 +48,13 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string[] }>;
 }): Promise<Metadata> {
-  const { category } = await load((await params).slug);
+  const { slug, category } = await load((await params).slug);
   if (!category) return {};
+  const description = category.description ?? `Curated ${category.title.toLowerCase()} resources.`;
   return {
     title: category.title,
-    description:
-      category.description ??
-      `Curated ${category.title.toLowerCase()} resources.`,
+    description,
+    ...shareMeta(category.title, description, `/category/${slug}`),
   };
 }
 
@@ -95,7 +97,7 @@ export default async function CategoryPage({
 
       <nav className="mb-6 flex items-center gap-1 text-sm text-muted-foreground">
         <Link href="/resources" className="hover:text-foreground">
-          Resources
+          <T k="category.home" />
         </Link>
         {parent && (
           <>
@@ -121,7 +123,7 @@ export default async function CategoryPage({
             {category.title}
           </h1>
           <p className="text-muted-foreground">
-            {category.resources.length} resources
+            <T k="category.resources" values={{ count: category.resources.length }} />
           </p>
         </div>
       </div>

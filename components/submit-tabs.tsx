@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { Boxes, Building2 } from "lucide-react";
+import { Boxes, Building2, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-/** Switch between adding a resource and suggesting a company. */
+/**
+ * Switch between the ways to contribute, in the site order: a resource, a
+ * company, or your CV (shared from Edit Profile).
+ */
 export function SubmitTabs({ active }: { active: "company" | "resource" }) {
   const { t } = useTranslation();
   const tabs = [
     { key: "resource", href: "/submit/resource", label: t("nav.submit"), icon: Boxes },
     { key: "company", href: "/submit/company", label: t("nav.suggestCompany"), icon: Building2 },
+    { key: "cv", href: "/profile/edit?tab=cv", label: t("cvs.share"), icon: FileText },
   ] as const;
   return (
-    <div className="mb-8 grid grid-cols-2 gap-1 rounded-xl border border-border bg-muted/40 p-1">
+    <div className="mb-8 grid grid-cols-1 gap-1 sm:grid-cols-3 rounded-xl border border-border bg-muted/40 p-1">
       {tabs.map(({ key, href, label, icon: Icon }) => (
         <Link
           key={key}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { shareMeta } from "@/lib/og";
 import { BrowseClient } from "@/components/browse-client";
 import { HomeIntro } from "@/components/home-intro";
 import { sanityFetch } from "@/sanity/lib/fetch";
@@ -9,11 +10,13 @@ import {
 } from "@/sanity/lib/queries";
 import type { Category, Resource, Tag } from "@/lib/types";
 
+const DESCRIPTION =
+  "A curated, searchable directory of the best resources for development, design and more.";
+
 export const metadata: Metadata = {
   title: "Resources",
-  description:
-    "A curated, searchable directory of the best resources for development, design and more.",
-  alternates: { canonical: "/resources" },
+  description: DESCRIPTION,
+  ...shareMeta("Resources", DESCRIPTION, "/resources"),
 };
 
 export default async function ResourcesPage() {

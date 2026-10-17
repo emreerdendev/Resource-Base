@@ -173,6 +173,13 @@ export const companyBySlugQuery = groq`
   }
 `
 
+/** Just the numbers the home page shows — not the documents themselves. */
+export const homeCountsQuery = groq`{
+  "resources": count(*[${PUBLISHED}]),
+  "companies": count(*[${PUBLISHED_COMPANY}]),
+  "categories": count(*[_type == "category" && !defined(parent)])
+}`
+
 /**
  * The ⌘K palette's dataset, served by /api/search-index and fetched only when
  * the palette opens — so pages no longer carry every resource and company.

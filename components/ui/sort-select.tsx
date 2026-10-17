@@ -10,7 +10,7 @@ export function SortSelect({ className, children, ...props }: React.ComponentPro
     <div className={cn("relative shrink-0", className)}>
       <select
         {...props}
-        className="h-full min-h-9 w-full cursor-pointer appearance-none rounded-md border border-input bg-background py-1 pr-9 pl-3 text-sm outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
+        className="h-full min-h-8 w-full cursor-pointer appearance-none rounded-lg border border-input bg-background py-1 pr-9 pl-3 text-sm outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
       >
         {children}
       </select>
