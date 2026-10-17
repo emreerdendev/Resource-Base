@@ -232,6 +232,7 @@ export const es = {
     title: "Esta página se perdió",
     body: "La página que buscas no existe o se movió. Volvamos al buen camino.",
     home: "Volver al inicio",
+    search: "Buscar",
     browse: "Explorar recursos",
     errorTitle: "Algo salió mal",
     errorBody: "Esta página no pudo cargarse. Suele ser temporal: inténtalo de nuevo.",

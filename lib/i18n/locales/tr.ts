@@ -232,6 +232,7 @@ export const tr = {
     title: "Bu sayfa kaybolmuş",
     body: "Aradığın sayfa yok ya da taşınmış olabilir. Seni doğru yere götürelim.",
     home: "Ana Sayfaya Dön",
+    search: "Ara",
     browse: "Kaynaklara Göz At",
     errorTitle: "Bir şeyler ters gitti",
     errorBody: "Bu sayfa yüklenemedi. Genellikle geçicidir — lütfen tekrar dene.",

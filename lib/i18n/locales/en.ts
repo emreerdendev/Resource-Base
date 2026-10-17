@@ -232,6 +232,7 @@ export const en = {
     title: "This page wandered off",
     body: "The page you’re looking for doesn’t exist or may have moved. Let’s get you back on track.",
     home: "Back Home",
+    search: "Search",
     browse: "Browse Resources",
     errorTitle: "Something went wrong",
     errorBody: "This page couldn’t load. It’s usually temporary — please try again.",

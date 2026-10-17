@@ -232,6 +232,7 @@ export const fr = {
     title: "Cette page s’est égarée",
     body: "La page que vous cherchez n’existe pas ou a été déplacée. Revenons sur la bonne voie.",
     home: "Retour à l’accueil",
+    search: "Rechercher",
     browse: "Parcourir les ressources",
     errorTitle: "Un problème est survenu",
     errorBody: "Cette page n’a pas pu se charger. C’est généralement temporaire — réessayez.",

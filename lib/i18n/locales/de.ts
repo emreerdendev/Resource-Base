@@ -232,6 +232,7 @@ export const de = {
     title: "Diese Seite hat sich verlaufen",
     body: "Die gesuchte Seite gibt es nicht oder sie wurde verschoben. Wir bringen dich zurück.",
     home: "Zur Startseite",
+    search: "Suchen",
     browse: "Ressourcen durchsuchen",
     errorTitle: "Etwas ist schiefgelaufen",
     errorBody: "Diese Seite konnte nicht geladen werden. Das ist meist nur vorübergehend — bitte versuche es erneut.",
