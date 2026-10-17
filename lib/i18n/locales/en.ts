@@ -61,9 +61,9 @@ export const en = {
 
   home: {
     onboardBadge: "Free and community-maintained",
-    onboardTitleLead: "Resources, companies and CVs",
+    onboardTitleLead: "Resources, Companies and CVs",
     onboardTitleHighlight: "in one directory.",
-    onboardSubtitle: "Resource Base lists hand-picked resources for development, design and more, companies with how to apply to each, and CVs shared by the community. Everything is free to browse.",
+    onboardSubtitle: "Resource Base lists hand-picked Resources for development, design and more, Companies with how to apply to each, and CVs shared by the community. Everything is free to browse.",
     companiesStat: "{{count}} companies",
     companiesBody: "Each company’s application emails, career page and LinkedIn. Save companies and track each application from “saved” to “offer”.",
     resourcesStat: "{{count}}+ resources · {{categories}} categories",
@@ -341,7 +341,7 @@ export const en = {
   },
 
   footer: {
-    tagline: "A free directory of resources, companies and CVs, maintained by the community.",
+    tagline: "A free directory of Resources, Companies and CVs, maintained by the community.",
     source: "Star on GitHub",
     reportIssue: "Report an Issue",
     sponsor: "Sponsor",

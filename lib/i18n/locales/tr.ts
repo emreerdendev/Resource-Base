@@ -61,9 +61,9 @@ export const tr = {
 
   home: {
     onboardBadge: "Ücretsiz ve topluluk tarafından sürdürülüyor",
-    onboardTitleLead: "Kaynaklar, şirketler ve CV'ler",
+    onboardTitleLead: "Kaynaklar, Şirketler ve CV'ler",
     onboardTitleHighlight: "tek bir dizinde.",
-    onboardSubtitle: "Resource Base; yazılım, tasarım ve daha fazlası için özenle seçilmiş kaynakları, her birine nasıl başvurulacağıyla birlikte şirketleri ve topluluğun paylaştığı CV'leri listeler. Hepsine ücretsiz göz atabilirsin.",
+    onboardSubtitle: "Resource Base; yazılım, tasarım ve daha fazlası için özenle seçilmiş Kaynakları, her birine nasıl başvurulacağıyla birlikte Şirketleri ve topluluğun paylaştığı CV'leri listeler. Hepsine ücretsiz göz atabilirsin.",
     companiesStat: "{{count}} şirket",
     companiesBody: "Her şirketin başvuru e-postaları, kariyer sayfası ve LinkedIn'i. Şirketleri kaydet, her başvuruyu “kaydedildi”den “teklif”e kadar takip et.",
     resourcesStat: "{{count}}+ kaynak · {{categories}} kategori",
@@ -339,7 +339,7 @@ export const tr = {
   },
 
   footer: {
-    tagline: "Kaynaklar, şirketler ve CV'ler için topluluk tarafından sürdürülen ücretsiz bir dizin.",
+    tagline: "Kaynaklar, Şirketler ve CV'ler için topluluk tarafından sürdürülen ücretsiz bir dizin.",
     source: "GitHub'da Yıldızla",
     reportIssue: "Sorun Bildir",
     sponsor: "Sponsor ol",
