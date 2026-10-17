@@ -88,9 +88,18 @@ export function MyCvPanel() {
                 {t(`cvs.language.${cv.language}`)} · {(cv.fileSize / 1024).toFixed(0)} KB
               </p>
             </div>
+            {/* Next to the status: where the review is tracked. */}
+            <div className="flex items-center gap-3">
+            <Link
+              href="/submissions"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+            >
+              <Send className="size-3" /> {t("myCv.track")}
+            </Link>
             <Badge variant="outline" className={cn("gap-1", STATUS_STYLE[cv.status])}>
               <Icon className="size-3" /> {t(`myCv.status.${cv.status}`)}
             </Badge>
+            </div>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{t(`myCv.statusHint.${cv.status}`)}</p>
           {cv.status === "rejected" && cv.rejectionReason && (
@@ -109,11 +118,6 @@ export function MyCvPanel() {
               <a href={`/api/cv/${cv.id}/file`} target="_blank" rel="noopener noreferrer">
                 {t("myCv.view")}
               </a>
-            </Button>
-            <Button asChild size="sm" variant="outline">
-              <Link href="/submissions">
-                <Send className="size-3.5" /> {t("myCv.track")}
-              </Link>
             </Button>
             {cv.status === "published" && (
               <Button size="sm" variant="outline" disabled={busy} onClick={() => setListed(false)}>
