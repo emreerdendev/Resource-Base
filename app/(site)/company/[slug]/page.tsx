@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CompanyPageView } from "@/components/company-page";
+import { rankRelatedCompanies } from "@/lib/company-utils";
 import { siteName, siteUrl } from "@/lib/site";
 import type { CompanyWithRelated } from "@/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
@@ -14,11 +15,12 @@ export async function generateStaticParams() {
 
 async function load(slug: string) {
   if (!(await hasSlug("company", slug))) return null;
-  return sanityFetch<CompanyWithRelated | null>({
+  const company = await sanityFetch<CompanyWithRelated | null>({
     query: companyBySlugQuery,
     params: { slug },
     tags: ["company"],
   });
+  return company && { ...company, related: rankRelatedCompanies(slug, company.related) };
 }
 
 export async function generateMetadata({

@@ -38,3 +38,31 @@ export function shuffle<T>(items: T[]): T[] {
   }
   return out;
 }
+
+/** Small stable string hash (FNV-1a) — same input, same number. */
+function hash(s: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Top "Similar Companies" from scored candidates. Equal scores are ordered by a
+ * hash of both slugs: stable for a given page (no reshuffle on every render)
+ * but different per company, so it isn't always the same alphabetical few.
+ */
+export function rankRelatedCompanies<T extends { slug: string; _score?: number }>(
+  slug: string,
+  candidates: T[],
+  limit = 6,
+): T[] {
+  return [...candidates]
+    .sort(
+      (a, b) =>
+        (b._score ?? 0) - (a._score ?? 0) || hash(`${slug}|${a.slug}`) - hash(`${slug}|${b.slug}`),
+    )
+    .slice(0, limit);
+}
