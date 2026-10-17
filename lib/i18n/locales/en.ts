@@ -147,6 +147,7 @@ export const en = {
     removalProposed: "Reported as gone — it will be removed from the directory if confirmed.",
     pending: "Pending",
     editShort: "Suggest",
+    track: "Track it in My Submissions",
   },
 
   resource: { share: "Share", related: "Suggested Resources" },

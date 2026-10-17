@@ -22,6 +22,7 @@ import { useTaxonomy } from "@/components/taxonomy-provider";
 import type { Resource } from "@/lib/types";
 import { cn, favicon } from "@/lib/utils";
 import {
+  ArrowRight,
   ExternalLink,
   X,
   Info,
@@ -341,6 +342,14 @@ export function ResourceModal({
               resolveCategory={titleForCat}
               resolveTag={titleForTag}
             />
+            {/* Where the user follows this suggestion's review. */}
+            <Link
+              href="/submissions"
+              onClick={() => onOpenChange(false)}
+              className="inline-flex items-center gap-1 self-end text-xs font-medium text-amber-700 underline-offset-4 hover:underline dark:text-amber-400"
+            >
+              {t("taxonomy.track")} <ArrowRight className="size-3" />
+            </Link>
           </div>
         ) : (
           (resource.categories?.length > 0 || resource.tags?.length > 0) && (

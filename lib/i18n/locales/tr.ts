@@ -147,6 +147,7 @@ export const tr = {
     removalProposed: "Artık yok olarak bildirildi — onaylanırsa dizinden kaldırılacak.",
     pending: "Beklemede",
     editShort: "Öner",
+    track: "Önerilerimde takip et",
   },
 
   resource: { share: "Paylaş", related: "Önerilen Kaynaklar" },

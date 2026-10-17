@@ -147,6 +147,7 @@ export const es = {
     removalProposed: "Notificado como desaparecido: se retirará del directorio si se confirma.",
     pending: "Pendiente",
     editShort: "Sugerir",
+    track: "Seguir en mis sugerencias",
   },
 
   resource: { share: "Compartir", related: "Recursos sugeridos" },

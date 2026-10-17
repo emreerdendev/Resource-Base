@@ -147,6 +147,7 @@ export const fr = {
     removalProposed: "Signalée comme disparue — elle sera retirée de l’annuaire si c’est confirmé.",
     pending: "En attente",
     editShort: "Suggérer",
+    track: "Suivre dans mes suggestions",
   },
 
   resource: { share: "Partager", related: "Ressources suggérées" },

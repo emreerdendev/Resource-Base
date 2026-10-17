@@ -147,6 +147,7 @@ export const de = {
     removalProposed: "Als nicht mehr vorhanden gemeldet – wird nach Bestätigung aus dem Verzeichnis entfernt.",
     pending: "Ausstehend",
     editShort: "Vorschlagen",
+    track: "In meinen Vorschlägen verfolgen",
   },
 
   resource: { share: "Teilen", related: "Vorgeschlagene Ressourcen" },
