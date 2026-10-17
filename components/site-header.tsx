@@ -1,16 +1,15 @@
 "use client";
 
-import { useAuth } from "@/components/auth/auth-provider";
 import { UserMenu } from "@/components/auth/user-menu";
 import { OPEN_COMMAND_EVENT } from "@/components/command-palette";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NavLink } from "@/components/nav-link";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Boxes, ChevronRight, Menu, Plus, Search, X } from "lucide-react";
+import { Boxes, ChevronRight, Menu, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 function openSearch() {
@@ -18,27 +17,21 @@ function openSearch() {
 }
 
 /**
- * How much of the header's collapsible text fits, measured (not breakpoint-
- * based) because the available width is capped by the max-w container and the
- * needed width changes with the language and sign-in state:
- *   0 → everything fits, 1 → the search label collapses to its icon,
- *   2 → the "+ Add" label collapses too.
- * A ResizeObserver re-checks whenever the row or any of its items change size.
+ * Whether the search button's label ("Search… ⌘K") fits, measured (not
+ * breakpoint-based) because the available width is capped by the max-w
+ * container and the needed width changes with the language and sign-in
+ * state: 0 → it fits, 1 → the button collapses to its icon. A ResizeObserver
+ * re-checks whenever the row or any of its items change size.
  */
 function useCollapseLevel(
   rowRef: React.RefObject<HTMLDivElement | null>,
   labelsRef: React.RefObject<HTMLSpanElement | null>,
 ) {
-  const [level, setLevel] = useState<0 | 1 | 2>(0);
+  const [level, setLevel] = useState<0 | 1>(0);
   useEffect(() => {
     const row = rowRef.current;
     const labels = labelsRef.current;
     if (!row || !labels) return;
-    const width = (key: string) =>
-      [...labels.querySelectorAll<HTMLElement>(`[data-label="${key}"]`)].reduce(
-        (sum, el) => sum + el.getBoundingClientRect().width,
-        0,
-      );
     const check = () => {
       const cs = getComputedStyle(row);
       const available =
@@ -47,16 +40,12 @@ function useCollapseLevel(
         (el) => el !== labels && getComputedStyle(el).display !== "none",
       );
       const used = items.reduce((sum, el) => sum + el.getBoundingClientRect().width, 0);
-      const submit = width("submit");
-      const search = width("search");
-      setLevel((current) => {
-        // Width of the row with no collapsible text, then add labels back.
-        const shown = current === 0 ? submit + search : current === 1 ? submit : 0;
-        const base = used - shown;
-        if (base + submit + search <= available) return 0;
-        if (base + submit <= available) return 1;
-        return 2;
-      });
+      const search = [...labels.querySelectorAll<HTMLElement>('[data-label="search"]')].reduce(
+        (sum, el) => sum + el.getBoundingClientRect().width,
+        0,
+      );
+      // Width of the row without the label, then see if the label fits back.
+      setLevel((current) => ((current === 0 ? used : used + search) <= available ? 0 : 1));
     };
     const ro = new ResizeObserver(check);
     ro.observe(row);
@@ -69,40 +58,23 @@ function useCollapseLevel(
 export function SiteHeader() {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, openAuth } = useAuth();
   // ⌘K searches companies AND resources, so it stays available everywhere
   // (the directory pages' inline search only filters their own list).
   const showSearch = true;
-  const navLink = (active: boolean) =>
+  // Sections read in the main text colour; Categories (a sub-page of
+  // Resources) stays muted. The current section is underlined, which doesn't
+  // shift the layout the way a bolder weight would.
+  const navLink = (active: boolean, muted = false) =>
     cn(
-      "whitespace-nowrap rounded-md px-2 py-2 text-sm transition-colors hover:text-foreground",
-      active ? "font-medium text-foreground" : "text-muted-foreground",
+      "whitespace-nowrap rounded-md px-2 py-2 text-sm underline-offset-[6px] transition-colors",
+      muted ? "text-muted-foreground hover:text-foreground" : "text-foreground hover:text-foreground/80",
+      active && "underline decoration-primary decoration-2",
     );
-
-  // "+" adds to the directory you're in: a company, a CV or a resource.
-  // Hidden on the homepage, which is just the entry point to all of them.
-  const companySide =
-    pathname.startsWith("/compan") || pathname.startsWith("/applications");
-  const cvSide = pathname.startsWith("/cvs") || pathname.startsWith("/liked-cvs");
-  const showSubmit = pathname !== "/";
-  const submitHref = companySide ? "/submit?type=company" : cvSide ? "/profile/edit?tab=cv" : "/submit";
-  const submitLabel = companySide
-    ? t("nav.suggestCompany")
-    : cvSide
-      ? t("cvs.share")
-      : t("nav.submit");
 
   const rowRef = useRef<HTMLDivElement>(null);
   const labelsRef = useRef<HTMLSpanElement>(null);
   const level = useCollapseLevel(rowRef, labelsRef);
 
-  // Guests: open the sign-in modal in place (don't yank them to the home page),
-  // then forward to /submit after they authenticate. Signed-in: go straight.
-  function goSubmit() {
-    if (user) router.push(submitHref);
-    else openAuth(submitHref);
-  }
   return (
     /* Opaque strip masking content that scrolls beneath the floating header. */
     <header className="sticky inset-x-0 top-0 z-50 bg-background px-3 py-4 sm:px-4">
@@ -117,11 +89,6 @@ export function SiteHeader() {
           aria-hidden
           className="pointer-events-none invisible absolute top-0 left-0 flex text-sm whitespace-nowrap"
         >
-          {showSubmit && (
-            <span data-label="submit" className="pl-1 font-medium">
-              {submitLabel}
-            </span>
-          )}
           {showSearch && (
             <>
               <span data-label="search" className="pl-2">
@@ -149,12 +116,6 @@ export function SiteHeader() {
         </span>
 
         <nav className="hidden shrink-0 items-center gap-1 md:flex">
-          <NavLink href="/companies" className={navLink(pathname.startsWith("/compan"))}>
-            {t("nav.companies")}
-          </NavLink>
-          <span aria-hidden className="text-border">
-            •
-          </span>
           {/* Categories are a sub-section of resources, so the pair sits tight. */}
           <div className="flex items-center">
             <NavLink
@@ -169,7 +130,7 @@ export function SiteHeader() {
             <ChevronRight aria-hidden className="size-3 shrink-0 text-muted-foreground/50" />
             <NavLink
               href="/categories"
-              className={cn(navLink(pathname.startsWith("/categor")), "pl-1")}
+              className={cn(navLink(pathname.startsWith("/categor"), true), "pl-1")}
             >
               {t("nav.categories")}
             </NavLink>
@@ -177,26 +138,15 @@ export function SiteHeader() {
           <span aria-hidden className="text-border">
             •
           </span>
+          <NavLink href="/companies" className={navLink(pathname.startsWith("/compan"))}>
+            {t("nav.companies")}
+          </NavLink>
+          <span aria-hidden className="text-border">
+            •
+          </span>
           <NavLink href="/cvs" className={navLink(pathname.startsWith("/cvs"))}>
             {t("nav.cvs")}
           </NavLink>
-          {showSubmit && (
-            <span aria-hidden className="text-border">
-              •
-            </span>
-          )}
-          {showSubmit && (
-            <button
-              type="button"
-              onClick={goSubmit}
-              aria-label={submitLabel}
-              title={submitLabel}
-              className="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
-            >
-              <Plus className="size-3.5" />
-              {level < 2 && <span>{submitLabel}</span>}
-            </button>
-          )}
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 pl-1 sm:gap-2 sm:pl-2">
@@ -226,10 +176,7 @@ export function SiteHeader() {
             <PreferencesGroup />
           </div>
           <UserMenu />
-          <MobileMenu
-            pathname={pathname}
-            submit={showSubmit ? { label: submitLabel, onClick: goSubmit } : null}
-          />
+          <MobileMenu pathname={pathname} />
         </div>
       </div>
     </header>
@@ -250,13 +197,7 @@ function PreferencesGroup() {
  * Below md the nav links don't fit next to the actions, so they move into a
  * menu panel under the header, together with the language + theme controls.
  */
-function MobileMenu({
-  pathname,
-  submit,
-}: {
-  pathname: string;
-  submit: { label: string; onClick: () => void } | null;
-}) {
+function MobileMenu({ pathname }: { pathname: string }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -274,10 +215,11 @@ function MobileMenu({
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const item = (active: boolean) =>
+  const item = (active: boolean, muted = false) =>
     cn(
       "flex items-center rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted",
-      active ? "bg-muted font-medium text-foreground" : "text-muted-foreground",
+      muted ? "text-muted-foreground" : "text-foreground",
+      active && "bg-muted font-medium text-foreground",
     );
 
   return (
@@ -302,9 +244,6 @@ function MobileMenu({
             id="mobile-menu"
             className="animate-in fade-in slide-in-from-top-1 absolute inset-x-0 top-[calc(100%+0.5rem)] z-50 flex flex-col gap-1 rounded-xl border border-border/70 bg-background p-2 shadow-lg duration-150"
           >
-            <Link href="/companies" onClick={close} className={item(pathname.startsWith("/compan"))}>
-              {t("nav.companies")}
-            </Link>
             <Link
               href="/resources"
               onClick={close}
@@ -315,27 +254,17 @@ function MobileMenu({
             <Link
               href="/categories"
               onClick={close}
-              className={cn(item(pathname.startsWith("/categor")), "pl-7")}
+              className={cn(item(pathname.startsWith("/categor"), true), "pl-7")}
             >
               <ChevronRight className="-ml-4 mr-1 size-3 text-muted-foreground/60" />
               {t("nav.categories")}
             </Link>
+            <Link href="/companies" onClick={close} className={item(pathname.startsWith("/compan"))}>
+              {t("nav.companies")}
+            </Link>
             <Link href="/cvs" onClick={close} className={item(pathname.startsWith("/cvs"))}>
               {t("nav.cvs")}
             </Link>
-            {submit && (
-              <button
-                type="button"
-                onClick={() => {
-                  close();
-                  submit.onClick();
-                }}
-                className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-primary transition-colors hover:bg-muted"
-              >
-                <Plus className="size-4" />
-                {submit.label}
-              </button>
-            )}
             <div className="mt-1 flex items-center justify-between border-t border-border px-1 pt-2">
               <span className="px-2 text-xs text-muted-foreground">{t("nav.preferences")}</span>
               <PreferencesGroup />
