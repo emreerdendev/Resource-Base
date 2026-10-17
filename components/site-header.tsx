@@ -76,8 +76,10 @@ export function SiteHeader() {
   const level = useCollapseLevel(rowRef, labelsRef);
 
   return (
-    /* Opaque strip masking content that scrolls beneath the floating header. */
-    <header className="sticky inset-x-0 top-0 z-50 bg-background px-3 py-4 sm:px-4">
+    /* Opaque strip masking content that scrolls beneath the floating header.
+       Layers, lowest first: sticky page toolbars z-20 · cookie banner z-30 ·
+       this header and its mobile menu z-40 · dialogs, dropdowns, toasts z-50+. */
+    <header className="sticky inset-x-0 top-0 z-40 bg-background px-3 py-4 sm:px-4">
       <div
         ref={rowRef}
         className="relative mx-auto flex h-14 max-w-4xl items-center rounded-xl border border-border/70 bg-background/95 px-3 shadow-lg shadow-black/5 ring-1 ring-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-background/85 sm:px-4"
@@ -239,10 +241,10 @@ function MobileMenu({ pathname }: { pathname: string }) {
       {open && (
         <>
           {/* Click-away layer. */}
-          <div className="fixed inset-0 z-40" aria-hidden onClick={close} />
+          <div className="fixed inset-0" aria-hidden onClick={close} />
           <div
             id="mobile-menu"
-            className="animate-in fade-in slide-in-from-top-1 absolute inset-x-0 top-[calc(100%+0.5rem)] z-50 flex flex-col gap-1 rounded-xl border border-border/70 bg-background p-2 shadow-lg duration-150"
+            className="animate-in fade-in slide-in-from-top-1 absolute inset-x-0 top-[calc(100%+0.5rem)] z-10 flex flex-col gap-1 rounded-xl border border-border/70 bg-background p-2 shadow-lg duration-150"
           >
             <Link
               href="/resources"
