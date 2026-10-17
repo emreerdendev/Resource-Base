@@ -89,22 +89,27 @@ export const resourceSlugsQuery = groq`*[${PUBLISHED} && defined(slug.current)].
 export const resourceIdsQuery = groq`*[${PUBLISHED}]._id`
 
 /**
- * A single published resource by slug, plus "suggested" resources: others that
- * share at least one category OR tag, ranked by how many they share (tag
- * overlap weighted higher than category, since tags are more specific), then by
- * featured/recency. Top 6.
+ * A single published resource by slug, plus up to 6 "suggested" resources.
+ * Categories come in pairs (a broad parent like "Design Assets" + a specific
+ * subcategory like "Icons"), so a shared parent alone says little: a candidate
+ * must share a tag or a subcategory — or, for a resource with no subcategory,
+ * a parent. Ranked by overlap (tag and subcategory 3, parent 1), then
+ * featured/recency. Broken links are never suggested.
  */
 export const resourceBySlugQuery = groq`
   *[${PUBLISHED} && slug.current == $slug][0] {
     ${RESOURCE_FIELDS},
     "related": *[
-      ${PUBLISHED} && slug.current != ^.slug.current &&
-      (count(categories[@._ref in ^.^.categories[]._ref]) > 0 ||
-       count(tags[@._ref in ^.^.tags[]._ref]) > 0)
+      ${PUBLISHED} && slug.current != ^.slug.current && linkStatus != "broken" &&
+      (count(tags[@._ref in ^.^.tags[]._ref]) > 0 ||
+       count(categories[@._ref in ^.^.categories[]._ref && defined(@->parent)]) > 0 ||
+       (count(^.categories[defined(@->parent)]) == 0 &&
+        count(categories[@._ref in ^.^.categories[]._ref]) > 0))
     ] {
       ${RESOURCE_FIELDS},
-      "_score": count(tags[@._ref in ^.^.tags[]._ref]) * 2 +
-                count(categories[@._ref in ^.^.categories[]._ref])
+      "_score": count(tags[@._ref in ^.^.tags[]._ref]) * 3 +
+                count(categories[@._ref in ^.^.categories[]._ref && defined(@->parent)]) * 3 +
+                count(categories[@._ref in ^.^.categories[]._ref && !defined(@->parent)])
     } | order(_score desc, featured desc, addedAt desc)[0...6]
   }
 `
@@ -142,17 +147,29 @@ export const allCompaniesQuery = groq`
 export const companySlugsQuery = groq`*[${PUBLISHED_COMPANY}].slug.current`
 export const companyIdsQuery = groq`*[${PUBLISHED_COMPANY}]._id`
 
-/** A company by slug plus a few others sharing a sector or city. */
+/**
+ * A company by slug plus candidates for "Similar Companies": others sharing a
+ * sector, a known client or a location (a shared work model only adds to the
+ * score). Ranked by overlap; equal scores are shuffled per company by
+ * `rankRelatedCompanies`, so the top 24 are fetched and trimmed to 6 there.
+ */
 export const companyBySlugQuery = groq`
   *[${PUBLISHED_COMPANY} && slug.current == $slug][0] {
     ${COMPANY_FIELDS},
     "related": *[
       ${PUBLISHED_COMPANY} && slug.current != ^.slug.current &&
-      (count(sectors[@ in ^.^.sectors]) > 0)
+      (count(sectors[@ in ^.^.sectors]) > 0 ||
+       count(clients[@ in ^.^.clients]) > 0 ||
+       count(cities[@ in ^.^.cities]) > 0 ||
+       count(otherLocations[@ in ^.^.otherLocations]) > 0)
     ] {
       ${COMPANY_FIELDS},
-      "_score": count(sectors[@ in ^.^.sectors]) * 2 + count(cities[@ in ^.^.cities])
-    } | order(_score desc, name asc)[0...6]
+      "_score": count(sectors[@ in ^.^.sectors]) * 4 +
+                count(clients[@ in ^.^.clients]) * 3 +
+                count(cities[@ in ^.^.cities]) * 2 +
+                count(otherLocations[@ in ^.^.otherLocations]) * 2 +
+                count(workModels[@ in ^.^.workModels])
+    } | order(_score desc)[0...24]
   }
 `
 
