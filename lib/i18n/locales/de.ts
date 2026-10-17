@@ -210,6 +210,24 @@ export const de = {
     browseCvs: "Alle Lebensläufe ansehen",
   },
 
+  verifyBanner: {
+    title: "Bestätige deine E-Mail, um alles freizuschalten.",
+    body_one: "Speichern, Liken, Verfolgen und Beitragen werden freigeschaltet, sobald du {{email}} bestätigst — noch {{count}} Tag, bevor das Konto gesperrt wird.",
+    body_other: "Speichern, Liken, Verfolgen und Beitragen werden freigeschaltet, sobald du {{email}} bestätigst — noch {{count}} Tage, bevor das Konto gesperrt wird.",
+    resend: "E-Mail erneut senden",
+    sent: "Ein neuer Link ist unterwegs an {{email}}.",
+    verifyFirst: "Bestätige zuerst deine E-Mail — der Link ist in deinem Posteingang.",
+  },
+  suspended: {
+    title: "Konto gesperrt",
+    body: "{{email}} wurde nicht innerhalb von 7 Tagen bestätigt, daher ist das Konto gesperrt. Bestätige die E-Mail, um es sofort zurückzubekommen — oder bitte uns um Reaktivierung.",
+    resend: "Neuen Bestätigungslink senden",
+    requestTitle: "Reaktivierung anfragen",
+    requestHint: "Keine E-Mail bekommen? Schreib uns, wir reaktivieren das Konto — danach hast du 7 weitere Tage zum Bestätigen.",
+    messagePlaceholder: "Was wir wissen sollten (optional)",
+    request: "Anfrage senden",
+    requested: "Anfrage gesendet. Wir prüfen sie bald — versuche dich später erneut anzumelden.",
+  },
   notFound: {
     title: "Diese Seite hat sich verlaufen",
     body: "Die gesuchte Seite gibt es nicht oder sie wurde verschoben. Wir bringen dich zurück.",
@@ -352,11 +370,8 @@ export const de = {
     emailInvalid: "Gib eine gültige E-Mail-Adresse ein",
     resetEmailSent: "Falls diese E-Mail existiert, ist ein Reset-Link unterwegs.",
     // E-Mail-Bestätigung
-    verifyCheckInbox: "Prüfe dein Postfach",
     verifyEmailSent:
-      "Wir haben einen Bestätigungslink an deine E-Mail gesendet. Klicke darauf, um dein Konto zu aktivieren.",
-    verifyEmailHint:
-      "Nichts erhalten? Prüfe deinen Spam-Ordner oder melde dich an, um einen neuen Link zu erhalten.",
+      "Konto erstellt! Wir haben dir einen Bestätigungslink geschickt — bestätige innerhalb von 7 Tagen, um alles freizuschalten.",
     emailNotVerified:
       "Bestätige zuerst deine E-Mail. Wir haben dir einen neuen Bestätigungslink gesendet.",
     verifyTitle: "Bestätige deine E-Mail",

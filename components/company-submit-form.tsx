@@ -250,6 +250,10 @@ export function CompanySubmitForm({
         }
         return;
       }
+      if (res.status === 403) {
+        toast.error(t("verifyBanner.verifyFirst"));
+        return;
+      }
       if (res.status === 429) {
         toast.error(t("card.favoriteRateLimited"));
         return;

@@ -3,7 +3,7 @@ import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { getDb } from "@/lib/db";
 import { notifications, submissions } from "@/lib/db/schema";
-import { getSessionUser } from "@/lib/authz";
+import { getSessionUser, isVerified } from "@/lib/authz";
 import { parseCompanySuggestion } from "@/lib/company-submission";
 import { normalizeWebUrl } from "@/lib/company-input";
 import { slugify } from "@/lib/slug";
@@ -90,6 +90,7 @@ async function createSubmission(req: NextRequest) {
   if (!user) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
+  if (!isVerified(user)) return NextResponse.json({ error: "unverified" }, { status: 403 });
   if (isPaused("SUBMISSIONS_PAUSED")) {
     return NextResponse.json({ error: "paused" }, { status: 503 });
   }

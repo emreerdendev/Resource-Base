@@ -113,7 +113,7 @@ export function CompanyTrackerProvider({ children }: { children: React.ReactNode
         if (!res.ok) {
           setItems(before);
           toast.error(
-            res.error === "rate_limited" ? t("card.favoriteRateLimited") : t("tracker.error"),
+            res.error === "unverified" ? t("verifyBanner.verifyFirst") : res.error === "rate_limited" ? t("card.favoriteRateLimited") : t("tracker.error"),
           );
         }
       } catch {
@@ -134,7 +134,7 @@ export function CompanyTrackerProvider({ children }: { children: React.ReactNode
         if (res.ok) return true;
         setItems(before);
         toast.error(
-          res.error === "rate_limited" ? t("card.favoriteRateLimited") : t("tracker.error"),
+          res.error === "unverified" ? t("verifyBanner.verifyFirst") : res.error === "rate_limited" ? t("card.favoriteRateLimited") : t("tracker.error"),
         );
       } catch {
         setItems(before);

@@ -13,6 +13,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { TaxonomyProvider } from "@/components/taxonomy-provider";
+import { VerifyEmailBanner } from "@/components/verify-email-banner";
 import { ProfileProvider } from "@/lib/profile";
 import { NotificationsProvider } from "@/lib/notifications";
 import { SubmissionsProvider } from "@/lib/submissions";
@@ -52,7 +53,10 @@ export default function SiteLayout({
                               </Suspense>
                               {/* Clear the floating header (top-3 + h-14 ≈ 4.25rem) so
                                   page content never renders behind it. */}
-                              <main className="flex-1 px-4 pb-12 pt-10">{children}</main>
+                              <main className="flex-1 px-4 pb-12 pt-10">
+                                <VerifyEmailBanner />
+                                {children}
+                              </main>
                               <SiteFooter />
                             </div>
                             <ConsentGate gaId={process.env.NEXT_PUBLIC_GA_ID} />

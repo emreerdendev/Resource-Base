@@ -38,6 +38,15 @@ export async function requireUser(): Promise<SessionUser> {
   return user;
 }
 
+/**
+ * Whether the user may write (favorites, tracker, likes, submissions, CV,
+ * photo, profile). Email/password accounts can sign in before verifying their
+ * address, but every write waits for it; OAuth accounts arrive verified.
+ */
+export function isVerified(user: SessionUser): boolean {
+  return user.emailVerified === true;
+}
+
 /** How recent a sign-in must be for account-level changes. */
 const FRESH_SESSION_MS = 15 * 60 * 1000;
 

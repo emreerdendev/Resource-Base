@@ -30,6 +30,7 @@ export function ProfileAvatarField() {
       headers: body ? { "Content-Type": body.type } : undefined,
     });
     if (res.status === 429) throw new Error(t("card.favoriteRateLimited"));
+    if (res.status === 403) throw new Error(t("verifyBanner.verifyFirst"));
     if (!res.ok) throw new Error(t("profile.photoError"));
     await reload();
   }

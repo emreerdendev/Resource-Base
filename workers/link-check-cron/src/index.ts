@@ -125,7 +125,8 @@ const NOTIFICATION_RETENTION_DAYS = 180;
 /**
  * Keeps D1 storage flat: expired sessions and verification tokens are never
  * deleted by Better Auth on its own, rate-limit counters older than their
- * longest window (1h) are dead, and read notifications age out.
+ * longest window (1h) are dead, and read notifications age out. Also
+ * suspends accounts that didn't verify their email in time.
  * Timestamps: Better Auth / Drizzle "timestamp" columns are unix seconds,
  * rateLimit.last_request is milliseconds.
  */
@@ -140,6 +141,15 @@ async function cleanupDatabase(env: Env): Promise<void> {
     ).bind(now - NOTIFICATION_RETENTION_DAYS * DAY_SEC),
     // Expired abuse-limit windows (lib/rate-limit.ts).
     env.DB.prepare("DELETE FROM usage_counters WHERE expires_at < ?").bind(now),
+    // Email/password accounts still unverified after their 7 days are
+    // suspended and signed out (the app refuses their sign-ins; verifying the
+    // email or an approved reactivation request lifts it).
+    env.DB.prepare(
+      "UPDATE user SET suspended_at = ? WHERE email_verified = 0 AND suspended_at IS NULL AND verify_deadline IS NOT NULL AND verify_deadline < ?",
+    ).bind(now, now),
+    env.DB.prepare(
+      "DELETE FROM session WHERE user_id IN (SELECT id FROM user WHERE suspended_at IS NOT NULL)",
+    ),
   ]);
   console.log(`cleanup: deleted ${results.map((r) => r.meta.changes).join("/")} rows`);
 }

@@ -104,6 +104,10 @@ function FixResubmit({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ kind: "fix", targetResourceId: resource._id, name: resource.name, url: normalized, replaces }),
       });
+      if (res.status === 403) {
+        toast.error(t("verifyBanner.verifyFirst"));
+        return;
+      }
       if (!res.ok) throw new Error(await res.text());
       toast.success(t("modal.fixSuccess"));
       onDone();

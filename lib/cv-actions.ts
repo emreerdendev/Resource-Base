@@ -1,7 +1,7 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
-import { getSessionUser, requireUser } from "@/lib/authz";
+import { getSessionUser, isVerified, requireUser } from "@/lib/authz";
 import { getDb } from "@/lib/db";
 import { recountLikes } from "@/lib/cv-like-count";
 import { cvLikes, cvs } from "@/lib/db/schema";
@@ -26,8 +26,9 @@ export async function listLikedCvIds(): Promise<string[]> {
  */
 export async function toggleCvLike(
   cvId: string,
-): Promise<{ liked: boolean; error?: "rate_limited" | "invalid" }> {
+): Promise<{ liked: boolean; error?: "rate_limited" | "invalid" | "unverified" }> {
   const me = await requireUser();
+  if (!isVerified(me)) return { liked: false, error: "unverified" };
   if (typeof cvId !== "string" || !ID_RE.test(cvId)) return { liked: false, error: "invalid" };
   const db = getDb();
   const own = and(eq(cvLikes.userId, me.id), eq(cvLikes.cvId, cvId));
@@ -93,6 +94,7 @@ export async function getMyCv(): Promise<MyCv | null> {
 /** Unlist / relist your published CV (no re-review needed to relist). */
 export async function setCvListed(listed: boolean): Promise<{ ok: boolean }> {
   const me = await requireUser();
+  if (!isVerified(me)) return { ok: false };
   if (typeof listed !== "boolean") return { ok: false };
   if (await overLimit("RL_USER", `cv-list:${me.id}`)) return { ok: false };
   const [from, to] = listed ? ["hidden", "published"] : ["published", "hidden"];

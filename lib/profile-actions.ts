@@ -5,7 +5,7 @@ import { and, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { user } from "@/lib/db/schema";
 import { getAuth } from "@/lib/auth";
-import { getSessionUser, requireFreshUser, requireUser } from "@/lib/authz";
+import { getSessionUser, isVerified, requireFreshUser, requireUser } from "@/lib/authz";
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
 import { cleanSocialLinks } from "@/lib/social-links";
 import { isReservedUsername, isValidUsername } from "@/lib/username";
@@ -54,6 +54,7 @@ export async function setUsername(
   next: string,
 ): Promise<{ error: string | null }> {
   const me = await requireUser();
+  if (!isVerified(me)) return { error: "unverified" };
   if (typeof next !== "string") return { error: "invalid_username" };
   // Case is kept as typed; it never makes a name distinct (see lib/username).
   const cleaned = next.trim();
@@ -101,6 +102,7 @@ export async function updateProfile(
   fields: Record<string, unknown>,
 ): Promise<{ error: string | null }> {
   const me = await requireUser();
+  if (!isVerified(me)) return { error: "unverified" };
   if (!fields || typeof fields !== "object") return { error: "invalid" };
   if (await overLimit("RL_USER", `profile:${me.id}`)) return { error: "rate_limited" };
   const patch: Record<string, unknown> = {};

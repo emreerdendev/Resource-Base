@@ -36,6 +36,15 @@ export const user = sqliteTable(
     bio: text("bio"),
     /** Profile links by platform (lib/social-links.ts) — one JSON object. */
     socialLinks: text("social_links", { mode: "json" }).$type<SocialLinks>(),
+    /**
+     * Email/password accounts must verify their email by this time (sign-up
+     * + 7 days, or again after a reactivation); null once there's nothing to
+     * verify. Until verified, writes are locked; after it, the account is
+     * suspended by the daily cron.
+     */
+    verifyDeadline: integer("verify_deadline", { mode: "timestamp" }),
+    /** Set while the account is suspended (it can't sign in). */
+    suspendedAt: integer("suspended_at", { mode: "timestamp" }),
     showEmail: integer("show_email", { mode: "boolean" })
       .notNull()
       .default(false),

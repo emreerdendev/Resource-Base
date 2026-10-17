@@ -121,7 +121,9 @@ export function ProfileEditForm() {
                 ? t("auth.usernameInvalid")
                 : error === "reserved_username"
                   ? t("validation.usernameReserved")
-                : error === "rate_limited"
+                : error === "unverified"
+                  ? t("verifyBanner.verifyFirst")
+                  : error === "rate_limited"
                   ? t("profile.usernameRateLimited")
                   : error,
           );
@@ -141,7 +143,9 @@ export function ProfileEditForm() {
             ? t("profile.invalidUrl")
             : error === "too_long"
               ? t("profile.tooLong")
-              : error === "rate_limited"
+              : error === "unverified"
+                ? t("verifyBanner.verifyFirst")
+                : error === "rate_limited"
                 ? t("card.favoriteRateLimited")
                 : t("profile.saveError"),
         );

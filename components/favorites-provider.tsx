@@ -76,7 +76,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
           );
           bump(id, isFav ? 1 : -1);
           toast.error(
-            t(res.error === "rate_limited" ? "card.favoriteRateLimited" : "card.favoriteError"),
+            t(res.error === "unverified" ? "verifyBanner.verifyFirst" : res.error === "rate_limited" ? "card.favoriteRateLimited" : "card.favoriteError"),
           );
         }
       } catch {

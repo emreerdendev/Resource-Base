@@ -169,6 +169,7 @@ const API_ERRORS: Record<string, string> = {
   not_pdf: "validation.fileType",
   unsafe: "myCv.error.unsafe",
   rate_limited: "myCv.error.rateLimited",
+  unverified: "verifyBanner.verifyFirst",
   consent: "validation.consent",
 };
 

@@ -3,7 +3,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { companyApplications } from "@/lib/db/schema";
-import { getSessionUser, requireUser } from "@/lib/authz";
+import { getSessionUser, isVerified, requireUser } from "@/lib/authz";
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
 import { listCompanyIds } from "@/sanity/lib/slugs";
 import {
@@ -43,7 +43,7 @@ export async function listTrackedCompanies(): Promise<TrackedCompany[]> {
   }));
 }
 
-type Result = { ok: true } | { ok: false; error: "rate_limited" | "invalid" };
+type Result = { ok: true } | { ok: false; error: "rate_limited" | "invalid" | "unverified" };
 
 /**
  * Save / update the user's status for a company. Passing `null` removes the
@@ -54,6 +54,7 @@ export async function setCompanyStatus(
   status: ApplicationStatus | null,
 ): Promise<Result> {
   const me = await requireUser();
+  if (!isVerified(me)) return { ok: false, error: "unverified" };
   // Removing skips the published check so entries of since-hidden companies
   // can still be cleared.
   const valid =
@@ -91,6 +92,7 @@ export async function setCompanyNote(
   note: string,
 ): Promise<Result> {
   const me = await requireUser();
+  if (!isVerified(me)) return { ok: false, error: "unverified" };
   if (typeof note !== "string" || !(await isCompanyId(companyId)))
     return { ok: false, error: "invalid" };
   if (await overLimit("RL_USER", `track:${me.id}`))
@@ -117,8 +119,9 @@ const IMPORT_MAX = 500;
  */
 export async function importTrackedCompanies(
   entries: { companyId: string; status: ApplicationStatus }[],
-): Promise<{ ok: true; imported: number } | { ok: false; error: "rate_limited" | "invalid" }> {
+): Promise<{ ok: true; imported: number } | { ok: false; error: "rate_limited" | "invalid" | "unverified" }> {
   const me = await requireUser();
+  if (!isVerified(me)) return { ok: false, error: "unverified" };
   if (!Array.isArray(entries) || entries.length === 0 || entries.length > IMPORT_MAX)
     return { ok: false, error: "invalid" };
   const published = await listCompanyIds();

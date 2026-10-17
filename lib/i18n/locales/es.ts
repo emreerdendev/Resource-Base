@@ -210,6 +210,24 @@ export const es = {
     browseCvs: "Ver todos los CV",
   },
 
+  verifyBanner: {
+    title: "Verifica tu correo para desbloquearlo todo.",
+    body_one: "Guardar, dar me gusta, hacer seguimiento y contribuir se activan al confirmar {{email}}: queda {{count}} día antes de suspender la cuenta.",
+    body_other: "Guardar, dar me gusta, hacer seguimiento y contribuir se activan al confirmar {{email}}: quedan {{count}} días antes de suspender la cuenta.",
+    resend: "Reenviar correo",
+    sent: "Un nuevo enlace va de camino a {{email}}.",
+    verifyFirst: "Verifica primero tu correo: el enlace está en tu bandeja de entrada.",
+  },
+  suspended: {
+    title: "Cuenta suspendida",
+    body: "{{email}} no se verificó en 7 días, así que la cuenta está suspendida. Verifica el correo para recuperarla al instante, o pídenos que la reactivemos.",
+    resend: "Enviar un nuevo enlace de verificación",
+    requestTitle: "Pedir la reactivación",
+    requestHint: "¿No te llegó el correo? Escríbenos y reactivaremos la cuenta; luego tendrás 7 días más para verificar.",
+    messagePlaceholder: "Algo que debamos saber (opcional)",
+    request: "Enviar solicitud",
+    requested: "Solicitud enviada. La revisaremos pronto; vuelve a intentar iniciar sesión más tarde.",
+  },
   notFound: {
     title: "Esta página se perdió",
     body: "La página que buscas no existe o se movió. Volvamos al buen camino.",
@@ -352,11 +370,8 @@ export const es = {
     emailInvalid: "Introduce un correo electrónico válido",
     resetEmailSent: "Si ese correo existe, el enlace de restablecimiento va en camino.",
     // Verificación de correo
-    verifyCheckInbox: "Revisa tu bandeja de entrada",
     verifyEmailSent:
-      "Enviamos un enlace de confirmación a tu correo. Haz clic en él para activar tu cuenta.",
-    verifyEmailHint:
-      "¿No te llegó? Revisa la carpeta de spam o intenta iniciar sesión para recibir un enlace nuevo.",
+      "¡Cuenta creada! Te enviamos un enlace de verificación: verifica en 7 días para desbloquearlo todo.",
     emailNotVerified:
       "Verifica tu correo primero. Te enviamos un nuevo enlace de confirmación.",
     verifyTitle: "Verifica tu correo",

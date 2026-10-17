@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { AVATAR_MAX_BYTES, avatarBucket, avatarUrl, deleteAvatarFile, sniffImage } from "@/lib/avatar";
-import { getSessionUser } from "@/lib/authz";
+import { getSessionUser, isVerified } from "@/lib/authz";
 import { getDb } from "@/lib/db";
 import { user as userTable } from "@/lib/db/schema";
 import { dailyCap, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
   if (!isSameOrigin(req)) return new NextResponse("Forbidden", { status: 403 });
   const me = await getSessionUser();
   if (!me) return new NextResponse("Unauthorized", { status: 401 });
+  if (!isVerified(me)) return NextResponse.json({ error: "unverified" }, { status: 403 });
   if (isPaused("UPLOADS_PAUSED")) return NextResponse.json({ error: "paused" }, { status: 503 });
   if (Number(req.headers.get("content-length") ?? 0) > AVATAR_MAX_BYTES)
     return NextResponse.json({ error: "too_large" }, { status: 413 });
@@ -63,6 +64,7 @@ export async function DELETE(req: NextRequest) {
   if (!isSameOrigin(req)) return new NextResponse("Forbidden", { status: 403 });
   const me = await getSessionUser();
   if (!me) return new NextResponse("Unauthorized", { status: 401 });
+  if (!isVerified(me)) return NextResponse.json({ error: "unverified" }, { status: 403 });
   if (await overLimit("RL_USER", `avatar:${me.id}`))
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   const previous = await currentImage(me.id);

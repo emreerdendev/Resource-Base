@@ -7,7 +7,7 @@ import {
   notifications,
   submissions,
 } from "@/lib/db/schema";
-import { getSessionUser, requireUser } from "@/lib/authz";
+import { getSessionUser, isVerified, requireUser } from "@/lib/authz";
 import { overLimit } from "@/lib/rate-limit";
 import { isResourceId } from "@/sanity/lib/slugs";
 import { writeClient } from "@/sanity/lib/writeClient";
@@ -28,8 +28,9 @@ export async function listFavorites(): Promise<string[]> {
 
 export async function toggleFavorite(
   resourceId: string,
-): Promise<{ favorited: boolean; error?: "rate_limited" | "invalid" }> {
+): Promise<{ favorited: boolean; error?: "rate_limited" | "invalid" | "unverified" }> {
   const me = await requireUser();
+  if (!isVerified(me)) return { favorited: false, error: "unverified" };
   if (typeof resourceId !== "string" || !/^[A-Za-z0-9._-]{1,100}$/.test(resourceId))
     return { favorited: false, error: "invalid" };
   const db = getDb();

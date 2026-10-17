@@ -11,6 +11,9 @@ import { isDisposableEmail } from "@/lib/disposable-email";
 import { sendEmail } from "@/lib/email";
 import { resetPasswordEmail, verifyEmail } from "@/lib/email-templates";
 
+/** Unverified email/password accounts are suspended after this long. */
+export const VERIFY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
 /** Stem a display name/email into a username base, then add a short suffix. */
 function usernameStem(raw: string | null | undefined): string {
   const cleaned = (raw ?? "")
@@ -125,11 +128,12 @@ export async function getAuth() {
     },
     emailAndPassword: {
       enabled: true,
-      // Email/password signups must confirm their address before they can sign
-      // in — stops abuse with fake/other people's emails. OAuth users are
-      // unaffected (their provider verifies the email; emailVerified comes back
-      // true on link).
-      requireEmailVerification: true,
+      // Email/password accounts can sign in right away — so a delayed or
+      // capped verification email never locks anyone out — but every write is
+      // locked until the address is verified (lib/authz requireVerifiedUser),
+      // and an account left unverified for 7 days is suspended (daily cron;
+      // see the session hook below). OAuth users arrive verified.
+      requireEmailVerification: false,
       minPasswordLength: 8,
       maxPasswordLength: 64,
       sendResetPassword: async ({ user, url }) => {
@@ -145,9 +149,8 @@ export async function getAuth() {
     },
     emailVerification: {
       sendOnSignUp: true, // fire the verification email right after signup
-      sendOnSignIn: true, // resend it if an unverified user tries to sign in
       autoSignInAfterVerification: true, // clicking the link signs them in
-      expiresIn: 60 * 60, // 1 hour, consistent with password reset
+      expiresIn: 24 * 60 * 60, // a day; a new link can be sent any time
       sendVerificationEmail: async ({ user, url }) => {
         const mail = verifyEmail(url);
         await sendEmail({
@@ -209,8 +212,15 @@ export async function getAuth() {
               throw new APIError("BAD_REQUEST", { message: "Disposable email.", code: "DISPOSABLE_EMAIL" });
             return { data: { ...data, ...cleanIdentity(data) } };
           },
-          // Auto-assign a unique username on signup (replaces handle_new_user).
+          // Auto-assign a unique username on signup (replaces handle_new_user),
+          // and start the 7-day verification window for unverified emails.
           after: async (createdUser) => {
+            if (!createdUser.emailVerified) {
+              await db
+                .update(schema.user)
+                .set({ verifyDeadline: new Date(Date.now() + VERIFY_WINDOW_MS) })
+                .where(eq(schema.user.id, createdUser.id));
+            }
             const stem = usernameStem(createdUser.name || createdUser.email);
             for (let i = 0; i < 6; i++) {
               const suffix = crypto.randomUUID().replace(/-/g, "").slice(0, 5);
@@ -228,6 +238,45 @@ export async function getAuth() {
           },
         },
       },
+      session: {
+        create: {
+          // Suspended accounts can't sign in — unless they've verified their
+          // email since (e.g. by the link), which lifts the suspension. An
+          // account past its deadline that the daily cron hasn't reached yet
+          // is suspended here.
+          before: async (session) => {
+            const [u] = await db
+              .select({
+                emailVerified: schema.user.emailVerified,
+                verifyDeadline: schema.user.verifyDeadline,
+                suspendedAt: schema.user.suspendedAt,
+              })
+              .from(schema.user)
+              .where(eq(schema.user.id, session.userId))
+              .limit(1);
+            if (!u) return;
+            if (u.emailVerified) {
+              if (u.suspendedAt || u.verifyDeadline) {
+                await db
+                  .update(schema.user)
+                  .set({ suspendedAt: null, verifyDeadline: null })
+                  .where(eq(schema.user.id, session.userId));
+              }
+              return;
+            }
+            const overdue = u.verifyDeadline && u.verifyDeadline.getTime() < Date.now();
+            if (u.suspendedAt || overdue) {
+              if (!u.suspendedAt) {
+                await db
+                  .update(schema.user)
+                  .set({ suspendedAt: new Date() })
+                  .where(eq(schema.user.id, session.userId));
+              }
+              throw new APIError("FORBIDDEN", { message: "Account suspended.", code: "ACCOUNT_SUSPENDED" });
+            }
+          },
+        },
+      },
     },
     // Profile fields are written only by lib/profile-actions (which validates
     // them), never through Better Auth's own endpoints: `input: false` keeps
@@ -239,6 +288,8 @@ export async function getAuth() {
         fullName: { type: "string", required: false, input: false },
         bio: { type: "string", required: false, input: false },
         showEmail: { type: "boolean", required: false, defaultValue: false, input: false },
+        // Shown in the "verify your email" banner (days left).
+        verifyDeadline: { type: "date", required: false, input: false },
       },
     },
     // captcha (if enabled) runs before nextCookies; nextCookies MUST be last.

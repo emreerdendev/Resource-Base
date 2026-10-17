@@ -210,6 +210,24 @@ export const tr = {
     browseCvs: "Tüm CV'lere Göz At",
   },
 
+  verifyBanner: {
+    title: "Her şeyi açmak için e-postanı doğrula.",
+    body_one: "Kaydetme, beğenme, takip ve katkı {{email}} adresini doğruladığında açılır — hesap askıya alınmadan önce {{count}} gün kaldı.",
+    body_other: "Kaydetme, beğenme, takip ve katkı {{email}} adresini doğruladığında açılır — hesap askıya alınmadan önce {{count}} gün kaldı.",
+    resend: "E-postayı Tekrar Gönder",
+    sent: "Yeni bağlantı {{email}} adresine gönderiliyor.",
+    verifyFirst: "Önce e-postanı doğrula — bağlantı gelen kutunda.",
+  },
+  suspended: {
+    title: "Hesap Askıya Alındı",
+    body: "{{email}} 7 gün içinde doğrulanmadığı için hesap askıya alındı. E-postayı doğrularsan hemen geri açılır — ya da yeniden etkinleştirme talebi gönderebilirsin.",
+    resend: "Yeni Doğrulama Bağlantısı Gönder",
+    requestTitle: "Yeniden Etkinleştirme Talebi",
+    requestHint: "E-posta gelmedi mi? Bize yaz, hesabı yeniden açalım — sonra doğrulamak için 7 gün daha olur.",
+    messagePlaceholder: "Bilmemiz gereken bir şey varsa (isteğe bağlı)",
+    request: "Talep Gönder",
+    requested: "Talebin alındı. Kısa sürede inceleyeceğiz — daha sonra tekrar giriş yapmayı dene.",
+  },
   notFound: {
     title: "Bu sayfa kaybolmuş",
     body: "Aradığın sayfa yok ya da taşınmış olabilir. Seni doğru yere götürelim.",
@@ -352,11 +370,8 @@ export const tr = {
     emailInvalid: "Geçerli bir e-posta adresi gir",
     resetEmailSent: "Bu e-posta kayıtlıysa, sıfırlama bağlantısı yolda.",
     // E-posta doğrulama
-    verifyCheckInbox: "E-postanı Kontrol Et",
     verifyEmailSent:
-      "E-postana bir onay bağlantısı gönderdik. Hesabını etkinleştirmek için bağlantıya tıkla.",
-    verifyEmailHint:
-      "Gelmedi mi? Spam klasörüne bak ya da yeni bir bağlantı için giriş yapmayı dene.",
+      "Hesap oluşturuldu! E-postana bir doğrulama bağlantısı gönderdik — her şeyi açmak için 7 gün içinde doğrula.",
     emailNotVerified:
       "Önce e-posta adresini doğrula. Sana yeni bir onay bağlantısı gönderdik.",
     verifyTitle: "E-postanı Doğrula",

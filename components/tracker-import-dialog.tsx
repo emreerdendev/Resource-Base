@@ -64,7 +64,7 @@ export function TrackerImportDialog({ companies }: { companies: Company[] }) {
       );
       if (!res.ok) {
         toast.error(
-          res.error === "rate_limited" ? t("card.favoriteRateLimited") : t("tracker.error"),
+          res.error === "unverified" ? t("verifyBanner.verifyFirst") : res.error === "rate_limited" ? t("card.favoriteRateLimited") : t("tracker.error"),
         );
         return;
       }

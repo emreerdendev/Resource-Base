@@ -55,7 +55,7 @@ export function CvLikesProvider({ children }: { children: React.ReactNode }) {
         const res = await toggleCvLike(id);
         if (res.error) {
           apply(was);
-          toast.error(t(res.error === "rate_limited" ? "card.favoriteRateLimited" : "cvs.likeError"));
+          toast.error(t(res.error === "unverified" ? "verifyBanner.verifyFirst" : res.error === "rate_limited" ? "card.favoriteRateLimited" : "cvs.likeError"));
         }
       } catch {
         apply(was);

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { getSessionUser } from "@/lib/authz";
+import { getSessionUser, isVerified } from "@/lib/authz";
 import { checkPdf, cvBucket, reviewLink } from "@/lib/cv-files";
 import { parseCvMeta } from "@/lib/cv-input";
 import { CV_MAX_BYTES } from "@/lib/cv-taxonomy";
@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
   if (!isSameOrigin(req)) return new NextResponse("Forbidden", { status: 403 });
   const user = await getSessionUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
+  if (!isVerified(user)) return NextResponse.json({ error: "unverified" }, { status: 403 });
   if (isPaused("UPLOADS_PAUSED")) return NextResponse.json({ error: "paused" }, { status: 503 });
 
   // Reject oversized bodies before reading them.

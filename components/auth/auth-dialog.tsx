@@ -52,7 +52,8 @@ export function AuthDialog({
 }) {
   const { t } = useTranslation();
   const [pending, setPending] = useState(false);
-  const [view, setView] = useState<"auth" | "forgot" | "verify-sent">("auth");
+  const [view, setView] = useState<"auth" | "forgot" | "suspended">("auth");
+  const [suspendedEmail, setSuspendedEmail] = useState("");
 
   // Controlled fields (so buttons can be disabled until valid).
   const [siEmail, setSiEmail] = useState("");
@@ -145,9 +146,12 @@ export function AuthDialog({
         captchaHeaders(captcha),
       );
       if (error) {
-        // Unverified email/password account: Better Auth blocks sign-in with
-        // EMAIL_NOT_VERIFIED (403) and, with sendOnSignIn, resends the link.
-        // Tell the user to check their inbox rather than showing a raw error.
+        // Unverified past the 7-day window: explain and offer the way back.
+        if (error.code === "ACCOUNT_SUSPENDED") {
+          setSuspendedEmail(siEmail.trim());
+          setView("suspended");
+          return;
+        }
         throw new Error(authErrorMessage(error));
       }
       // Signed in: start loading the session (see lib/auth-hint). The welcome
@@ -177,10 +181,13 @@ export function AuthDialog({
         captchaHeaders(captcha),
       );
       if (error) throw new Error(authErrorMessage(error));
-      // Verification is required: signUp does NOT create a session. Show a
-      // check-your-inbox screen instead of closing the dialog.
+      // Signed in right away. Writes stay locked until the email is verified
+      // (the banner explains, with 7 days to do it), so a delayed or capped
+      // verification email never shuts anyone out.
+      markSignInIntent();
+      setAuthHint();
       toast.success(t("auth.verifyEmailSent"));
-      setView("verify-sent");
+      onOpenChange(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failed"));
     } finally {
@@ -235,31 +242,11 @@ export function AuthDialog({
       }}
     >
       <DialogContent className="sm:max-w-sm">
-        {view === "verify-sent" ? (
-          <>
-            <DialogHeader>
-              <DialogTitle>{t("auth.verifyCheckInbox")}</DialogTitle>
-              <DialogDescription>{t("auth.verifyEmailSent")}</DialogDescription>
-            </DialogHeader>
-            <div className="grid place-items-center gap-3 py-2 text-center">
-              <span className="grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
-                <MailCheck className="size-6" />
-              </span>
-              <p className="text-sm text-muted-foreground">
-                {t("auth.verifyEmailHint")}
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="link"
-              size="sm"
-              className="justify-self-center"
-              onClick={() => setView("auth")}
-            >
-              {t("auth.backToSignIn")}
-            </Button>
-          </>
-        ) : view === "forgot" ? (
+        {view === "suspended" ? (
+          <SuspendedView
+            email={suspendedEmail}
+            onBack={() => setView("auth")}
+          />        ) : view === "forgot" ? (
           <>
             <DialogHeader>
               <DialogTitle>{t("auth.forgotTitle")}</DialogTitle>
@@ -516,5 +503,104 @@ export function isSafePath(p: string): boolean {
     p.startsWith("/") &&
     !p.startsWith("//") &&
     !/[\\\u0000-\u001f\u007f]/.test(p)
+  );
+}
+
+/**
+ * Shown when an unverified account is past its 7 days. Two ways back: verify
+ * the email (a new link; verifying lifts the suspension on its own), or ask
+ * for the account to be reactivated (reviewed in the Studio; approval gives
+ * another 7 days to verify).
+ */
+function SuspendedView({ email, onBack }: { email: string; onBack: () => void }) {
+  const { t } = useTranslation();
+  const [captcha, setCaptcha] = useState("");
+  const [captchaKey, setCaptchaKey] = useState(0);
+  const captchaOk = !turnstileEnabled || captcha.length > 0;
+  const [pending, setPending] = useState<"resend" | "request" | null>(null);
+  const [message, setMessage] = useState("");
+  const [requested, setRequested] = useState(false);
+  const fresh = () => {
+    setCaptcha("");
+    setCaptchaKey((k) => k + 1);
+  };
+
+  async function resend() {
+    setPending("resend");
+    try {
+      const { error } = await authClient.sendVerificationEmail(
+        { email, callbackURL: "/" },
+        captchaHeaders(captcha),
+      );
+      if (error) throw new Error(error.status === 429 ? t("auth.tooManyEmails") : t("auth.failed"));
+      toast.success(t("auth.verificationResent"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("auth.failed"));
+    } finally {
+      setPending(null);
+      fresh();
+    }
+  }
+
+  async function request() {
+    setPending("request");
+    try {
+      const res = await fetch("/api/account/reactivate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, message: message.trim(), token: captcha }),
+      });
+      if (res.status === 429) throw new Error(t("auth.tooManyEmails"));
+      if (!res.ok) throw new Error(t("auth.failed"));
+      setRequested(true);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("auth.failed"));
+    } finally {
+      setPending(null);
+      fresh();
+    }
+  }
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>{t("suspended.title")}</DialogTitle>
+        <DialogDescription>{t("suspended.body", { email })}</DialogDescription>
+      </DialogHeader>
+      {requested ? (
+        <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
+          {t("suspended.requested")}
+        </p>
+      ) : (
+        <div className="grid gap-3">
+          <Turnstile action="suspended" resetKey={captchaKey} onToken={setCaptcha} />
+          <Button type="button" disabled={!captchaOk || pending !== null} onClick={resend}>
+            {pending === "resend" ? <Loader2 className="size-4 animate-spin" /> : <MailCheck className="size-4" />}
+            {t("suspended.resend")}
+          </Button>
+          <div className="grid gap-2 rounded-lg border border-border p-3">
+            <p className="text-sm font-medium">{t("suspended.requestTitle")}</p>
+            <p className="text-xs text-muted-foreground">{t("suspended.requestHint")}</p>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              maxLength={500}
+              rows={3}
+              aria-label={t("suspended.requestTitle")}
+              placeholder={t("suspended.messagePlaceholder")}
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <Button type="button" variant="outline" disabled={!captchaOk || pending !== null} onClick={request}>
+              {pending === "request" && <Loader2 className="size-4 animate-spin" />}
+              {t("suspended.request")}
+            </Button>
+          </div>
+          {!captchaOk && <p className="text-center text-xs text-muted-foreground">{t("auth.captchaRequired")}</p>}
+        </div>
+      )}
+      <Button type="button" variant="link" size="sm" className="justify-self-center" onClick={onBack}>
+        {t("auth.backToSignIn")}
+      </Button>
+    </>
   );
 }

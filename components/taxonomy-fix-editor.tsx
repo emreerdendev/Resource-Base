@@ -148,6 +148,10 @@ export function TaxonomyFixEditor({
               }),
         }),
       });
+      if (res.status === 403) {
+        toast.error(t("verifyBanner.verifyFirst"));
+        return;
+      }
       if (!res.ok) throw new Error(await res.text());
       toast.success(t("taxonomy.success"));
       onDone();

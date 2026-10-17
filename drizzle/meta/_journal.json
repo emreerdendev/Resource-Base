@@ -92,6 +92,13 @@
       "when": 1792272367401,
       "tag": "0012_usage_counters",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1792275541369,
+      "tag": "0013_email_verification_deadline",
+      "breakpoints": true
     }
   ]
 }

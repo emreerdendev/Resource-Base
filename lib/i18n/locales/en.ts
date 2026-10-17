@@ -210,6 +210,24 @@ export const en = {
     browseCvs: "Browse All CVs",
   },
 
+  verifyBanner: {
+    title: "Verify your email to unlock everything.",
+    body_one: "Saving, liking, tracking and contributing open up once you confirm {{email}} — {{count}} day left before the account is suspended.",
+    body_other: "Saving, liking, tracking and contributing open up once you confirm {{email}} — {{count}} days left before the account is suspended.",
+    resend: "Resend Email",
+    sent: "A new link is on its way to {{email}}.",
+    verifyFirst: "Verify your email first — check your inbox for the link.",
+  },
+  suspended: {
+    title: "Account Suspended",
+    body: "{{email}} wasn’t verified within 7 days, so the account is suspended. Verify the email to get it back right away — or ask us to reactivate it.",
+    resend: "Send a New Verification Link",
+    requestTitle: "Ask for Reactivation",
+    requestHint: "Didn’t get the email? Ask us and we’ll reactivate the account — you’ll then have 7 more days to verify.",
+    messagePlaceholder: "Anything we should know (optional)",
+    request: "Send Request",
+    requested: "Request sent. We’ll review it soon — try signing in again later.",
+  },
   notFound: {
     title: "This page wandered off",
     body: "The page you’re looking for doesn’t exist or may have moved. Let’s get you back on track.",
@@ -352,11 +370,8 @@ export const en = {
     emailInvalid: "Enter a valid email address",
     resetEmailSent: "If that email exists, a reset link is on its way.",
     // Email verification
-    verifyCheckInbox: "Check Your Inbox",
     verifyEmailSent:
-      "We’ve sent a confirmation link to your email. Click it to activate your account.",
-    verifyEmailHint:
-      "Didn’t get it? Check your spam folder, or try signing in to get a fresh link.",
+      "Account created! We sent a verification link to your email — verify within 7 days to unlock everything.",
     emailNotVerified:
       "Verify your email first. We’ve sent you a new confirmation link.",
     verifyTitle: "Verify Your Email",

@@ -210,6 +210,24 @@ export const fr = {
     browseCvs: "Parcourir tous les CV",
   },
 
+  verifyBanner: {
+    title: "Vérifiez votre e-mail pour tout débloquer.",
+    body_one: "Enregistrer, aimer, suivre et contribuer seront possibles une fois {{email}} confirmé — {{count}} jour avant la suspension du compte.",
+    body_other: "Enregistrer, aimer, suivre et contribuer seront possibles une fois {{email}} confirmé — {{count}} jours avant la suspension du compte.",
+    resend: "Renvoyer l’e-mail",
+    sent: "Un nouveau lien est en route vers {{email}}.",
+    verifyFirst: "Vérifiez d’abord votre e-mail — le lien est dans votre boîte de réception.",
+  },
+  suspended: {
+    title: "Compte suspendu",
+    body: "{{email}} n’a pas été vérifié sous 7 jours, le compte est donc suspendu. Vérifiez l’e-mail pour le récupérer tout de suite — ou demandez sa réactivation.",
+    resend: "Envoyer un nouveau lien de vérification",
+    requestTitle: "Demander la réactivation",
+    requestHint: "Pas reçu l’e-mail ? Écrivez-nous et nous réactiverons le compte — vous aurez ensuite 7 jours de plus pour vérifier.",
+    messagePlaceholder: "Ce que nous devrions savoir (facultatif)",
+    request: "Envoyer la demande",
+    requested: "Demande envoyée. Nous l’examinerons bientôt — réessayez de vous connecter plus tard.",
+  },
   notFound: {
     title: "Cette page s’est égarée",
     body: "La page que vous cherchez n’existe pas ou a été déplacée. Revenons sur la bonne voie.",
@@ -352,11 +370,8 @@ export const fr = {
     emailInvalid: "Entrez une adresse e-mail valide",
     resetEmailSent: "Si cet e-mail existe, un lien de réinitialisation arrive.",
     // Vérification de l'e-mail
-    verifyCheckInbox: "Vérifiez votre boîte mail",
     verifyEmailSent:
-      "Nous avons envoyé un lien de confirmation à votre e-mail. Cliquez dessus pour activer votre compte.",
-    verifyEmailHint:
-      "Pas reçu ? Vérifiez vos spams ou essayez de vous connecter pour obtenir un nouveau lien.",
+      "Compte créé ! Nous vous avons envoyé un lien de vérification — vérifiez sous 7 jours pour tout débloquer.",
     emailNotVerified:
       "Vérifiez d'abord votre e-mail. Nous vous avons envoyé un nouveau lien de confirmation.",
     verifyTitle: "Vérifiez votre e-mail",
