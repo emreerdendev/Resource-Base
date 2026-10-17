@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Briefcase,
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { LinkedinIcon } from "@/components/brand-icons";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
+import { useContributors } from "@/components/contributors-provider";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { normalizeLinkedinJobsUrl } from "@/lib/company-input";
@@ -246,6 +247,10 @@ export function CompanyDetails({
         </div>
       )}
 
+      {company.submittedBy && (
+        <AddedBy userId={company.submittedBy} onNavigate={onNavigate} />
+      )}
+
       {user ? (
         <NoteEditor companyId={company._id} />
       ) : (
@@ -255,5 +260,27 @@ export function CompanyDetails({
         </p>
       )}
     </div>
+  );
+}
+
+/** "Added by @username" for community-suggested companies, resolved live by user id. */
+function AddedBy({ userId, onNavigate }: { userId: string; onNavigate?: () => void }) {
+  const { t } = useTranslation();
+  const { register, get } = useContributors();
+  useEffect(() => register(userId), [register, userId]);
+  const who = get(userId);
+  if (!who?.username) return null;
+  return (
+    <Link
+      href={`/profile/${who.username}`}
+      onClick={onNavigate}
+      className="inline-flex items-center gap-1.5 self-start text-xs text-muted-foreground transition-colors hover:text-foreground"
+    >
+      {who.avatar_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={who.avatar_url} alt="" referrerPolicy="no-referrer" className="size-4 rounded-full object-cover" />
+      ) : null}
+      {t("card.addedBy", { username: who.username })}
+    </Link>
   );
 }

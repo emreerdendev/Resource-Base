@@ -152,6 +152,8 @@ export interface Company {
   sectors: Sector[]
   clients: string[]
   addedAt?: string
+  /** User id of the community member whose suggestion added it. */
+  submittedBy?: string | null
 }
 
 export interface CompanyWithRelated extends Company {

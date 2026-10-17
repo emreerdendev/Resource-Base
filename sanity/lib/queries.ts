@@ -126,7 +126,8 @@ const COMPANY_FIELDS = groq`
   "workModels": coalesce(workModels, []),
   "sectors": coalesce(sectors, []),
   "clients": coalesce(clients, []),
-  addedAt
+  addedAt,
+  submittedBy
 `
 
 const PUBLISHED_COMPANY = groq`_type == "company" && status == "published" && defined(slug.current)`

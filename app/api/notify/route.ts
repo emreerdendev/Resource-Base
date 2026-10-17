@@ -70,7 +70,10 @@ type CompanySubmissionDoc = {
  * the deterministic `company-<slug>` id, so retries never duplicate it.
  * Returns the company slug.
  */
-async function createCompanyFromSubmission(submissionId: string): Promise<string | null> {
+async function createCompanyFromSubmission(
+  submissionId: string,
+  submittedBy: string,
+): Promise<string | null> {
   const doc = await writeClient.fetch<CompanySubmissionDoc | null>(
     `*[_type == "submission" && _id == $id][0]{ name, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, companyCities, companyOtherLocations, companyWorkModels }`,
     { id: submissionId },
@@ -104,6 +107,8 @@ async function createCompanyFromSubmission(submissionId: string): Promise<string
     clients: [],
     status: "published",
     addedAt: new Date().toISOString(),
+    // Credits the suggester ("Added by @username", resolved live by id).
+    submittedBy,
     internalNotes: `Suggested by the community (submission ${submissionId}).`,
   });
   return slug;
@@ -201,7 +206,7 @@ export async function POST(req: NextRequest) {
   let companySlug: string | null = null;
   if (approved && isCompany) {
     try {
-      companySlug = await createCompanyFromSubmission(body._id);
+      companySlug = await createCompanyFromSubmission(body._id, body.submittedBy);
     } catch (err) {
       console.error("company create failed", err);
     }

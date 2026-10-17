@@ -149,6 +149,14 @@ export const company = defineType({
       initialValue: () => new Date().toISOString(),
     }),
     defineField({
+      name: 'submittedBy',
+      title: 'Suggested by (user id)',
+      type: 'string',
+      description: 'Set when the company came from an approved community suggestion; shown as “Added by @username”. Clear it to hide the credit.',
+      group: 'moderation',
+      readOnly: true,
+    }),
+    defineField({
       name: 'internalNotes',
       type: 'text',
       rows: 2,

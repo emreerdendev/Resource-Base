@@ -55,6 +55,9 @@ export async function POST(req: NextRequest) {
       .patch({ query: `*[_type == "resource" && submittedBy == $uid]`, params: { uid: userId } }, (p) =>
         p.unset(["submittedBy"]),
       )
+      .patch({ query: `*[_type == "company" && submittedBy == $uid]`, params: { uid: userId } }, (p) =>
+        p.unset(["submittedBy"]),
+      )
       .commit();
   } catch (err) {
     console.error("sanity anonymize failed", err);
