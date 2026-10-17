@@ -146,7 +146,7 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
       </nav>
 
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-border bg-muted/50">
           {icon ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -176,6 +176,23 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
               {t("card.by", { author: resource.author })}
             </p>
           )}
+        </div>
+        {/* Share and favorite sit top right, like the company page. */}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={share}>
+            {copied ? <Check className="size-3.5 text-emerald-500" /> : <Share2 className="size-3.5" />}
+            {copied ? t("resource.linkCopied") : t("resource.share")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => (user ? toggle(resource._id) : openAuth())}
+            aria-pressed={fav}
+            className={cn(fav && "border-primary/50 text-primary")}
+          >
+            <Star className={cn("size-3.5", fav && "fill-primary text-primary")} />
+            {t(fav ? "card.favorited" : "card.favorite")}
+          </Button>
         </div>
       </div>
 
@@ -322,8 +339,7 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
         )}
       </div>
 
-      {/* Actions — suggest edit · share · favorite. The editor / read-only
-          suggestion view render above. */}
+      {/* Suggest edit — the editor / read-only suggestion view render above. */}
       <div className="mt-6 flex flex-wrap items-center gap-2">
         {user && submissionsLoading ? (
           <Button variant="outline" size="lg" disabled>
@@ -355,20 +371,6 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
             {t("taxonomy.editShort")}
           </Button>
         )}
-        <Button variant="outline" size="lg" onClick={share}>
-          {copied ? <Check className="text-emerald-500" /> : <Share2 />}
-          {copied ? t("resource.linkCopied") : t("resource.share")}
-        </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={() => (user ? toggle(resource._id) : openAuth())}
-          aria-pressed={fav}
-          className={cn(fav && "border-primary/50 text-primary")}
-        >
-          <Star className={cn(fav && "fill-primary text-primary")} />
-          {t(fav ? "card.favorited" : "card.favorite")}
-        </Button>
       </div>
 
       {/* Related */}
