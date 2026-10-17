@@ -114,6 +114,7 @@ Notes:
 - Runtime secrets are set with `wrangler secret put`; the public `NEXT_PUBLIC_*` and Sanity tokens must also be present as **Build variables** in Workers Builds (Next.js inlines them / fetches Sanity at build time).
 - Apply new D1 migrations to production with `pnpm db:migrate:remote` before (or right after) deploying a schema change.
 - Add a Sanity webhook (**sanity.io/manage → API → Webhooks**) pointing at `/api/revalidate` (content revalidation — make sure its filter includes the `company` type) and `/api/notify` (submission-approval notifications), each sharing its respective secret. Give the revalidate webhook the projection `{ _type, "skip": delta::changedOnly((lastCheckedAt, httpStatus)) }` so the link checker's daily bookkeeping doesn't re-render the site.
+- CVs are stored in the R2 bucket `resource-base-cvs` (binding `CV_BUCKET`). Create it once with `npx wrangler r2 bucket create resource-base-cvs` (R2 must be enabled on the account). Uploaded CVs arrive in the Studio under **📄 Pending CVs**; approving or rejecting one there publishes it or notifies the owner through the same `/api/notify` webhook as other submissions.
 - The broken-link checker runs daily as a separate Cron Trigger Worker (`workers/link-check-cron`), which also deletes expired sessions, verification tokens, stale rate-limit rows and read notifications older than 180 days. Redeploy it (`cd workers/link-check-cron && pnpm deploy`) after changing it.
 
 ### Production hardening
