@@ -18,7 +18,7 @@ type Body = { _type?: string; slug?: string | null; skip?: boolean };
  * Configure in sanity.io/manage: filter
  *   _type in ["resource","company","category","tag"]
  * drafts off, and projection
- *   { _type, "slug": slug.current, "skip": delta::changedOnly((lastCheckedAt, httpStatus, linkStatus))
+ *   { _type, "slug": slug.current, "skip": delta::changedOnly((lastCheckedAt, httpStatus, linkStatus, linkFailures))
  *       && (before().linkStatus == "broken") == (after().linkStatus == "broken") }
  * `skip` marks the daily link checker's bookkeeping patches; only a change
  * into or out of "broken" (which the site shows) refreshes anything.
