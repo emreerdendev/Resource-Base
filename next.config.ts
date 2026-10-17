@@ -141,7 +141,9 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       // The Studio moved to Sanity's free hosting.
-      { source: "/studio/:path*", destination: `${STUDIO_URL}/:path*`, permanent: false },
+      // Two rules: OpenNext left an empty `:path*` in the target unexpanded.
+      { source: "/studio", destination: STUDIO_URL, permanent: false },
+      { source: "/studio/:path+", destination: `${STUDIO_URL}/:path+`, permanent: false },
       // Old profile links → /@username (the editor keeps /profile/edit).
       {
         source: "/profile/:username((?!edit$)[^/]+)",
