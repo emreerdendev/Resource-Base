@@ -510,8 +510,8 @@ export function isSafePath(p: string): boolean {
 /**
  * Shown when an unverified account is past its 7 days. The way back is the
  * email itself: send a new link, and opening it verifies the address, lifts
- * the suspension and signs the user in. The button rests for a minute after
- * each send (the same per-address cooldown the server enforces).
+ * the suspension and signs the user in. The button rests after each send for
+ * two minutes (the per-address cooldown the server enforces).
  */
 function SuspendedView({ email, onBack }: { email: string; onBack: () => void }) {
   const { t } = useTranslation();

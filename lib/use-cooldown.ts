@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 
 /**
  * A short wait after sending an email, shown on the button ("Send again in
- * 42s"). Matches the server's one-minute per-address cooldown, so people
+ * 42s"). Matches the server's two-minute per-address cooldown, so people
  * don't click into a limit.
  */
-export function useCooldown(seconds = 60) {
+export function useCooldown(seconds = 120) {
   const [until, setUntil] = useState(0);
   const [now, setNow] = useState(0);
   useEffect(() => {

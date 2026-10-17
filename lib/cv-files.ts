@@ -1,11 +1,7 @@
 import "server-only";
 
-import { createHmac } from "node:crypto";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { safeEqual } from "@/lib/request";
 
-/** How long the reviewer link stored in Sanity stays valid. */
-const REVIEW_LINK_TTL_SEC = 30 * 24 * 60 * 60;
 
 export function cvBucket(): R2Bucket {
   const bucket = getCloudflareContext().env.CV_BUCKET;
@@ -28,19 +24,18 @@ export function checkPdf(bytes: Uint8Array): "ok" | "not_pdf" | "unsafe" {
   return "ok";
 }
 
-function sign(id: string, exp: number): string {
-  const secret = getCloudflareContext().env.BETTER_AUTH_SECRET;
-  return createHmac("sha256", secret).update(`cv-file:${id}:${exp}`).digest("base64url");
-}
-
-/** A time-limited link that opens a (possibly unpublished) CV, for the Sanity reviewer. */
-export function reviewLink(origin: string, id: string): string {
-  const exp = Math.floor(Date.now() / 1000) + REVIEW_LINK_TTL_SEC;
-  return `${origin}/api/cv/${id}/file?exp=${exp}&sig=${sign(id, exp)}`;
-}
-
-export function isValidReviewSignature(id: string, exp: string | null, sig: string | null) {
-  const e = Number(exp);
-  if (!sig || !Number.isInteger(e) || e < Date.now() / 1000) return false;
-  return safeEqual(sig, sign(id, e));
+/**
+ * Whether this signed-in email belongs to a site admin (the ADMIN_EMAILS
+ * variable, comma-separated). Admins can open pending CVs from the Studio's
+ * review link. The Sanity dataset is public on the free plan, so the link
+ * itself must not grant access — being signed in as an admin does.
+ */
+export function isAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const list = (getCloudflareContext().env as unknown as Record<string, string | undefined>).ADMIN_EMAILS ?? "";
+  return list
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(email.trim().toLowerCase());
 }

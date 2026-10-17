@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/authz";
-import { cvBucket, isValidReviewSignature } from "@/lib/cv-files";
+import { cvBucket, isAdminEmail } from "@/lib/cv-files";
 import { getDb } from "@/lib/db";
 import { cvs } from "@/lib/db/schema";
 import { overLimit } from "@/lib/rate-limit";
@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 /**
  * Serve a CV's PDF. Published CVs open for any signed-in user (CVs carry
  * personal data, so they stay away from anonymous crawlers); the owner can
- * always open their own; the Sanity reviewer uses a signed, expiring link.
+ * always open their own; admins (ADMIN_EMAILS) can open pending ones to review.
  * Browsers render PDFs in their own viewer (not as this site's page), and
  * nosniff keeps the bytes from ever being sniffed as HTML; the site-wide CSP
  * (next.config.ts) applies on top.
@@ -20,12 +20,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) return new NextResponse("Not found", { status: 404 });
   const sp = req.nextUrl.searchParams;
-  const reviewer = isValidReviewSignature(id, sp.get("exp"), sp.get("sig"));
-
-  const user = reviewer ? null : await getSessionUser();
-  if (!reviewer && !user) return new NextResponse("Sign in to view CVs", { status: 401 });
+  const user = await getSessionUser();
+  if (!user) return new NextResponse("Sign in to view CVs", { status: 401 });
+  // The Studio's review link: open to the site's admins only.
+  const reviewer = isAdminEmail(user.email);
   // Generous for reading, but stops a signed-in script from bulk-downloading.
-  if (user && (await overLimit("RL_USER", `cv-file:${user.id}`)))
+  if (!reviewer && (await overLimit("RL_USER", `cv-file:${user.id}`)))
     return new NextResponse("Too many requests", { status: 429 });
 
   const [cv] = await getDb()

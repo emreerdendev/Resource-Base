@@ -33,7 +33,7 @@ const MAX_EMAILS_PER_DAY = 150;
 // rotating IPs), these are keyed on the destination address — the one thing an
 // attacker bombarding someone's inbox (or spinning up signups to a victim's
 // address) can't rotate. Stops "mail bombing" a single mailbox.
-const RECIPIENT_COOLDOWN_SECONDS = 60; // min gap between two mails to the same address
+const RECIPIENT_COOLDOWN_SECONDS = 120; // min gap between two mails to the same address
 const RECIPIENT_MAX_PER_HOUR = 3;
 const RECIPIENT_MAX_PER_DAY = 5;
 

@@ -115,10 +115,10 @@ async function createSubmission(req: NextRequest) {
 
   // Company suggestions and company edits have their own shape and approval path.
   if (data.kind === "companyEdit") {
-    return submitCompanyEdit(data, user.id, user.email ?? "");
+    return submitCompanyEdit(data, user.id);
   }
   if (data.kind === "company") {
-    return submitCompany(data, user.id, user.email ?? "");
+    return submitCompany(data, user.id);
   }
 
   // Submission kinds: "new" (brand-new resource), "fix" (correct a broken URL),
@@ -145,7 +145,6 @@ async function createSubmission(req: NextRequest) {
 
   // Identity comes from the session, not the body.
   const userId = user.id;
-  const email = user.email ?? "";
 
   const PRICINGS = ["free", "freemium", "paid"];
   const pricing = PRICINGS.includes(str(data.pricing)) ? str(data.pricing) : undefined;
@@ -346,7 +345,6 @@ async function createSubmission(req: NextRequest) {
             ...(proposeRemoval && { proposeRemoval: true }),
           }
         : {}),
-      email: email.slice(0, 200),
       submittedBy: userId,
       status: "pending",
       createdAt: new Date().toISOString(),
@@ -407,7 +405,7 @@ async function createSubmission(req: NextRequest) {
  * to review. On approval /api/notify creates the live company document. Exact
  * duplicates of an existing company (same slug) are rejected up front.
  */
-async function submitCompany(data: Record<string, unknown>, userId: string, email: string) {
+async function submitCompany(data: Record<string, unknown>, userId: string) {
   const parsed = parseCompanySuggestion(data);
   if (!parsed.ok) return new NextResponse(parsed.error, { status: 400 });
   const c = parsed.value;
@@ -446,7 +444,6 @@ async function submitCompany(data: Record<string, unknown>, userId: string, emai
       companyOtherLocations: c.otherLocations,
       companyWorkModels: c.workModels,
       note: c.note,
-      email: email.slice(0, 200),
       submittedBy: userId,
       status: "pending",
       createdAt: new Date().toISOString(),
@@ -481,7 +478,7 @@ async function submitCompany(data: Record<string, unknown>, userId: string, emai
  * be removed) → a pending `submission` (kind "companyEdit"). Only fields that
  * differ from the live company are kept; /api/notify applies them on approval.
  */
-async function submitCompanyEdit(data: Record<string, unknown>, userId: string, email: string) {
+async function submitCompanyEdit(data: Record<string, unknown>, userId: string) {
   const companyId = str(data.targetCompanyId);
   if (!(await listCompanyIds()).has(companyId)) {
     return new NextResponse("Unknown company", { status: 400 });
@@ -542,7 +539,6 @@ async function submitCompanyEdit(data: Record<string, unknown>, userId: string, 
       ...(changes.emails?.length && { companyEmails: changes.emails }),
       ...(cleared.length && { clearFields: cleared }),
       note,
-      email: email.slice(0, 200),
       submittedBy: userId,
       status: "pending",
       createdAt: new Date().toISOString(),

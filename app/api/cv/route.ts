@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getSessionUser, isVerified } from "@/lib/authz";
-import { checkPdf, cvBucket, reviewLink } from "@/lib/cv-files";
+import { checkPdf, cvBucket } from "@/lib/cv-files";
 import { parseCvMeta } from "@/lib/cv-input";
 import { CV_MAX_BYTES } from "@/lib/cv-taxonomy";
 import { getDb } from "@/lib/db";
@@ -71,13 +71,13 @@ export async function POST(req: NextRequest) {
       kind: "cv",
       name: `${meta.value.title} — @${user.username ?? user.id}`,
       cvId: id,
-      cvFileUrl: reviewLink(req.nextUrl.origin, id),
+      // Opens only for the site's admins (ADMIN_EMAILS) — the dataset is public.
+      cvFileUrl: `${req.nextUrl.origin}/api/cv/${id}/file`,
       cvField: meta.value.field,
       cvSeniority: meta.value.seniority,
       cvLanguage: meta.value.language,
       cvTechnologies: meta.value.technologies,
       note: meta.value.summary ?? undefined,
-      email: (user.email ?? "").slice(0, 200),
       submittedBy: user.id,
       status: "pending",
       createdAt: new Date().toISOString(),

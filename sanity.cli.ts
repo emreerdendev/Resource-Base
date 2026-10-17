@@ -15,5 +15,5 @@ export default defineCliConfig({
   api: { projectId, dataset },
   // Hosted at https://<studioHost>.sanity.studio (STUDIO_URL in lib/site.ts).
   studioHost: 'resourcebase',
-  deployment: { autoUpdates: true },
+  deployment: { appId: 'poz0s8mqrvmmxa53y62gmmfe', autoUpdates: true },
 })

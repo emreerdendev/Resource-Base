@@ -193,7 +193,7 @@ export const submission = defineType({
       title: 'CV file (PDF)',
       type: 'url',
       description:
-        'Private review link, valid for 30 days. Check it is a real CV with no offensive or unrelated content, then approve to publish it (signed-in users only).',
+        'Opens the PDF on the site when you are signed in there with an admin email (ADMIN_EMAILS). Check it is a real CV with no offensive or unrelated content, then approve to publish it.',
       readOnly: true,
       hidden: ({ parent }) => parent?.kind !== 'cv',
     }),
@@ -282,7 +282,6 @@ export const submission = defineType({
       hidden: ({ parent }) => !isNewResource(parent),
     }),
     defineField({ name: 'note', type: 'text', rows: 3 }),
-    defineField({ name: 'email', type: 'string' }),
     defineField({
       name: 'submittedBy',
       title: 'Submitted by (user id)',
