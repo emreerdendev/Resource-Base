@@ -35,7 +35,8 @@ export function middleware(request: NextRequest) {
     if (isProtectedPage(pathname)) {
       const url = request.nextUrl.clone();
       url.pathname = "/";
-      url.search = "?auth=required";
+      // Remember the destination so signing in continues there.
+      url.search = `?auth=required&next=${encodeURIComponent(pathname + request.nextUrl.search)}`;
       return NextResponse.redirect(url);
     }
   }

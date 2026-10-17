@@ -71,9 +71,20 @@ export function AuthDialog({
     setCaptchaKey((k) => k + 1);
   }
 
+  /**
+   * Where to land after signing in: an explicit target (e.g. a form the user
+   * was heading to), otherwise the page they're on now — so signing in from a
+   * resource page brings them back to that resource, not the homepage.
+   */
   function callbackPath() {
     const next = getRedirect?.();
-    return next && next.startsWith("/") ? next : "/";
+    if (next && isSafePath(next)) return next;
+    if (typeof window === "undefined") return "/";
+    const url = new URL(window.location.href);
+    url.searchParams.delete("auth");
+    url.searchParams.delete("next");
+    url.searchParams.delete("error");
+    return `${url.pathname}${url.search}`;
   }
 
   // Clear form fields after a submit — success or failure — so stale values
@@ -152,7 +163,8 @@ export function AuthDialog({
       // local-part; the user can change their handle later from Profile.
       const email = suEmail.trim();
       const { error } = await authClient.signUp.email(
-        { email, password: suPw, name: email.split("@")[0] },
+        // callbackURL: the verification link brings them back to this page.
+        { email, password: suPw, name: email.split("@")[0], callbackURL: callbackPath() },
         captchaHeaders(captcha),
       );
       if (error) throw new Error(error.message ?? authErrorMessage(error));
@@ -483,4 +495,9 @@ export function AuthDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+/** A same-site path ("/x"), never another origin ("//evil.com", "https://…"). */
+export function isSafePath(p: string): boolean {
+  return p.startsWith("/") && !p.startsWith("//") && !p.startsWith("/\\");
 }

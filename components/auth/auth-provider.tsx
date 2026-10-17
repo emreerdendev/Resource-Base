@@ -13,7 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { authClient, useSession } from "@/lib/auth-client";
-import { AuthDialog } from "@/components/auth/auth-dialog";
+import { AuthDialog, isSafePath } from "@/components/auth/auth-dialog";
 import { isProtectedPage } from "@/lib/protected-routes";
 
 export type AuthUser = NonNullable<
@@ -83,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const params = new URLSearchParams(window.location.search);
     const error = params.get("error");
     const auth = params.get("auth");
+    // Bounced from a protected page: ?next= is where they were going.
+    const next = params.get("next");
     const hasFlag = error || auth === "required" || auth === "signin";
     if (!hasFlag) {
       flagHandled.current = false;
@@ -106,9 +108,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     if (error === "account_not_linked") {
+      // Responds to the URL the page was opened with (an external event).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNotice(t("auth.accountNotLinked"));
       setDialogOpen(true);
     } else if (auth === "required" || auth === "signin") {
+      redirectAfterAuth.current = next && isSafePath(next) ? next : null;
       setDialogOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
