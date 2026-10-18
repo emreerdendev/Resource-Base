@@ -1,7 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "resource-base",
-  "main": ".open-next/worker.js",
+  // worker.ts wraps OpenNext's .open-next/worker.js (browser cache headers).
+  "main": "worker.ts",
   "compatibility_date": "2026-04-01",
   "compatibility_flags": ["nodejs_compat"],
   // Don't inject esbuild's `__name` helper: code that serializes a function
