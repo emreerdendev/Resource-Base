@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { Boxes, Building2, FileText, Home, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { OPEN_COMMAND_EVENT } from "@/components/command-palette";

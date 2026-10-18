@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { useSearchParams } from "next/navigation";
 import { ArrowUpRight, Database, FileText, KeyRound, UserPen, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";

@@ -11,7 +11,7 @@ import {
 import { hasSlug } from "@/sanity/lib/slugs";
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { notFound } from "next/navigation";
 import { jsonLd } from "@/lib/json-ld";
 import { shareMeta } from "@/lib/og";

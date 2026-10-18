@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {

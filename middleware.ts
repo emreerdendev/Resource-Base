@@ -14,7 +14,7 @@ const AUTH_HINT_COOKIE = "rb_auth";
  * Per-IP limit on a Workers Rate Limiting binding (free, no storage). Lets the
  * request through if the binding is missing (local dev) or errors.
  */
-async function overIpLimit(binding: "RL_GLOBAL" | "RL_AUTH", request: NextRequest): Promise<boolean> {
+async function overIpLimit(binding: "RL_GLOBAL" | "RL_RSC" | "RL_AUTH", request: NextRequest): Promise<boolean> {
   try {
     const rl = (getCloudflareContext().env as unknown as Record<string, RateLimit | undefined>)[binding];
     if (!rl) return false;
@@ -64,7 +64,11 @@ export async function middleware(request: NextRequest) {
 
   // Abuse shield: a client sending more than a person ever could is turned
   // away here, before any render, query or Sanity request is spent on it.
-  if (await overIpLimit("RL_GLOBAL", request)) return tooMany();
+  // Client-side navigations and prefetches (RSC requests) come in bursts of
+  // several per click, so they have their own, larger budget; page loads and
+  // API calls share the stricter one.
+  const rsc = request.headers.has("rsc") || request.nextUrl.searchParams.has("_rsc");
+  if (await overIpLimit(rsc ? "RL_RSC" : "RL_GLOBAL", request)) return tooMany();
   // Better Auth handles its own routes (and has stricter D1 limits on the
   // email/sign-up ones); this only caps raw volume per IP.
   if (pathname.startsWith("/api/auth")) {

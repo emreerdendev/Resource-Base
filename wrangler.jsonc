@@ -72,6 +72,8 @@
     // Every dynamic request, keyed by IP (middleware): the outer shield that
     // stops one client from turning traffic into renders and cost.
     { "name": "RL_GLOBAL", "namespace_id": "1004", "simple": { "limit": 300, "period": 60 } },
+    // Client-side navigations and prefetches (RSC requests), per IP.
+    { "name": "RL_RSC", "namespace_id": "1006", "simple": { "limit": 1200, "period": 60 } },
     // The auth API (sign-in, sign-up, emails…), keyed by IP (middleware).
     { "name": "RL_AUTH", "namespace_id": "1005", "simple": { "limit": 60, "period": 60 } }
   ],

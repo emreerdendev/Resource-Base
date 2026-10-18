@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Building2, FileText, Plus, Sparkles, Upload } from "lucide-react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { useTranslation } from "react-i18next";
 
 /**

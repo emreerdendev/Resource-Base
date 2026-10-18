@@ -29,7 +29,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { trackClick } from "@/lib/track-click";

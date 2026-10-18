@@ -11,6 +11,7 @@ interface __BaseEnv_CloudflareEnv {
 	RL_USER: RateLimit;
 	RL_SUBMIT: RateLimit;
 	RL_GLOBAL: RateLimit;
+	RL_RSC: RateLimit;
 	RL_AUTH: RateLimit;
 	ASSETS: Fetcher;
 	BETTER_AUTH_SECRET: string;

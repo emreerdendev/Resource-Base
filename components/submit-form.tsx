@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { toast } from "sonner";
 import { Globe, Hash, ListChecks, Loader2, Send, Type } from "lucide-react";
 import { useTranslation } from "react-i18next";

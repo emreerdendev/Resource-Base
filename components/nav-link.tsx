@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import type { ComponentProps } from "react";
 
 /**
- * A Link that prefetches on hover/focus instead of on sight. Header and footer
- * links are on every page, so viewport prefetching cost several Worker
- * requests per page view for pages most visitors never open.
+ * The site's Link: prefetches on hover/focus instead of on sight. Next.js
+ * prefetches a route as several per-segment requests, so prefetching every
+ * link in view cost ~100 Worker requests for a handful of page views (and
+ * tripped the per-IP limit). Used everywhere in place of next/link.
  */
 export function NavLink({
   href,

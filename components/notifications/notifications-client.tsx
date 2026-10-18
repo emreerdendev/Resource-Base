@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useNotifications, type Notification } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 import { Bell } from "lucide-react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 

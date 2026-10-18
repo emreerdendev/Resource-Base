@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useState } from "react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { toast } from "sonner";
 import { CheckCircle2, Clock, EyeOff, FileText, Heart, Loader2, Send, Upload, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";

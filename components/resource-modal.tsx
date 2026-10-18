@@ -35,7 +35,7 @@ import {
   TriangleAlert,
   Wrench,
 } from "lucide-react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";

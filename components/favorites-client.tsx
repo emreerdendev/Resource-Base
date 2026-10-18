@@ -8,7 +8,7 @@ import { ResourceGridSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import type { Resource } from "@/lib/types";
 import { Star } from "lucide-react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/empty-state";
 

@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Boxes, ChevronRight, Menu, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 

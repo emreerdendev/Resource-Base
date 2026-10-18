@@ -3,7 +3,7 @@
 import { CategoryIcon } from "@/components/category-icon";
 import type { Category } from "@/lib/types";
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { NavLink as Link } from "@/components/nav-link";
 import { useTranslation } from "react-i18next";
 
 type Domain = "developer" | "designer" | "general";
