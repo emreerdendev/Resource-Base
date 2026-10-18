@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Suggest a resource
+    url: https://resource-base.com/submit/resource
+    about: New resources are submitted on the site (free account) — reviewed, then published automatically. Issues aren't used for this.
+  - name: Suggest a company
+    url: https://resource-base.com/submit/company
+    about: Missing companies are submitted on the site, the same way.
+  - name: Fix or edit a listing
+    url: https://resource-base.com/resources
+    about: Open the resource or company on the site and use the "Suggest" button — wrong links, categories, tags, descriptions or "it's gone".

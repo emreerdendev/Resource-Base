@@ -152,7 +152,8 @@ Resource Base is an independent directory. Listed resources are the property of 
 
 ## Feedback & contact
 
-- **Found a bug or want to suggest a resource the directory is missing?** Open an issue, or submit it right inside the app.
+- **Want to add a resource or company, or fix a listing?** Do it on the site: [submit a resource](https://resource-base.com/submit/resource), [submit a company](https://resource-base.com/submit/company), or use the **Suggest** button on any resource or company page. You need a free account; every contribution is reviewed and published automatically on approval. Suggestions opened as GitHub issues aren't added.
+- **Found a bug?** [Open an issue](../../issues/new/choose) — issues are for bugs and other project matters.
 - **Anything else?** Email **emreerden@pm.me** or visit [emreerden.dev](https://emreerden.dev).
 
 ---
