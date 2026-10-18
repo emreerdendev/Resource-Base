@@ -22,6 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { IconInput } from "@/components/ui/icon-input";
 import {
@@ -646,14 +647,20 @@ function SubmissionDialog({
                   </Button>
                 )}
                 {/* The live resource or company page, when there is one. */}
+                {/* Same separator and Details button as the resource and
+                    company modals (one column of their three-button row). */}
                 {details && (
-                  <div className="border-t border-border pt-4">
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={details}>
-                        <Info className="size-3.5" /> {t("modal.details")}
-                      </Link>
-                    </Button>
-                  </div>
+                  <>
+                    <Separator />
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button asChild variant="outline" size="lg">
+                        <Link href={details}>
+                          <Info />
+                          {t("modal.details")}
+                        </Link>
+                      </Button>
+                    </div>
+                  </>
                 )}
               </>
             )}
