@@ -24,8 +24,17 @@ async function overIpLimit(binding: "RL_GLOBAL" | "RL_RSC" | "RL_AUTH", request:
   }
 }
 
-const tooMany = () =>
-  new NextResponse("Too many requests", { status: 429, headers: { "Retry-After": "60" } });
+/**
+ * 429. A page load gets a small page that reloads itself once the minute is
+ * up, instead of bare text; fetches get plain text.
+ */
+function tooMany(request: NextRequest) {
+  const headers = { "Retry-After": "60", "Cache-Control": "no-store" };
+  if (request.headers.get("sec-fetch-dest") !== "document")
+    return new NextResponse("Too many requests", { status: 429, headers });
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="60"><title>Resource Base</title><style>:root{color-scheme:light dark}body{margin:0;min-height:100vh;display:grid;place-items:center;font:16px/1.5 system-ui,sans-serif;background:#fbfaff;color:#18181b;text-align:center;padding:16px}@media(prefers-color-scheme:dark){body{background:#0e0e12;color:#f4f4f5}}p{color:#71717a;max-width:28rem}a{color:#7c5cf0}</style></head><body><main><h1>Too many requests</h1><p>This page was requested too often in a short time. It will reload by itself in a minute.</p><p><a href="/">Back home</a></p></main></body></html>`;
+  return new NextResponse(html, { status: 429, headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } });
+}
 
 /** API routes that require a signed-in user. */
 const PROTECTED_APIS = ["/api/submit", "/api/user"];
@@ -64,16 +73,24 @@ export async function middleware(request: NextRequest) {
 
   // Abuse shield: a client sending more than a person ever could is turned
   // away here, before any render, query or Sanity request is spent on it.
-  // Client-side navigations and prefetches (RSC requests) come in bursts of
-  // several per click, so they have their own, larger budget; page loads and
-  // API calls share the stricter one.
-  const rsc = request.headers.has("rsc") || request.nextUrl.searchParams.has("_rsc");
-  if (await overIpLimit(rsc ? "RL_RSC" : "RL_GLOBAL", request)) return tooMany();
+  // Client-side navigations and prefetches (RSC GETs of pages) come in bursts
+  // of several per click, so they have their own, larger budget; page loads,
+  // API calls and server actions share the stricter one whatever headers
+  // they carry.
+  const rsc =
+    request.method === "GET" &&
+    !pathname.startsWith("/api/") &&
+    !request.headers.has("next-action") &&
+    (request.headers.has("rsc") || request.nextUrl.searchParams.has("_rsc"));
+  if (await overIpLimit(rsc ? "RL_RSC" : "RL_GLOBAL", request)) return tooMany(request);
   // Better Auth handles its own routes (and has stricter D1 limits on the
-  // email/sign-up ones); this only caps raw volume per IP.
-  if (pathname.startsWith("/api/auth")) {
-    return (await overIpLimit("RL_AUTH", request)) ? tooMany() : NextResponse.next();
+  // email/sign-up ones); this only caps raw volume per IP. Reading the
+  // session (every signed-in page load) isn't counted here: it's a cheap
+  // cookie read, and on a shared IP it would lock signed-in users out.
+  if (pathname.startsWith("/api/auth") && pathname !== "/api/auth/get-session") {
+    return (await overIpLimit("RL_AUTH", request)) ? tooMany(request) : NextResponse.next();
   }
+  if (pathname === "/api/auth/get-session") return NextResponse.next();
 
   const hasSession = !!getSessionCookie(request);
 
