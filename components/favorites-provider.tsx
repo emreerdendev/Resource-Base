@@ -60,31 +60,27 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const toggle = useCallback(
     async (id: string) => {
       if (!user) return; // callers open the auth modal instead
-      const isFav = ids.includes(id);
+      const want = !ids.includes(id);
+      // Shown as `on` locally (the public count moves with it).
+      const show = (on: boolean) => {
+        setIds((prev) => (on ? [...prev.filter((x) => x !== id), id] : prev.filter((x) => x !== id)));
+        bump(id, on ? 1 : -1);
+      };
       // Optimistic — instant across all consumers via shared context.
-      setIds((prev) => (isFav ? prev.filter((x) => x !== id) : [...prev, id]));
-      // Keep the public favorite count in sync optimistically too.
-      bump(id, isFav ? -1 : 1);
-
+      show(want);
       try {
-        const res = await toggleFavorite(id);
-        // Rate-limited (spam guard): the write didn't happen, so revert the
-        // optimistic UI rather than let it lie about the saved state.
-        if (res?.error) {
-          setIds((prev) =>
-            isFav ? [...prev, id] : prev.filter((x) => x !== id),
-          );
-          bump(id, isFav ? 1 : -1);
+        // Sends the wanted state, so a stale screen never flips a saved one;
+        // the reply is what's saved.
+        const res = await toggleFavorite(id, want);
+        const saved = res.error && res.error !== "rate_limited" ? !want : res.favorited;
+        if (saved !== want) show(saved);
+        if (res.error)
           toast.error(
             t(res.error === "unverified" ? "verifyBanner.verifyFirst" : res.error === "rate_limited" ? "card.favoriteRateLimited" : "card.favoriteError"),
           );
-        }
       } catch {
         // On failure, revert the optimistic UI so it never lies about state.
-        setIds((prev) =>
-          isFav ? [...prev, id] : prev.filter((x) => x !== id),
-        );
-        bump(id, isFav ? 1 : -1);
+        show(!want);
         toast.error(t("card.favoriteError"));
       }
     },

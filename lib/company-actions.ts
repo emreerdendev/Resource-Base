@@ -44,15 +44,22 @@ export async function listTrackedCompanies(): Promise<TrackedCompany[]> {
 }
 
 type Result = { ok: true } | { ok: false; error: "rate_limited" | "invalid" | "unverified" };
+type StatusResult =
+  | { ok: true; status: ApplicationStatus | null }
+  | { ok: false; error: "rate_limited" | "invalid" | "unverified" };
 
 /**
  * Save / update the user's status for a company. Passing `null` removes the
  * company from their tracker (un-bookmark). Upsert keeps it a single round-trip.
+ * `ifNew` (the bookmark button) only adds an untracked company, so a click
+ * from a stale screen never resets "interview" back to "saved". Returns the
+ * saved status.
  */
 export async function setCompanyStatus(
   companyId: string,
   status: ApplicationStatus | null,
-): Promise<Result> {
+  ifNew = false,
+): Promise<StatusResult> {
   const me = await requireUser();
   if (!isVerified(me)) return { ok: false, error: "unverified" };
   // Removing skips the published check so entries of since-hidden companies
@@ -73,17 +80,27 @@ export async function setCompanyStatus(
   );
   if (status === null) {
     await db.delete(companyApplications).where(own);
-    return { ok: true };
+    return { ok: true, status: null };
   }
   const now = new Date();
-  await db
+  const insert = db
     .insert(companyApplications)
-    .values({ userId: me.id, companyId, status, updatedAt: now })
-    .onConflictDoUpdate({
-      target: [companyApplications.userId, companyApplications.companyId],
-      set: { status, updatedAt: now },
-    });
-  return { ok: true };
+    .values({ userId: me.id, companyId, status, updatedAt: now });
+  if (ifNew) {
+    const [added] = await insert.onConflictDoNothing().returning({ status: companyApplications.status });
+    if (added) return { ok: true, status };
+    const [row] = await db
+      .select({ status: companyApplications.status })
+      .from(companyApplications)
+      .where(own)
+      .limit(1);
+    return { ok: true, status: (row?.status as ApplicationStatus | undefined) ?? status };
+  }
+  await insert.onConflictDoUpdate({
+    target: [companyApplications.userId, companyApplications.companyId],
+    set: { status, updatedAt: now },
+  });
+  return { ok: true, status };
 }
 
 /** Private note on a tracked company (auto-tracks it as "saved" if needed). */

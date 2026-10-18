@@ -711,6 +711,10 @@ export const tr = {
     badge: "{{count}} CV",
   },
 
+  viewer: {
+    loadError: "Kayıtlı verilerin yüklenemedi. Tekrar denemek için sayfayı yenile.",
+  },
+
   myCv: {
     subtitle: "CV'ni paylaş, başkaları da faydalansın. Listelenmeden önce incelenir, yalnızca giriş yapan kullanıcılar açabilir ve istediğin zaman listeden kaldırabilir ya da silebilirsin.",
     status: {

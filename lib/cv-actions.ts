@@ -27,6 +27,8 @@ export async function listLikedCvIds(): Promise<string[]> {
  */
 export async function toggleCvLike(
   cvId: string,
+  /** The state the user asked for (see toggleFavorite). */
+  want?: boolean,
 ): Promise<{ liked: boolean; error?: "rate_limited" | "invalid" | "unverified" }> {
   const me = await requireUser();
   if (!isVerified(me)) return { liked: false, error: "unverified" };
@@ -34,6 +36,7 @@ export async function toggleCvLike(
   const db = getDb();
   const own = and(eq(cvLikes.userId, me.id), eq(cvLikes.cvId, cvId));
   const [existing] = await db.select({ cvId: cvLikes.cvId }).from(cvLikes).where(own).limit(1);
+  if (typeof want === "boolean" && want === Boolean(existing)) return { liked: want };
   if (await overLimit("RL_USER", `cv-like:${me.id}`))
     return { liked: Boolean(existing), error: "rate_limited" };
 

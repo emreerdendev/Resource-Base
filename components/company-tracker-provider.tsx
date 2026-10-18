@@ -25,7 +25,8 @@ type TrackerValue = {
   loading: boolean;
   get: (companyId: string) => TrackedCompany | undefined;
   /** `null` removes the company from the tracker. */
-  setStatus: (companyId: string, status: ApplicationStatus | null) => Promise<void>;
+  /** `ifNew`: only add an untracked company (the bookmark button). */
+  setStatus: (companyId: string, status: ApplicationStatus | null, ifNew?: boolean) => Promise<void>;
   setNote: (companyId: string, note: string) => Promise<boolean>;
   /** Re-fetch from the server (e.g. after a bulk import). */
   reload: () => Promise<void>;
@@ -103,46 +104,59 @@ export function CompanyTrackerProvider({ children }: { children: React.ReactNode
     [setItems],
   );
 
+  /** Put one entry back as it was, leaving changes to other companies alone. */
+  const restore = useCallback(
+    (companyId: string, entry: TrackedCompany | undefined) =>
+      setItems((prev) => {
+        const rest = prev.filter((x) => x.companyId !== companyId);
+        return entry ? [entry, ...rest] : rest;
+      }),
+    [setItems],
+  );
+
   const setStatus = useCallback(
-    async (companyId: string, status: ApplicationStatus | null) => {
+    async (companyId: string, status: ApplicationStatus | null, ifNew = false) => {
       if (!user) return; // callers open the auth modal instead
-      const before = items;
+      const before = items.find((x) => x.companyId === companyId);
       upsertLocal(companyId, status === null ? null : { status });
       try {
-        const res = await setCompanyStatus(companyId, status);
+        const res = await setCompanyStatus(companyId, status, ifNew);
         if (!res.ok) {
-          setItems(before);
+          restore(companyId, before);
           toast.error(
             res.error === "unverified" ? t("verifyBanner.verifyFirst") : res.error === "rate_limited" ? t("card.favoriteRateLimited") : t("tracker.error"),
           );
+        } else if (res.status !== status && res.status !== null) {
+          // Already tracked with another status: show what's saved.
+          upsertLocal(companyId, { status: res.status });
         }
       } catch {
-        setItems(before);
+        restore(companyId, before);
         toast.error(t("tracker.error"));
       }
     },
-    [user, items, upsertLocal, setItems, t],
+    [user, items, upsertLocal, restore, t],
   );
 
   const setNote = useCallback(
     async (companyId: string, note: string) => {
       if (!user) return false;
-      const before = items;
+      const before = items.find((x) => x.companyId === companyId);
       upsertLocal(companyId, { note: note.trim() || null });
       try {
         const res = await setCompanyNote(companyId, note);
         if (res.ok) return true;
-        setItems(before);
+        restore(companyId, before);
         toast.error(
           res.error === "unverified" ? t("verifyBanner.verifyFirst") : res.error === "rate_limited" ? t("card.favoriteRateLimited") : t("tracker.error"),
         );
       } catch {
-        setItems(before);
+        restore(companyId, before);
         toast.error(t("tracker.error"));
       }
       return false;
     },
-    [user, items, upsertLocal, setItems, t],
+    [user, items, upsertLocal, restore, t],
   );
 
   const value = useMemo<TrackerValue>(() => {

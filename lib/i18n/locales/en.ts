@@ -713,6 +713,10 @@ export const en = {
     badge: "{{count}} CVs",
   },
 
+  viewer: {
+    loadError: "Couldn’t load your saved data. Reload to try again.",
+  },
+
   myCv: {
     subtitle: "Share your CV so others can learn from it. It’s reviewed before it’s listed, only signed-in users can open it, and you can unlist or delete it any time.",
     status: {

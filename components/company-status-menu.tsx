@@ -98,7 +98,7 @@ export function CompanyStatusMenu({
         onClick={(e) => {
           e.stopPropagation();
           if (!user) return openAuth();
-          void setStatus(companyId, "saved");
+          void setStatus(companyId, "saved", true);
         }}
         aria-label={user ? t("tracker.save") : t("card.signInToSave")}
         title={user ? t("tracker.save") : t("card.signInToSave")}

@@ -713,6 +713,10 @@ export const de = {
     badge: "{{count}} Lebensläufe",
   },
 
+  viewer: {
+    loadError: "Deine gespeicherten Daten konnten nicht geladen werden. Lade die Seite neu, um es erneut zu versuchen.",
+  },
+
   myCv: {
     subtitle: "Teile deinen Lebenslauf, damit andere davon lernen können. Er wird vor dem Listen geprüft, nur angemeldete Nutzer:innen können ihn öffnen, und du kannst ihn jederzeit ausblenden oder löschen.",
     status: {

@@ -52,11 +52,12 @@ export function CvLikesProvider({ children }: { children: React.ReactNode }) {
       };
       apply(!was);
       try {
-        const res = await toggleCvLike(id);
-        if (res.error) {
-          apply(was);
+        // The wanted state, not a flip (see favorites); the reply is what's saved.
+        const res = await toggleCvLike(id, !was);
+        const saved = res.error && res.error !== "rate_limited" ? was : res.liked;
+        if (saved !== !was) apply(saved);
+        if (res.error)
           toast.error(t(res.error === "unverified" ? "verifyBanner.verifyFirst" : res.error === "rate_limited" ? "card.favoriteRateLimited" : "cvs.likeError"));
-        }
       } catch {
         apply(was);
         toast.error(t("cvs.likeError"));

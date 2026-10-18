@@ -713,6 +713,10 @@ export const es = {
     badge: "{{count}} CV",
   },
 
+  viewer: {
+    loadError: "No se pudieron cargar tus datos guardados. Recarga la página para intentarlo de nuevo.",
+  },
+
   myCv: {
     subtitle: "Comparte tu CV para que otros aprendan de él. Se revisa antes de publicarse, solo los usuarios con sesión iniciada pueden abrirlo y puedes ocultarlo o eliminarlo cuando quieras.",
     status: {

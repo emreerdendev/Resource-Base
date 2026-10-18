@@ -26,8 +26,14 @@ export async function listFavorites(): Promise<string[]> {
   return rows.map((r) => r.resourceId);
 }
 
+/**
+ * Favorite or unfavorite a resource. `want` is the state the user asked for,
+ * so a click from a stale screen sets that state instead of flipping whatever
+ * is saved; the result is always the saved state.
+ */
 export async function toggleFavorite(
   resourceId: string,
+  want?: boolean,
 ): Promise<{ favorited: boolean; error?: "rate_limited" | "invalid" | "unverified" }> {
   const me = await requireUser();
   if (!isVerified(me)) return { favorited: false, error: "unverified" };
@@ -40,6 +46,7 @@ export async function toggleFavorite(
     .from(favorites)
     .where(where)
     .limit(1);
+  if (typeof want === "boolean" && want === Boolean(existing)) return { favorited: want };
   // Per-user ceiling well above real use — only trips a script spamming D1
   // writes. Returns the current state unchanged on trip.
   if (await overLimit("RL_USER", `fav:${me.id}`))

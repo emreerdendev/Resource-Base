@@ -62,10 +62,24 @@ type SessionState = { session: AuthSession | null; isPending: boolean };
  * signed-out visitors make no session request at all.
  */
 function SessionBridge({ onChange }: { onChange: (s: SessionState) => void }) {
-  const { data, isPending } = useSession();
+  const { data, isPending, error, refetch } = useSession();
+  // A failed read (429, network, redeploy) isn't "signed out": Better Auth
+  // would report no session and never ask again. Retry a couple of times and
+  // stay pending meanwhile; only a 401 or a real empty session signs out.
+  const [retries, setRetries] = useState(0);
+  const failed = !!error && error.status !== 401;
+  const retrying = failed && retries < 2;
   useEffect(() => {
-    onChange({ session: data ?? null, isPending });
-  }, [data, isPending, onChange]);
+    if (!retrying) return;
+    const timer = setTimeout(() => {
+      setRetries((n) => n + 1);
+      void refetch();
+    }, 1000 * (retries + 1));
+    return () => clearTimeout(timer);
+  }, [retrying, retries, refetch]);
+  useEffect(() => {
+    onChange({ session: data ?? null, isPending: isPending || retrying });
+  }, [data, isPending, retrying, onChange]);
   return null;
 }
 
