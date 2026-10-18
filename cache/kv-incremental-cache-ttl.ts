@@ -34,10 +34,19 @@ type IncrementalCache = Extract<IncrementalCacheOverride, { get: unknown }>;
  *
  * Error pages (404s for made-up slugs, 500s) are never stored: each distinct
  * junk URL would otherwise become its own KV write plus a week of storage.
+ * But when a page that IS cached comes back as an error (its resource or
+ * company was removed), the old entry is deleted: otherwise the removed page
+ * kept being served, and re-rendered in the background on every view, until
+ * the entry expired.
+ *
+ * The name is OpenNext's own KV cache name so `opennextjs-cloudflare deploy`
+ * loads the build's prerendered pages into KV (it only does that for the
+ * names it knows). Those entries carry no TTL; the link-check cron deletes
+ * every key of a build that is no longer live.
  */
 const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
-const NAME = "cf-kv-incremental-cache-ttl";
+const NAME = "cf-kv-incremental-cache";
 const BINDING_NAME = "NEXT_INC_CACHE_KV";
 const PREFIX_ENV_NAME = "NEXT_INC_CACHE_KV_PREFIX";
 
@@ -81,7 +90,17 @@ class KVIncrementalCacheWithTtl {
     const kv = getCloudflareContext().env[BINDING_NAME];
     if (!kv) throw new Error("No KV Namespace");
     debugCache("KVIncrementalCacheWithTtl", `set ${key}`);
-    if (isErrorPage(value)) return;
+    if (isErrorPage(value)) {
+      // A list lookup (not a write) first, so junk URLs cost no KV writes.
+      const kvKey = this.getKVKey(key, cacheType);
+      try {
+        const { keys } = await kv.list({ prefix: kvKey, limit: 1 });
+        if (keys.some((k) => k.name === kvKey)) await kv.delete(kvKey);
+      } catch (e) {
+        console.error("Failed to drop an errored page from cache", e);
+      }
+      return;
+    }
     try {
       await kv.put(
         this.getKVKey(key, cacheType),

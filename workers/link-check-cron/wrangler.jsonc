@@ -21,8 +21,11 @@
       "database_id": "30e17abb-8039-46ae-b507-cba92062f4b8"
     }
   ],
+  // The main app's page cache, to delete keys of builds no longer live.
+  "kv_namespaces": [{ "binding": "NEXT_INC_CACHE_KV", "id": "7972c906f2c84a05adf9975ba9a95643" }],
   // Non-secret Sanity config (the write token is set via `wrangler secret put`).
   "vars": {
+    "SITE_URL": "https://resource-base.com",
     "SANITY_PROJECT_ID": "77o1dw6w",
     "SANITY_DATASET": "production",
     "SANITY_API_VERSION": "2024-10-01"

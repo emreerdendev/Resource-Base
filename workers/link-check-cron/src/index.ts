@@ -9,6 +9,9 @@ import { createClient } from "@sanity/client";
 
 interface Env {
   DB: D1Database;
+  /** The main app's page cache (OpenNext incremental cache). */
+  NEXT_INC_CACHE_KV: KVNamespace;
+  SITE_URL: string;
   SANITY_PROJECT_ID: string;
   SANITY_DATASET: string;
   SANITY_API_VERSION: string;
@@ -75,7 +78,7 @@ async function runLinkCheck(env: Env): Promise<void> {
   const resources = await client.fetch<
     { _id: string; url: string; linkStatus?: string; linkFailures?: number }[]
   >(
-    `*[_type == "resource" && manualOverride != true]
+    `*[_type == "resource" && submissionStatus == "published" && manualOverride != true]
        | order(coalesce(lastCheckedAt, "1970-01-01") asc)[0...$batch]{ _id, url, linkStatus, linkFailures }`,
     { batch: BATCH },
   );
@@ -183,6 +186,38 @@ async function pruneSubmissions(env: Env): Promise<void> {
   console.log(`prune: deleted ${ids.length} old submissions`);
 }
 
+/** At most this many keys are deleted per run (each is one KV operation). */
+const MAX_KV_DELETES = 400;
+
+/**
+ * The app's page cache keys are scoped to a build (`incremental-cache/<buildId>/…`),
+ * so after every deploy the previous build's pages are unreachable but stay
+ * in KV until they expire — and pages loaded at deploy time never do. This
+ * deletes every key whose build isn't the live one (read from the site's
+ * public /BUILD_ID asset), keeping KV storage at one build's worth.
+ */
+async function pruneStaleBuildCache(env: Env): Promise<void> {
+  const res = await fetch(new URL("/BUILD_ID", env.SITE_URL), { signal: AbortSignal.timeout(TIMEOUT_MS) });
+  const live = (await res.text()).trim();
+  // Never guess: without a valid live id, delete nothing.
+  if (!res.ok || !/^[A-Za-z0-9_-]{8,64}$/.test(live)) {
+    console.log("kv-prune: live build id unavailable, skipped");
+    return;
+  }
+  const stale: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await env.NEXT_INC_CACHE_KV.list({ prefix: "incremental-cache/", cursor });
+    for (const k of page.keys) {
+      if (k.name.split("/")[1] !== live) stale.push(k.name);
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor && stale.length < MAX_KV_DELETES);
+  const batch = stale.slice(0, MAX_KV_DELETES);
+  for (const name of batch) await env.NEXT_INC_CACHE_KV.delete(name);
+  console.log(`kv-prune: deleted ${batch.length} keys of old builds (live ${live})`);
+}
+
 export default {
   async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(
@@ -193,6 +228,9 @@ export default {
     );
     ctx.waitUntil(
       pruneSubmissions(env).catch((err) => console.error("prune failed", err)),
+    );
+    ctx.waitUntil(
+      pruneStaleBuildCache(env).catch((err) => console.error("kv-prune failed", err)),
     );
   },
 } satisfies ExportedHandler<Env>;
