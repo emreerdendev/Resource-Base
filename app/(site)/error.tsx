@@ -40,6 +40,10 @@ export default function SiteError({ error }: { error: Error & { digest?: string 
     <div className="flex flex-col items-center py-20 text-center">
       <h1 className="text-2xl font-semibold tracking-tight">{t("notFound.errorTitle")}</h1>
       <p className="mt-2 max-w-md text-balance text-muted-foreground">{t("notFound.errorBody")}</p>
+      {/* A short code to quote when reporting it (no personal data). */}
+      <p className="mt-3 max-w-md font-mono text-[11px] break-all text-muted-foreground/70 select-all">
+        {error.digest ? `#${error.digest}` : `${error.name}: ${error.message}`.slice(0, 160)}
+      </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Button size="lg" onClick={retry}>
           <RotateCw /> {t("notFound.retry")}

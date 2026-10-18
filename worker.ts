@@ -25,9 +25,30 @@ function forBrowsers(response: Response): Response {
   return fixed;
 }
 
+/**
+ * Browsers that visited before that fix still hold page data saved under the
+ * old 30-day rule. Their first page load afterwards clears this site's HTTP
+ * cache once (Clear-Site-Data), marked by a cookie so it never repeats.
+ * Scripts and styles simply download again.
+ */
+const CACHE_RESET_COOKIE = "rb_cache_reset=1";
+
+function resetOldBrowserCache(request: Request, response: Response): Response {
+  if (request.headers.get("sec-fetch-dest") !== "document") return response;
+  if (!response.headers.get("content-type")?.includes("text/html")) return response;
+  if (request.headers.get("cookie")?.includes(CACHE_RESET_COOKIE)) return response;
+  const reset = new Response(response.body, response);
+  reset.headers.set("Clear-Site-Data", '"cache"');
+  reset.headers.append(
+    "Set-Cookie",
+    `${CACHE_RESET_COOKIE}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`,
+  );
+  return reset;
+}
+
 export default {
   async fetch(request, env, ctx) {
-    return forBrowsers(await handler.fetch(request, env, ctx));
+    return resetOldBrowserCache(request, forBrowsers(await handler.fetch(request, env, ctx)));
   },
 } satisfies ExportedHandler<CloudflareEnv>;
 
