@@ -152,7 +152,7 @@ export function UserMenu() {
             <Bell className="size-4" /> {t("nav.notifications")}
             {unread > 0 && (
               <span
-                className="ml-auto rounded-full bg-emerald-500 px-1.5 text-[11px] font-medium text-white"
+                className="ml-auto rounded-full bg-emerald-500 pt-0.5 flex items-center justify-center w-4 h-4 text-[11px] font-medium text-white"
                 aria-label={t("nav.unread", { count: unread })}
               >
                 {unread}
