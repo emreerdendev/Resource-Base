@@ -8,6 +8,9 @@ import { searchIndexQuery } from "@/sanity/lib/queries";
 // serialized into every page's HTML.
 export const dynamic = "force-static";
 
+/** Browsers keep it for 5 minutes, so reloads don't fetch it again. */
+const CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=86400";
+
 export async function GET() {
   const index = await sanityFetch<SearchIndex>({
     query: searchIndexQuery,
@@ -18,5 +21,5 @@ export async function GET() {
     ...r,
     description: r.description?.slice(0, 240) || undefined,
   }));
-  return NextResponse.json({ ...index, resources });
+  return NextResponse.json({ ...index, resources }, { headers: { "Cache-Control": CACHE_CONTROL } });
 }

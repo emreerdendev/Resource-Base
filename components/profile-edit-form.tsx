@@ -130,7 +130,8 @@ export function ProfileEditForm() {
       // Username goes through the validated RPC if it changed.
       const nextUsername = fields.username.trim();
       if (nextUsername && nextUsername !== profile!.username) {
-        const { error } = await setUsername(nextUsername);
+        // The profile update below reloads it once for both.
+        const { error } = await setUsername(nextUsername, { reload: false });
         if (error) {
           toast.error(
             error === "username_taken"

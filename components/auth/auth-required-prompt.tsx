@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -14,13 +14,12 @@ import { useAuth } from "@/components/auth/auth-provider";
  * The effect is driven by the param itself (not a one-shot ref): this
  * component lives in the persistent (site) layout and never remounts, so a ref
  * guard would swallow every bounce after the first. Stripping the param via
- * router.replace is what prevents re-firing.
+ * history.replaceState is what prevents re-firing.
  */
 export function AuthRequiredPrompt() {
   const { t } = useTranslation();
   const { openAuth, loading, user } = useAuth();
   const params = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
 
   const needsAuth = params.get("auth") === "required";
@@ -33,9 +32,10 @@ export function AuthRequiredPrompt() {
       toast.info(t("auth.requiredBody"));
       openAuth();
     }
-    // Strip the param so refresh/back doesn't re-trigger.
-    router.replace(pathname, { scroll: false });
-  }, [needsAuth, loading, user, openAuth, router, pathname, t]);
+    // Strip the param so refresh/back doesn't re-trigger. history.replaceState
+    // updates useSearchParams without asking the server for the page again.
+    window.history.replaceState(null, "", pathname);
+  }, [needsAuth, loading, user, openAuth, pathname, t]);
 
   return null;
 }

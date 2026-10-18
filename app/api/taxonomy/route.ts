@@ -8,10 +8,13 @@ import { allCategoriesQuery, allTagsQuery } from "@/sanity/lib/queries";
 // instead of being embedded in every page's HTML.
 export const dynamic = "force-static";
 
+/** Browsers keep it for 5 minutes, so reloads don't fetch it again. */
+const CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=86400";
+
 export async function GET() {
   const [categories, tags] = await Promise.all([
     sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["taxonomy", "resource-list"] }),
     sanityFetch<Tag[]>({ query: allTagsQuery, tags: ["taxonomy", "resource-list"] }),
   ]);
-  return NextResponse.json({ categories, tags });
+  return NextResponse.json({ categories, tags }, { headers: { "Cache-Control": CACHE_CONTROL } });
 }

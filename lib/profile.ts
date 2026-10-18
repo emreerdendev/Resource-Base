@@ -56,7 +56,8 @@ type ProfileValue = {
   update: (
     fields: Partial<EditableProfile>,
   ) => Promise<{ error: string | null }>;
-  setUsername: (next: string) => Promise<{ error: string | null }>;
+  /** `reload: false` when a profile update (which reloads) follows. */
+  setUsername: (next: string, opts?: { reload?: boolean }) => Promise<{ error: string | null }>;
   reload: () => Promise<void>;
 };
 
@@ -122,9 +123,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   );
 
   const setUsername = useCallback(
-    async (next: string): Promise<{ error: string | null }> => {
+    async (next: string, opts?: { reload?: boolean }): Promise<{ error: string | null }> => {
       const res = await setUsernameAction(next);
-      if (!res.error) await load();
+      if (!res.error && opts?.reload !== false) await load();
       return res;
     },
     [load],

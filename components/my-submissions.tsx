@@ -40,7 +40,8 @@ import { ResourceGridSkeleton } from "@/components/skeletons";
 import { normalizeWebUrl } from "@/lib/company-input";
 import { fieldProps } from "@/lib/use-form-errors";
 import { useAuth } from "@/components/auth/auth-provider";
-import { getMyCv, type MyCv } from "@/lib/cv-actions";
+import type { MyCv } from "@/lib/cv-actions";
+import { loadMyCv } from "@/lib/my-cv";
 import { withdrawSubmission } from "@/lib/data-actions";
 import { useSubmissions } from "@/lib/submissions";
 import { cn, favicon } from "@/lib/utils";
@@ -119,16 +120,17 @@ export function MySubmissions({ categories }: { categories: Category[] }) {
   const [group, setGroup] = useState<Group | "all">("all");
   // The CV lives in its own table; undefined while loading.
   const [cv, setCv] = useState<MyCv | null | undefined>(undefined);
+  const userId = user?.id;
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     let active = true;
-    getMyCv()
+    loadMyCv(userId)
       .then((v) => active && setCv(v))
       .catch(() => active && setCv(null));
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [userId]);
 
   if (loading || cv === undefined) {
     return <ResourceGridSkeleton count={6} />;

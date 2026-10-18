@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { getMyCv, setCvListed, type MyCv } from "@/lib/cv-actions";
+import { setCvListed, type MyCv } from "@/lib/cv-actions";
+import { loadMyCv } from "@/lib/my-cv";
 import { forgetCvListing } from "@/lib/cv-listing";
 import { useConfirm } from "@/components/confirm-dialog";
 import { parseCvMeta } from "@/lib/cv-input";
@@ -49,11 +50,45 @@ export function MyCvPanel() {
   const [busy, setBusy] = useState(false);
   const { confirm, dialog } = useConfirm();
 
-  const reload = useCallback(async () => setCv(await getMyCv()), []);
+  const userId = user?.id;
+  const reload = useCallback(async () => {
+    if (!userId) return;
+    try {
+      setCv(await loadMyCv(userId, true));
+    } catch {
+      toast.error(t("myCv.error.generic"));
+    }
+  }, [userId, t]);
+  // A failed load leaves a retry button rather than an endless skeleton.
+  const [loadFailed, setLoadFailed] = useState(false);
   useEffect(() => {
-    if (user) getMyCv().then(setCv);
-  }, [user]);
+    if (!userId) return;
+    let active = true;
+    loadMyCv(userId)
+      .then((v) => active && setCv(v))
+      .catch(() => active && setLoadFailed(true));
+    return () => {
+      active = false;
+    };
+  }, [userId]);
 
+  if (cv === undefined && loadFailed)
+    return (
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        <p>{t("myCv.error.generic")}</p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="mt-3"
+          onClick={() => {
+            setLoadFailed(false);
+            void reload();
+          }}
+        >
+          {t("notFound.retry")}
+        </Button>
+      </div>
+    );
   if (cv === undefined) return <FormSkeleton fields={7} tall={[6]} />;
 
   async function setListed(listed: boolean) {

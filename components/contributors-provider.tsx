@@ -38,7 +38,8 @@ export function ContributorsProvider({
     if (!id || loading.current) return;
     loading.current = true;
     fetch("/api/contributors")
-      .then((r) => (r.ok ? r.json() : {}))
+      // A non-OK answer is a failure too, so the next card tries again.
+      .then((r) => (r.ok ? (r.json() as Promise<Record<string, PublicProfileCompact>>) : Promise.reject(r.status)))
       .then((data: Record<string, PublicProfileCompact>) => setMap(data))
       .catch(() => {
         loading.current = false; // try again on the next card

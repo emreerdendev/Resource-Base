@@ -9,6 +9,7 @@ import { FormField } from "@/components/form-field";
 import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import { IconInput } from "@/components/ui/icon-input";
 import { authClient } from "@/lib/auth-client";
+import { loadLinkedAccounts } from "@/lib/linked-accounts";
 import { setMyPassword } from "@/lib/profile-actions";
 
 const PW_MIN = 8;
@@ -33,18 +34,15 @@ export function ProfileChangePassword() {
   const [pending, setPending] = useState(false);
 
   const refresh = () =>
-    authClient.listAccounts().then((res) => {
-      const accounts = (res?.data ?? []) as { providerId?: string }[];
-      setHasPassword(accounts.some((a) => a.providerId === "credential"));
-    });
+    loadLinkedAccounts(true)
+      .then((ids) => setHasPassword(ids.includes("credential")))
+      .catch(() => {});
 
   useEffect(() => {
     let active = true;
-    authClient.listAccounts().then((res) => {
-      if (!active) return;
-      const accounts = (res?.data ?? []) as { providerId?: string }[];
-      setHasPassword(accounts.some((a) => a.providerId === "credential"));
-    });
+    loadLinkedAccounts()
+      .then((ids) => active && setHasPassword(ids.includes("credential")))
+      .catch(() => {});
     return () => {
       active = false;
     };

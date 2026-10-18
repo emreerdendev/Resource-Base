@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { GoogleIcon, GithubIcon, GitlabIcon } from "@/components/brand-icons";
 import { authClient } from "@/lib/auth-client";
+import { loadLinkedAccounts } from "@/lib/linked-accounts";
 
 type Provider = "google" | "github" | "gitlab";
 
@@ -27,11 +28,11 @@ export function ProfileConnectedAccounts() {
   const [credential, setCredential] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const res = await authClient.listAccounts();
-    const accounts = (res?.data ?? []) as { providerId?: string }[];
-    setLinked(new Set(accounts.map((a) => a.providerId ?? "").filter(Boolean)));
-    setCredential(accounts.some((a) => a.providerId === "credential"));
+  const load = useCallback(async (fresh = false) => {
+    const ids = await loadLinkedAccounts(fresh).catch(() => null);
+    if (!ids) return;
+    setLinked(new Set(ids));
+    setCredential(ids.includes("credential"));
   }, []);
 
   useEffect(() => {
@@ -77,7 +78,7 @@ export function ProfileConnectedAccounts() {
       toast.error(t("auth.unlinkFailed"));
       return;
     }
-    await load();
+    await load(true);
   }
 
   return (

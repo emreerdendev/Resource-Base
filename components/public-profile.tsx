@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { contributorTier } from "@/lib/contributor-tier";
 import { initial } from "@/lib/initial";
 import { socialEntries } from "@/lib/social-links";
-import { getMyCv } from "@/lib/cv-actions";
+import { loadMyCv } from "@/lib/my-cv";
 import { useSubmissions } from "@/lib/submissions";
 import type { PublicProfile, Resource } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -195,16 +195,19 @@ function OwnerActivity() {
   const cvLikes = useCvLikes();
   const submissions = useSubmissions();
   // My Submissions lists the CV too, so it counts here as well.
+  const { user } = useAuth();
+  const userId = user?.id;
   const [cvCount, setCvCount] = useState<number | null>(null);
   useEffect(() => {
+    if (!userId) return;
     let active = true;
-    getMyCv()
+    loadMyCv(userId)
       .then((cv) => active && setCvCount(cv ? 1 : 0))
       .catch(() => active && setCvCount(0));
     return () => {
       active = false;
     };
-  }, []);
+  }, [userId]);
   const cards = [
     { href: "/favorites", icon: Star, label: t("nav.favorites"), count: favorites.loading ? null : favorites.ids.length },
     { href: "/applications", icon: BriefcaseBusiness, label: t("nav.applications"), count: tracker.loading ? null : tracker.items.length },

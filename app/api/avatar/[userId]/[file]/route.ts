@@ -14,11 +14,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ user
   if (!key) return new NextResponse("Not found", { status: 404 });
 
   const cache = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
-  const hit = await cache?.match(req.url);
+  // Keyed by path only, so a query string can't skip the cache into R2.
+  const cacheKey = new Request(new URL(req.nextUrl.pathname, req.url));
+  const hit = await cache?.match(cacheKey);
   if (hit) return hit;
 
   const object = await avatarBucket().get(key);
-  if (!object) return new NextResponse("Not found", { status: 404 });
+  if (!object) {
+    // Remembered briefly, so a missing file isn't looked up in R2 on every request.
+    const missing = new NextResponse("Not found", { status: 404, headers: { "Cache-Control": "public, max-age=60" } });
+    await cache?.put(cacheKey, missing.clone()).catch(() => {});
+    return missing;
+  }
   const res = new NextResponse(object.body, {
     headers: {
       "Content-Type": object.httpMetadata?.contentType ?? "image/webp",
@@ -26,6 +33,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ user
       "X-Content-Type-Options": "nosniff",
     },
   });
-  await cache?.put(req.url, res.clone()).catch(() => {});
+  await cache?.put(cacheKey, res.clone()).catch(() => {});
   return res;
 }

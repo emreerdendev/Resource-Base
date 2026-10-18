@@ -315,7 +315,22 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
       </div>
 
       {failed ? (
-        <p className="py-20 text-center text-muted-foreground">{t("cvs.loadError")}</p>
+        <div className="py-20 text-center text-muted-foreground">
+          <p>{t("cvs.loadError")}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={() => {
+              setFailed(false);
+              loadCvListing()
+                .then(setAll)
+                .catch(() => setFailed(true));
+            }}
+          >
+            {t("notFound.retry")}
+          </Button>
+        </div>
       ) : loading ? (
         <ResourceGridSkeleton count={8} columns={2} />
       ) : base.length === 0 ? (

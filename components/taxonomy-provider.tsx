@@ -30,7 +30,8 @@ export function TaxonomyProvider({ children }: { children: React.ReactNode }) {
     if (started.current) return;
     started.current = true;
     fetch("/api/taxonomy")
-      .then((r) => (r.ok ? (r.json() as Promise<TaxonomyData>) : EMPTY))
+      // A non-OK answer is a failure too, so the next use tries again.
+      .then((r) => (r.ok ? (r.json() as Promise<TaxonomyData>) : Promise.reject(r.status)))
       .then(setData)
       .catch(() => {
         started.current = false; // retry on next use

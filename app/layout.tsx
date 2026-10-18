@@ -3,6 +3,7 @@ import { Inter, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { OG_IMAGE } from "@/lib/og";
 import { siteName, siteDescription, siteUrl } from "@/lib/site";
 
 // Inter for body text (crisp, neutral), Plus Jakarta Sans for headings
@@ -31,10 +32,12 @@ export const metadata: Metadata = {
     template: "%s · Resource Base",
   },
   description: siteDescription,
+  // Static files in public/ are served by the assets binding, never the Worker.
+  icons: { icon: { url: "/icon.svg", type: "image/svg+xml" } },
   // Only what every page shares. Pages set their own title/description/URL
   // (lib/og.ts); inheriting the home page's would mislabel every share.
-  openGraph: { type: "website", siteName },
-  twitter: { card: "summary_large_image" },
+  openGraph: { type: "website", siteName, images: [OG_IMAGE] },
+  twitter: { card: "summary_large_image", images: [OG_IMAGE.url] },
 };
 
 export default function RootLayout({
