@@ -6,7 +6,7 @@ import { AtSign, Eye, EyeOff, Loader2, Mail, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ProfileAvatarField } from "@/components/profile-avatar-field";
+import { ProfileAvatarField, type AvatarChange } from "@/components/profile-avatar-field";
 import { ProfileLinksField, linkError, type LinkRow } from "@/components/profile-links-field";
 import { IconInput } from "@/components/ui/icon-input";
 import { FormField } from "@/components/form-field";
@@ -53,22 +53,27 @@ const sameLinks = (a: LinkRow[], b: LinkRow[]) =>
 export function ProfileEditForm() {
   const { t } = useTranslation();
   const id = useId();
-  const { profile, loading, update, setUsername } = useProfile();
+  const { profile, loading, update, setUsername, reload } = useProfile();
   const [pending, setPending] = useState(false);
   // Snapshot of the profile as last loaded — the baseline we diff against to
   // know whether anything actually changed.
   const [baseline, setBaseline] = useState<Fields | null>(null);
   const [fields, setFields] = useState<Fields | null>(null);
 
-  // Re-seed the form whenever a (re)loaded profile arrives — adjusted during
-  // render rather than in an effect, so there's no extra pass.
+  // Seed the form from the profile when it first loads (or the account
+  // changes), and again after a save — never in the middle of editing, so a
+  // background reload can't wipe what was typed. Adjusted during render.
   const [seededFrom, setSeededFrom] = useState<typeof profile>(null);
-  if (profile && profile !== seededFrom) {
+  const [reseed, setReseed] = useState(false);
+  if (profile && profile !== seededFrom && (!seededFrom || seededFrom.id !== profile.id || reseed)) {
     setSeededFrom(profile);
+    setReseed(false);
     const next = fieldsFromProfile(profile);
     setBaseline(next);
     setFields(next);
   }
+  // A new or removed photo waits for "Save Profile" like everything else.
+  const [avatar, setAvatar] = useState<AvatarChange>(null);
 
   const setField = <K extends keyof Fields>(key: K, value: Fields[K]) =>
     setFields((f) => (f ? { ...f, [key]: value } : f));
@@ -100,7 +105,8 @@ export function ProfileEditForm() {
     fields.full_name !== baseline.full_name ||
     fields.bio !== baseline.bio ||
     fields.show_email !== baseline.show_email ||
-    !sameLinks(fields.links, baseline.links);
+    !sameLinks(fields.links, baseline.links) ||
+    avatar !== null;
   const canSave = dirty && !pending;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -109,6 +115,18 @@ export function ProfileEditForm() {
     if (!fields || !canSave || !form.check(e.currentTarget) || linksInvalid) return;
     setPending(true);
     try {
+      // The photo first: if it fails, nothing else has changed yet.
+      if (avatar) {
+        const res = await fetch("/api/avatar", {
+          method: avatar.kind === "upload" ? "POST" : "DELETE",
+          body: avatar.kind === "upload" ? avatar.blob : undefined,
+          headers: avatar.kind === "upload" ? { "Content-Type": avatar.blob.type } : undefined,
+        });
+        if (res.status === 429) throw new Error(t("card.favoriteRateLimited"));
+        if (res.status === 403) throw new Error(t("verifyBanner.verifyFirst"));
+        if (!res.ok) throw new Error(t("profile.photoError"));
+        setAvatar(null);
+      }
       // Username goes through the validated RPC if it changed.
       const nextUsername = fields.username.trim();
       if (nextUsername && nextUsername !== profile!.username) {
@@ -128,9 +146,12 @@ export function ProfileEditForm() {
                   : error,
           );
           setPending(false);
+          if (avatar) await reload();
           return;
         }
       }
+      // Whatever reloads now is the saved state: take it into the form.
+      setReseed(true);
       const { error } = await update({
         full_name: fields.full_name || null,
         bio: fields.bio || null,
@@ -159,7 +180,13 @@ export function ProfileEditForm() {
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
-      <ProfileAvatarField />
+      <ProfileAvatarField
+        current={profile.avatar_url}
+        name={profile.full_name || profile.username}
+        value={avatar}
+        onChange={setAvatar}
+        disabled={pending}
+      />
 
       {/* Email is read-only (managed by auth) with a public-visibility toggle. */}
       <Field label={t("profile.email")}>
