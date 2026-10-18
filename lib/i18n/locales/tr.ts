@@ -455,7 +455,8 @@ export const tr = {
   companies: {
     otherLocations: "Diğer Konumlar",
     removeFilter: "Filtreyi kaldır: {{filter}}",
-    badge: "{{count}} şirket",
+    badge_one: "{{count}} şirket",
+    badge_other: "{{count}} şirket",
     subtitle: "Başvuru e-postaları, kariyer sayfaları ve LinkedIn bilgileriyle şirketler; topluluk tarafından derlenir. İlgilendiklerini kaydet, her başvuruyu listende takip et.",
     searchPlaceholder: "Şirket, e-posta, müşteri ara…",
     shuffle: "Listeyi karıştır",
@@ -708,7 +709,8 @@ export const tr = {
     similar: "Benzer CV'ler",
     previewError: "CV burada gösterilemedi — yeni sekmede aç veya indir.",
     disclaimer: "CV'ler sahipleri tarafından paylaşılır ve Resource Base tarafından doğrulanmaz. Örnek olarak kullan; birinin CV'sini kopyalamak veya sahibine spam amaçlı ulaşmak yasaktır.",
-    badge: "{{count}} CV",
+    badge_one: "{{count}} CV",
+    badge_other: "{{count}} CV",
   },
 
   viewer: {

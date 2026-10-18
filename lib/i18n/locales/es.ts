@@ -457,7 +457,8 @@ export const es = {
   companies: {
     otherLocations: "Otras ubicaciones",
     removeFilter: "Quitar filtro: {{filter}}",
-    badge: "{{count}} empresas",
+    badge_one: "{{count}} empresa",
+    badge_other: "{{count}} empresas",
     subtitle: "Empresas con sus correos de postulación, páginas de empleo y LinkedIn, recopiladas por la comunidad. Guarda las que te interesen y sigue cada postulación en tu lista.",
     searchPlaceholder: "Buscar empresas, correos, clientes…",
     shuffle: "Mezclar la lista",
@@ -710,7 +711,8 @@ export const es = {
     similar: "CV similares",
     previewError: "No se pudo mostrar este CV aquí: ábrelo en una pestaña nueva o descárgalo.",
     disclaimer: "Los CV los comparten sus dueños y Resource Base no los verifica. Úsalos como ejemplo; copiar el CV de otra persona o contactar a su dueño con spam no está permitido.",
-    badge: "{{count}} CV",
+    badge_one: "{{count}} CV",
+    badge_other: "{{count}} CV",
   },
 
   viewer: {

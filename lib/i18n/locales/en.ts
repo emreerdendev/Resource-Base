@@ -457,7 +457,8 @@ export const en = {
   companies: {
     otherLocations: "Other Locations",
     removeFilter: "Remove filter: {{filter}}",
-    badge: "{{count}} companies",
+    badge_one: "{{count}} company",
+    badge_other: "{{count}} companies",
     subtitle: "Companies with their application emails, career pages and LinkedIn, compiled by the community. Save the ones you’re interested in and track each application in your list.",
     searchPlaceholder: "Search companies, emails, clients…",
     shuffle: "Shuffle the list",
@@ -710,7 +711,8 @@ export const en = {
     similar: "Similar CVs",
     previewError: "Couldn’t show this CV here — open it in a new tab or download it.",
     disclaimer: "CVs are shared by their owners and aren’t verified by Resource Base. Use them as examples; copying someone’s CV or contacting its owner for spam isn’t allowed.",
-    badge: "{{count}} CVs",
+    badge_one: "{{count}} CV",
+    badge_other: "{{count}} CVs",
   },
 
   viewer: {

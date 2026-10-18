@@ -457,7 +457,8 @@ export const de = {
   companies: {
     otherLocations: "Andere Standorte",
     removeFilter: "Filter entfernen: {{filter}}",
-    badge: "{{count}} Unternehmen",
+    badge_one: "{{count}} Unternehmen",
+    badge_other: "{{count}} Unternehmen",
     subtitle: "Unternehmen mit Bewerbungs-E-Mails, Karriereseiten und LinkedIn, von der Community zusammengestellt. Speichere die, die dich interessieren, und verfolge jede Bewerbung in deiner Liste.",
     searchPlaceholder: "Unternehmen, E-Mails, Kunden suchen…",
     shuffle: "Liste mischen",
@@ -710,7 +711,8 @@ export const de = {
     similar: "Ähnliche Lebensläufe",
     previewError: "Der Lebenslauf kann hier nicht angezeigt werden – öffne ihn in einem neuen Tab oder lade ihn herunter.",
     disclaimer: "Lebensläufe werden von ihren Inhaber:innen geteilt und von Resource Base nicht geprüft. Nutze sie als Beispiele; Kopieren oder Spam an die Inhaber:innen ist nicht erlaubt.",
-    badge: "{{count}} Lebensläufe",
+    badge_one: "{{count}} Lebenslauf",
+    badge_other: "{{count}} Lebensläufe",
   },
 
   viewer: {

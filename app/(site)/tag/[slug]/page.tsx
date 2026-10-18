@@ -37,7 +37,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const tag = await load(slug);
   if (!tag) return {};
-  const title = `${tag.title} resources`;
+  const title = `${tag.title} Resources`;
   const description = `Resources tagged ${tag.title}.`;
   return { title, description, ...shareMeta(title, description, `/tag/${slug}`) };
 }

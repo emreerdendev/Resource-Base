@@ -30,7 +30,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const company = await load(slug);
   if (!company) return {};
-  const title = `${company.name} — careers & how to apply`;
+  const title = `${company.name} — Careers & How to Apply`;
   const description =
     company.description ??
     `How to apply to ${company.name}: application emails, career pages and LinkedIn — on ${siteName}.`;
