@@ -154,7 +154,7 @@ export function CompanyStatusMenu({
         <DropdownMenuItem
           variant="destructive"
           onClick={async () => {
-            if (await confirmRemove(confirm, t)) void setStatus(companyId, null);
+            if (await confirmRemove(confirm, t, tracked.note)) void setStatus(companyId, null);
           }}
           className="whitespace-nowrap"
         >
@@ -167,11 +167,13 @@ export function CompanyStatusMenu({
   );
 }
 
-/** Removing a tracked company drops its status and note: ask first. */
-export function confirmRemove(
+/** Removing a tracked company also deletes its note: ask first when there is one. */
+export async function confirmRemove(
   confirm: (o: ConfirmOptions) => Promise<boolean>,
   t: (key: string) => string,
+  note: string | null | undefined,
 ): Promise<boolean> {
+  if (!note?.trim()) return true;
   return confirm({
     title: t("tracker.removeTitle"),
     description: t("tracker.removeText"),

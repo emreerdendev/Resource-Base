@@ -262,7 +262,7 @@ function RemovedCompanies({ items }: { items: TrackedCompany[] }) {
               aria-label={t("tracker.remove")}
               title={t("tracker.remove")}
               onClick={async () => {
-                if (await confirmRemove(confirm, t)) void setStatus(r.companyId, null);
+                if (await confirmRemove(confirm, t, r.note)) void setStatus(r.companyId, null);
               }}
             >
               <Trash2 className="size-4" />
