@@ -8,6 +8,7 @@ import { getDb } from "@/lib/db";
 import { cvs } from "@/lib/db/schema";
 import { dailyCap, dailyCapReached, isPaused, isRateLimited, overLimit } from "@/lib/rate-limit";
 import { isSameOrigin } from "@/lib/request";
+import { inBackground, serverTiming } from "@/lib/server-timing";
 import { writeClient } from "@/sanity/lib/writeClient";
 
 export const runtime = "nodejs";
@@ -23,7 +24,9 @@ const UPLOADS_PER_DAY = 3;
  */
 export async function POST(req: NextRequest) {
   if (!isSameOrigin(req)) return new NextResponse("Forbidden", { status: 403 });
+  const timing = serverTiming();
   const user = await getSessionUser();
+  timing.mark("session");
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
   if (!isVerified(user)) return NextResponse.json({ error: "unverified" }, { status: 403 });
   if (isPaused("UPLOADS_PAUSED")) return NextResponse.json({ error: "paused" }, { status: 503 });
@@ -41,6 +44,7 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
+  timing.mark("body");
   if (form.get("consent") !== "yes") return NextResponse.json({ error: "consent" }, { status: 400 });
   const meta = parseCvMeta(Object.fromEntries(form));
   if (!meta.ok) return NextResponse.json({ error: meta.error }, { status: 400 });
@@ -51,38 +55,55 @@ export async function POST(req: NextRequest) {
   const bytes = new Uint8Array(await file.arrayBuffer());
   const check = checkPdf(bytes);
   if (check !== "ok") return NextResponse.json({ error: check }, { status: 400 });
+  timing.mark("check");
   // Counted only for valid uploads, so a rejected file doesn't use up the day.
-  if (await isRateLimited(`cv-day:${user.id}`, UPLOADS_PER_DAY, 86400))
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  if (await dailyCapReached("cv-uploads", dailyCap("cvUploads")))
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-
+  // Independent steps run together.
   const db = getDb();
-  const [existing] = await db.select().from(cvs).where(eq(cvs.userId, user.id)).limit(1);
+  const [userOver, siteOver, [existing]] = await Promise.all([
+    isRateLimited(`cv-day:${user.id}`, UPLOADS_PER_DAY, 86400),
+    dailyCapReached("cv-uploads", dailyCap("cvUploads")),
+    db.select().from(cvs).where(eq(cvs.userId, user.id)).limit(1),
+  ]);
+  timing.mark("limits");
+  if (userOver || siteOver) return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+
   const id = existing?.id ?? crypto.randomUUID();
   const fileKey = `cvs/${id}/${crypto.randomUUID()}.pdf`;
   const bucket = cvBucket();
-  await bucket.put(fileKey, bytes, { httpMetadata: { contentType: "application/pdf" } });
 
   let submissionId: string | null = null;
+  let stored = false;
   try {
-    const submission = await writeClient.create({
-      _type: "submission",
-      kind: "cv",
-      name: `${meta.value.title} — @${user.username ?? user.id}`,
-      cvId: id,
-      // Opens only for the site's admins (ADMIN_EMAILS) — the dataset is public.
-      cvFileUrl: `${req.nextUrl.origin}/api/cv/${id}/file`,
-      cvField: meta.value.field,
-      cvSeniority: meta.value.seniority,
-      cvLanguage: meta.value.language,
-      cvTechnologies: meta.value.technologies,
-      note: meta.value.summary ?? undefined,
-      submittedBy: user.id,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-    });
-    submissionId = submission._id;
+    // The file and its review document are written at the same time; both
+    // are awaited before deciding, so a failure never leaves the other behind.
+    const [put, created] = await Promise.allSettled([
+      bucket.put(fileKey, bytes, { httpMetadata: { contentType: "application/pdf" } }),
+      writeClient.create(
+        {
+          _type: "submission",
+          kind: "cv",
+          name: `${meta.value.title} — @${user.username ?? user.id}`,
+          cvId: id,
+          // Opens only for the site's admins (ADMIN_EMAILS) — the dataset is public.
+          cvFileUrl: `${req.nextUrl.origin}/api/cv/${id}/file`,
+          cvField: meta.value.field,
+          cvSeniority: meta.value.seniority,
+          cvLanguage: meta.value.language,
+          cvTechnologies: meta.value.technologies,
+          note: meta.value.summary ?? undefined,
+          submittedBy: user.id,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+        },
+        { visibility: "async" },
+      ),
+    ]);
+    stored = put.status === "fulfilled";
+    if (created.status === "fulfilled") submissionId = created.value._id;
+    if (put.status === "rejected") throw put.reason;
+    if (created.status === "rejected") throw created.reason;
+    const submission = created.value;
+    timing.mark("store");
 
     const now = new Date();
     const row = {
@@ -96,22 +117,23 @@ export async function POST(req: NextRequest) {
     };
     if (existing) await db.update(cvs).set(row).where(eq(cvs.id, id));
     else await db.insert(cvs).values({ id, userId: user.id, ...row });
+    timing.mark("save");
   } catch (err) {
     // Nothing points at the new file or review document yet: remove both.
     console.error("cv upload failed", err);
-    await bucket.delete(fileKey).catch(() => {});
+    if (stored) await bucket.delete(fileKey).catch(() => {});
     if (submissionId) await writeClient.delete(submissionId).catch(() => {});
     return NextResponse.json({ error: "server" }, { status: 500 });
   }
-  // The row now points at the new file. Cleaning up the old one is best effort
-  // and must never undo the upload.
+  // The row now points at the new file. Cleaning up the old one happens after
+  // the response and never undoes the upload.
   if (existing) {
-    await bucket.delete(existing.fileKey).catch((err) => console.error("old cv file delete failed", err));
+    inBackground(bucket.delete(existing.fileKey));
     // A replaced CV leaves the review queue for good.
     if (existing.sanitySubmissionId && existing.status === "pending")
-      await writeClient.delete(existing.sanitySubmissionId).catch(() => {});
+      inBackground(writeClient.delete(existing.sanitySubmissionId));
   }
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true }, { headers: { "Server-Timing": timing.header() } });
 }
 
 /** Delete the signed-in user's CV: the file, its listing and its likes. */
