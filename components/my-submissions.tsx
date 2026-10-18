@@ -5,7 +5,7 @@ import { NavLink as Link } from "@/components/nav-link";
 import { toast } from "sonner";
 import {
   ArrowRight,
-  ArrowUpRight,
+  Info,
   ExternalLink,
   FileText,
   Trash2,
@@ -46,7 +46,8 @@ import { withdrawSubmission } from "@/lib/data-actions";
 import { useSubmissions } from "@/lib/submissions";
 import { cn, favicon } from "@/lib/utils";
 import { slugify } from "@/lib/slug";
-import type { Category, Submission, SubmissionStatus } from "@/lib/types";
+import { loadSearchIndex } from "@/lib/search-index";
+import type { Category, SearchIndex, Submission, SubmissionStatus } from "@/lib/types";
 
 const OTHER = "__other__";
 
@@ -293,6 +294,20 @@ function SubmissionDialog({
   const [pending, setPending] = useState(false);
   const [editing, setEditing] = useState(false);
   const [categoryChoice, setCategoryChoice] = useState("");
+  // The live page the submission is about (once it's published), looked up
+  // in the cached search index.
+  const [detailsHref, setDetailsHref] = useState<{ id: string; href: string | null } | null>(null);
+  useEffect(() => {
+    if (!submission) return;
+    let active = true;
+    loadSearchIndex()
+      .then((index) => active && setDetailsHref({ id: submission.id, href: detailsPath(submission, index) }))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [submission]);
+  const details = submission && detailsHref?.id === submission.id ? detailsHref.href : null;
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const known = categories.some(
@@ -606,13 +621,6 @@ function SubmissionDialog({
                     {t("submissions.editResubmit")}
                   </Button>
                 )}
-                {s.kind === "company" && s.status === "approved" && s.name && (
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href={`/company/${slugify(s.name)}`}>
-                      {s.name} <ArrowUpRight className="size-3.5" />
-                    </Link>
-                  </Button>
-                )}
                 {canEdit && (
                   <Button
                     variant="outline"
@@ -637,6 +645,16 @@ function SubmissionDialog({
                     {t(s.status === "pending" ? "submissions.withdraw" : "submissions.remove")}
                   </Button>
                 )}
+                {/* The live resource or company page, when there is one. */}
+                {details && (
+                  <div className="border-t border-border pt-4">
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={details}>
+                        <Info className="size-3.5" /> {t("modal.details")}
+                      </Link>
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </>
@@ -645,6 +663,28 @@ function SubmissionDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+const sameUrl = (a: string | null | undefined, b: string | null | undefined) =>
+  !!a && !!b && a.replace(/\/+$/, "").toLowerCase() === b.replace(/\/+$/, "").toLowerCase();
+
+/**
+ * Where a submission's live page is: the resource or company it changed, or
+ * the one it added once published. Null while there's none (e.g. pending new).
+ */
+function detailsPath(s: Submission, index: SearchIndex): string | null {
+  if (s.kind === "company" || s.kind === "companyEdit") {
+    const c =
+      (s.target_resource_id && index.companies.find((x) => x._id === s.target_resource_id)) ||
+      (s.kind === "company" && s.status === "approved"
+        ? index.companies.find((x) => (s.name && x.slug === slugify(s.name)) || sameUrl(x.website, s.url))
+        : undefined);
+    return c?.slug ? `/company/${c.slug}` : null;
+  }
+  const r =
+    (s.target_resource_id && index.resources.find((x) => x._id === s.target_resource_id)) ||
+    (s.kind === "new" && s.status === "approved" ? index.resources.find((x) => sameUrl(x.url, s.url)) : undefined);
+  return r?.slug ? `/resource/${r.slug}` : null;
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {

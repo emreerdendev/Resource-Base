@@ -18,23 +18,14 @@ import { createResourceSearch } from "@/lib/resource-search";
 import { createSearch } from "@/lib/search";
 import type { CvListing, SearchIndex } from "@/lib/types";
 import { trackClick } from "@/lib/track-click";
+import { loadSearchIndex } from "@/lib/search-index";
 
 /** Fired by the header search button to open the palette from anywhere. */
 export const OPEN_COMMAND_EVENT = "open-command-palette";
 
 const EMPTY: SearchIndex = { resources: [], companies: [] };
 
-// One fetch per page load, shared by every open; a failure retries next open.
-let indexPromise: Promise<SearchIndex> | null = null;
-function loadIndex(): Promise<SearchIndex> {
-  indexPromise ??= fetch("/api/search-index")
-    .then((r) => (r.ok ? (r.json() as Promise<SearchIndex>) : Promise.reject(r.status)))
-    .catch((err) => {
-      indexPromise = null;
-      throw err;
-    });
-  return indexPromise;
-}
+const loadIndex = loadSearchIndex;
 
 /**
  * ⌘K search over every resource, company and CV. The dataset is fetched the first

@@ -171,7 +171,7 @@ export interface CompanyWithRelated extends Company {
 }
 
 /** A resource as the ⌘K palette needs it — the slim shape /api/search-index serves. */
-export type ResourceHit = Pick<Resource, '_id' | 'name' | 'url' | 'featured' | 'author' | 'description'> & {
+export type ResourceHit = Pick<Resource, '_id' | 'name' | 'slug' | 'url' | 'featured' | 'author' | 'description'> & {
   categories: { title: string }[]
   tags: { title: string }[]
 }

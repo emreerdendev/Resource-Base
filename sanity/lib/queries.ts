@@ -192,7 +192,7 @@ export const homeCountsQuery = groq`{
  */
 export const searchIndexQuery = groq`{
   "resources": *[${PUBLISHED}] | order(featured desc, addedAt desc) {
-    _id, name, url, featured, author,
+    _id, name, "slug": slug.current, url, featured, author,
     description,
     "categories": coalesce(categories[]->{ title }, []),
     "tags": coalesce(tags[]->{ title }, [])

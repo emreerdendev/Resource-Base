@@ -57,9 +57,11 @@ export async function POST(req: NextRequest) {
       default:
         return NextResponse.json({ revalidated: false, type: body._type });
     }
-    // Next 16 requires a cache profile; "max" expires the tagged entries on
-    // the next request.
-    for (const tag of tags) revalidateTag(tag, "max");
+    // Expired right away, so the next visitor gets the new version (one
+    // render, as before). "max" served the old page to that visitor and only
+    // refreshed it in the background, so an approved edit looked like it
+    // hadn't applied.
+    for (const tag of tags) revalidateTag(tag, { expire: 0 });
     await forgetLists(lists);
     return NextResponse.json({ revalidated: true, tags });
   } catch (err) {
