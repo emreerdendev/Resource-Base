@@ -34,6 +34,7 @@ import { PricingSelect } from "@/components/pricing-select";
 import { TaxonomyProposal } from "@/components/taxonomy-proposal";
 import { CompanyEditProposal } from "@/components/company-edit-proposal";
 import { ResubmitPanel } from "@/components/resubmit-panel";
+import { useConfirm } from "@/components/confirm-dialog";
 import { FormField } from "@/components/form-field";
 import { ResourceGridSkeleton } from "@/components/skeletons";
 import { normalizeWebUrl } from "@/lib/company-input";
@@ -325,10 +326,17 @@ function SubmissionDialog({
   }
 
   const [withdrawing, setWithdrawing] = useState(false);
+  const { confirm, dialog } = useConfirm();
   async function withdraw() {
     if (!submission) return;
     const pendingOne = submission.status === "pending";
-    if (!window.confirm(t(pendingOne ? "submissions.withdrawConfirm" : "submissions.removeConfirm"))) return;
+    const ok = await confirm({
+      title: t(pendingOne ? "submissions.withdrawTitle" : "submissions.removeTitle"),
+      description: t(pendingOne ? "submissions.withdrawConfirm" : "submissions.removeConfirm"),
+      confirmLabel: t(pendingOne ? "submissions.withdraw" : "submissions.remove"),
+      destructive: true,
+    });
+    if (!ok) return;
     setWithdrawing(true);
     try {
       const res = await withdrawSubmission(submission.id);
@@ -631,6 +639,7 @@ function SubmissionDialog({
             )}
           </>
         )}
+        {dialog}
       </DialogContent>
     </Dialog>
   );

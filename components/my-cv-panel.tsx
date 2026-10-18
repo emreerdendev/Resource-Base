@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { getMyCv, setCvListed, type MyCv } from "@/lib/cv-actions";
 import { forgetCvListing } from "@/lib/cv-listing";
+import { useConfirm } from "@/components/confirm-dialog";
 import { parseCvMeta } from "@/lib/cv-input";
 import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import {
@@ -46,6 +47,7 @@ export function MyCvPanel() {
   const [cv, setCv] = useState<MyCv | null | undefined>(undefined);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { confirm, dialog } = useConfirm();
 
   const reload = useCallback(async () => setCv(await getMyCv()), []);
   useEffect(() => {
@@ -55,16 +57,28 @@ export function MyCvPanel() {
   if (cv === undefined) return <FormSkeleton fields={7} tall={[6]} />;
 
   async function setListed(listed: boolean) {
+    const ok = await confirm(
+      listed
+        ? { title: t("myCv.showTitle"), description: t("myCv.showText"), confirmLabel: t("myCv.show") }
+        : { title: t("myCv.hideTitle"), description: t("myCv.hideText"), confirmLabel: t("myCv.hide") },
+    );
+    if (!ok) return;
     setBusy(true);
-    const { ok } = await setCvListed(listed).catch(() => ({ ok: false }));
+    const res = await setCvListed(listed).catch(() => ({ ok: false }));
     setBusy(false);
-    if (!ok) return void toast.error(t("myCv.error.generic"));
+    if (!res.ok) return void toast.error(t("myCv.error.generic"));
     forgetCvListing();
     await reload();
   }
 
   async function remove() {
-    if (!window.confirm(t("myCv.deleteConfirm"))) return;
+    const ok = await confirm({
+      title: t("myCv.deleteTitle"),
+      description: t("myCv.deleteConfirm"),
+      confirmLabel: t("myCv.delete"),
+      destructive: true,
+    });
+    if (!ok) return;
     setBusy(true);
     const res = await fetch("/api/cv", { method: "DELETE" }).catch(() => null);
     setBusy(false);
@@ -79,6 +93,7 @@ export function MyCvPanel() {
 
   return (
     <div>
+      {dialog}
       <p className="mb-6 text-sm text-muted-foreground">{t("myCv.subtitle")}</p>
 
       {cv && (
@@ -209,6 +224,7 @@ function CvUploadForm({
   const [tech, setTech] = useState(initial?.technologies.join(", ") ?? "");
   const [summary, setSummary] = useState(initial?.summary ?? "");
   const [consent, setConsent] = useState(false);
+  const { confirm, dialog } = useConfirm();
 
   const techCount = tech.split(",").map((x) => x.trim()).filter(Boolean).length;
   const errors = {
@@ -237,6 +253,12 @@ function CvUploadForm({
     if (pending || !form.check(e.currentTarget)) return;
     const meta = parseCvMeta({ title, field, seniority, language, technologies: tech, summary });
     if (!meta.ok || !file) return; // already covered by the inline errors
+    // A listed (or unlisted) CV goes back to review when replaced.
+    if (
+      (initial?.status === "published" || initial?.status === "hidden") &&
+      !(await confirm({ title: t("myCv.replaceTitle"), description: t("myCv.replaceText"), confirmLabel: t("myCv.form.submit") }))
+    )
+      return;
 
     const body = new FormData();
     body.set("file", file);
@@ -288,6 +310,7 @@ function CvUploadForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4 rounded-xl border border-border p-4">
+      {dialog}
       <FormField id={`${id}-file`} label={t("myCv.form.file")} required hint={t("myCv.form.fileHint")} error={form.show("file")}>
         <label
           className={cn(

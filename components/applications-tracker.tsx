@@ -7,7 +7,8 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
 import { CompanyLogo } from "@/components/company-logo";
 import { CompanyModal } from "@/components/company-modal";
-import { CompanyStatusMenu, STATUS_STYLES } from "@/components/company-status-menu";
+import { CompanyStatusMenu, STATUS_STYLES, confirmRemove } from "@/components/company-status-menu";
+import { useConfirm } from "@/components/confirm-dialog";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
 import { TrackerSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
@@ -234,6 +235,7 @@ export function ApplicationsTracker({ companies }: { companies: Company[] }) {
 function RemovedCompanies({ items }: { items: TrackedCompany[] }) {
   const { t } = useTranslation();
   const { setStatus } = useCompanyTracker();
+  const { confirm, dialog } = useConfirm();
   // The company document is gone, so its id ("company-acme-inc") is the only
   // name left.
   const label = (id: string) =>
@@ -259,13 +261,16 @@ function RemovedCompanies({ items }: { items: TrackedCompany[] }) {
               variant="ghost"
               aria-label={t("tracker.remove")}
               title={t("tracker.remove")}
-              onClick={() => setStatus(r.companyId, null)}
+              onClick={async () => {
+                if (await confirmRemove(confirm, t)) void setStatus(r.companyId, null);
+              }}
             >
               <Trash2 className="size-4" />
             </Button>
           </li>
         ))}
       </ul>
+      {dialog}
     </details>
   );
 }

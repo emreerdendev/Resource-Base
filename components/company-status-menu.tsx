@@ -4,6 +4,7 @@ import { Bookmark, BookmarkCheck, Check, ChevronDown, Trash2 } from "lucide-reac
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
+import { useConfirm, type ConfirmOptions } from "@/components/confirm-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -82,6 +83,7 @@ export function CompanyStatusMenu({
   const { user, openAuth } = useAuth();
   const { get, setStatus } = useCompanyTracker();
   const tracked = get(companyId);
+  const { confirm, dialog } = useConfirm();
 
   const base = cn(
     "relative z-10 inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
@@ -112,6 +114,8 @@ export function CompanyStatusMenu({
   }
 
   return (
+    <>
+    {dialog}
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
@@ -149,7 +153,9 @@ export function CompanyStatusMenu({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          onClick={() => void setStatus(companyId, null)}
+          onClick={async () => {
+            if (await confirmRemove(confirm, t)) void setStatus(companyId, null);
+          }}
           className="whitespace-nowrap"
         >
           <Trash2 className="size-4" />
@@ -157,5 +163,19 @@ export function CompanyStatusMenu({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
+}
+
+/** Removing a tracked company drops its status and note: ask first. */
+export function confirmRemove(
+  confirm: (o: ConfirmOptions) => Promise<boolean>,
+  t: (key: string) => string,
+): Promise<boolean> {
+  return confirm({
+    title: t("tracker.removeTitle"),
+    description: t("tracker.removeText"),
+    confirmLabel: t("tracker.remove"),
+    destructive: true,
+  });
 }
