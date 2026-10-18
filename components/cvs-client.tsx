@@ -212,7 +212,7 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
       <div className="mx-auto max-w-4xl">
         {header}
         {loading ? (
-          <ResourceGridSkeleton count={6} />
+          <ResourceGridSkeleton count={6} columns={2} />
         ) : (
           <EmptyState
             icon={Heart}
@@ -317,7 +317,7 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
       {failed ? (
         <p className="py-20 text-center text-muted-foreground">{t("cvs.loadError")}</p>
       ) : loading ? (
-        <ResourceGridSkeleton count={9} />
+        <ResourceGridSkeleton count={8} columns={2} />
       ) : base.length === 0 ? (
         // Nothing shared yet (an empty Liked CVs list returned above).
         <div className="py-20 text-center text-muted-foreground">
@@ -332,7 +332,8 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
       ) : (
         <>
           <div ref={resultsRef} className="scroll-mt-28" />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Two per row: CV titles need the width. */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {shown.map((cv) => (
               <CvCard key={cv.id} cv={cv} pool={all ?? undefined} />
             ))}

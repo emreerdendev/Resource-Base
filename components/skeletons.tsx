@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 /** A single resource-card placeholder. */
 function CardSkeleton() {
@@ -19,10 +20,10 @@ function CardSkeleton() {
   );
 }
 
-/** A responsive grid of card skeletons. */
-export function ResourceGridSkeleton({ count = 9 }: { count?: number }) {
+/** A responsive grid of card skeletons (CV lists use two columns). */
+export function ResourceGridSkeleton({ count = 9, columns = 3 }: { count?: number; columns?: 2 | 3 }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2", columns === 3 && "lg:grid-cols-3")}>
       {Array.from({ length: count }).map((_, i) => (
         <CardSkeleton key={i} />
       ))}
@@ -31,11 +32,11 @@ export function ResourceGridSkeleton({ count = 9 }: { count?: number }) {
 }
 
 /** Header + grid placeholder for list-style pages. */
-export function ListPageSkeleton({ actions = 0 }: { actions?: number }) {
+export function ListPageSkeleton({ actions = 0, columns }: { actions?: number; columns?: 2 | 3 }) {
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeaderSkeleton actions={actions} />
-      <ResourceGridSkeleton count={6} />
+      <ResourceGridSkeleton count={6} columns={columns} />
     </div>
   );
 }

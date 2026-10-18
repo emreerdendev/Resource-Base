@@ -9,7 +9,7 @@ export default function Loading() {
         <Skeleton className="h-4 w-96 max-w-full" />
       </div>
       <Skeleton className="mb-6 h-12 w-full rounded-xl" />
-      <ResourceGridSkeleton count={12} />
+      <ResourceGridSkeleton count={12} columns={2} />
     </div>
   );
 }
