@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { avatarBucket, avatarKey } from "@/lib/avatar";
+import { inBackground } from "@/lib/server-timing";
 
 export const runtime = "nodejs";
 
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ user
   if (!object) {
     // Remembered briefly, so a missing file isn't looked up in R2 on every request.
     const missing = new NextResponse("Not found", { status: 404, headers: { "Cache-Control": "public, max-age=60" } });
-    await cache?.put(cacheKey, missing.clone()).catch(() => {});
+    if (cache) inBackground(cache.put(cacheKey, missing.clone()).catch(() => {}));
     return missing;
   }
   const res = new NextResponse(object.body, {
@@ -33,6 +34,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ user
       "X-Content-Type-Options": "nosniff",
     },
   });
-  await cache?.put(cacheKey, res.clone()).catch(() => {});
+  if (cache) inBackground(cache.put(cacheKey, res.clone()).catch(() => {}));
   return res;
 }

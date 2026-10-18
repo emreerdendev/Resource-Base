@@ -119,11 +119,15 @@ export async function getAuth() {
         // Read-only and called on every page load / tab focus — limiting it
         // would cost a D1 write per call for no protection.
         "/get-session": false,
-        "/request-password-reset": { window: 3600, max: 3 }, // sends email
-        "/forget-password": { window: 3600, max: 3 }, // alias
-        "/send-verification-email": { window: 3600, max: 5 }, // sends email
-        "/sign-up/email": { window: 3600, max: 5 },
-        "/sign-in/email": { window: 900, max: 10 }, // allow retries, stop brute force
+        // Keyed by IP, and one IP can be a whole office, campus or mobile
+        // carrier. Turnstile already stops scripts on all of these, and every
+        // email also has per-address and daily caps (lib/email.ts), so these
+        // only bound volume.
+        "/request-password-reset": { window: 3600, max: 10 }, // sends email
+        "/forget-password": { window: 3600, max: 10 }, // alias
+        "/send-verification-email": { window: 3600, max: 10 }, // sends email
+        "/sign-up/email": { window: 3600, max: 20 },
+        "/sign-in/email": { window: 900, max: 30 }, // allow retries, stop brute force
       },
     },
     emailAndPassword: {

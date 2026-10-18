@@ -71,6 +71,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Signed Sanity webhooks (bulk edits send bursts) and OpenNext's own
+  // background page refreshes aren't visitors: they skip the per-IP limits.
+  // (The refresh header carries OpenNext's secret preview id, so it can't be
+  // faked; the webhook routes reject anything unsigned before doing work.)
+  const previewId = process.env.__NEXT_PREVIEW_MODE_ID;
+  const internal =
+    (!!previewId && request.headers.get("x-prerender-revalidate") === previewId) ||
+    pathname === "/api/revalidate" ||
+    pathname === "/api/notify";
+  if (internal) return NextResponse.next();
+
   // Abuse shield: a client sending more than a person ever could is turned
   // away here, before any render, query or Sanity request is spent on it.
   // Client-side navigations and prefetches (RSC GETs of pages) come in bursts

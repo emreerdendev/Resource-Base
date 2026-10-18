@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { favorites, resourceClicks } from "@/lib/db/schema";
 import type { ResourceCounts } from "@/lib/types";
+import { inBackground } from "@/lib/server-timing";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest) {
     favorites: Object.fromEntries(favoriteRows.map((r) => [r.id, Number(r.count)])),
   };
   const res = NextResponse.json(body, { headers: { "Cache-Control": CACHE_CONTROL } });
-  await cache?.put(key, res.clone());
+  // Stored after the response; a failed write never fails the request.
+  if (cache) inBackground(cache.put(key, res.clone()).catch(() => {}));
   return res;
 }

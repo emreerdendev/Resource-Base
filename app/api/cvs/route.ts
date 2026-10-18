@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { cvs, user } from "@/lib/db/schema";
 import { cvListKey } from "@/lib/cv-list-cache";
 import type { CvListing } from "@/lib/types";
+import { inBackground } from "@/lib/server-timing";
 
 export const runtime = "nodejs";
 
@@ -54,6 +55,7 @@ export async function GET(req: NextRequest) {
     owner: { username: r.username, name: r.name || r.authName, avatar: r.avatar },
   }));
   const res = NextResponse.json(body, { headers: { "Cache-Control": CACHE_CONTROL } });
-  await cache?.put(key, res.clone());
+  // Stored after the response; a failed write never fails the request.
+  if (cache) inBackground(cache.put(key, res.clone()).catch(() => {}));
   return res;
 }

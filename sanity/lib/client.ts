@@ -19,4 +19,6 @@ export const client = createClient({
   useCdn: true,
   token: process.env.SANITY_API_READ_TOKEN,
   perspective: "published",
+  // A hung request fails instead of holding a render until the Worker limit.
+  timeout: 10_000,
 });
