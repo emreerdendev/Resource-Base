@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { OG_IMAGE } from "@/lib/og";
 import { siteName, siteDescription, siteUrl } from "@/lib/site";
+import { StaleBuildGuard } from "@/components/stale-build-guard";
 
 // Inter for body text (crisp, neutral), Plus Jakarta Sans for headings
 // (modern, geometric, distinctive). Geist Mono for code/kbd.
@@ -81,6 +82,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster />
+          <StaleBuildGuard />
         </ThemeProvider>
       </body>
     </html>

@@ -1,26 +1,41 @@
 "use client";
 
-import { startTransition, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
+import { isStaleBuildError, reloadForNewBuild, reloadedRecently } from "@/lib/stale-build";
 import { NavLink as Link } from "@/components/nav-link";
 import { Home, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
-/** Shown when a page fails to render (e.g. a data source is briefly down). */
-export default function SiteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+/**
+ * Shown when a page fails to render (e.g. a data source is briefly down).
+ * A tab left open across a deploy fails differently — the page's scripts are
+ * gone — and is reloaded onto the new build right away instead.
+ */
+export default function SiteError({ error }: { error: Error & { digest?: string }; reset: () => void }) {
   const { t } = useTranslation();
-  const router = useRouter();
-  // Re-fetch the page from the server, then re-render it: reset() alone only
-  // re-renders the failed payload, so a failed navigation stayed broken.
-  const retry = () =>
-    startTransition(() => {
-      router.refresh();
-      reset();
-    });
+  // Decided once: reload unless this tab just did (then show the error).
+  const [reloading] = useState(
+    () => typeof window !== "undefined" && isStaleBuildError(error) && !reloadedRecently(),
+  );
+  // A full load: it gets the current build and fresh data, which recovers
+  // from both a stale tab and a failed render (router.refresh + reset could
+  // only retry with the same, possibly missing, scripts).
+  const retry = () => window.location.reload();
   useEffect(() => {
+    if (reloading) {
+      reloadForNewBuild();
+      return;
+    }
     console.error(error);
-  }, [error]);
+  }, [error, reloading]);
+  if (reloading)
+    return (
+      <div className="flex justify-center py-20 text-muted-foreground">
+        <Loader2 className="size-5 animate-spin" />
+      </div>
+    );
   return (
     <div className="flex flex-col items-center py-20 text-center">
       <h1 className="text-2xl font-semibold tracking-tight">{t("notFound.errorTitle")}</h1>
