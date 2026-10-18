@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { getSessionUser, isVerified, requireUser } from "@/lib/authz";
 import { getDb } from "@/lib/db";
 import { recountLikes } from "@/lib/cv-like-count";
+import { forgetCvList } from "@/lib/cv-list-cache";
 import { cvLikes, cvs } from "@/lib/db/schema";
 import { overLimit } from "@/lib/rate-limit";
 
@@ -102,5 +103,6 @@ export async function setCvListed(listed: boolean): Promise<{ ok: boolean }> {
     .update(cvs)
     .set({ status: to, updatedAt: new Date() })
     .where(and(eq(cvs.userId, me.id), eq(cvs.status, from)));
+  await forgetCvList();
   return { ok: true };
 }

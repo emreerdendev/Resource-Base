@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { SOCIAL_ICONS } from "@/components/social-icons";
 import { useCompanyTracker } from "@/components/company-tracker-provider";
@@ -12,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { contributorTier } from "@/lib/contributor-tier";
 import { initial } from "@/lib/initial";
 import { socialEntries } from "@/lib/social-links";
+import { getMyCv } from "@/lib/cv-actions";
 import { useSubmissions } from "@/lib/submissions";
 import type { PublicProfile, Resource } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -192,11 +194,22 @@ function OwnerActivity() {
   const tracker = useCompanyTracker();
   const cvLikes = useCvLikes();
   const submissions = useSubmissions();
+  // My Submissions lists the CV too, so it counts here as well.
+  const [cvCount, setCvCount] = useState<number | null>(null);
+  useEffect(() => {
+    let active = true;
+    getMyCv()
+      .then((cv) => active && setCvCount(cv ? 1 : 0))
+      .catch(() => active && setCvCount(0));
+    return () => {
+      active = false;
+    };
+  }, []);
   const cards = [
     { href: "/favorites", icon: Star, label: t("nav.favorites"), count: favorites.loading ? null : favorites.ids.length },
     { href: "/applications", icon: BriefcaseBusiness, label: t("nav.applications"), count: tracker.loading ? null : tracker.items.length },
     { href: "/liked-cvs", icon: Heart, label: t("nav.likedCvs"), count: cvLikes.loading ? null : cvLikes.likedIds.length },
-    { href: "/submissions", icon: Send, label: t("nav.submissions"), count: submissions.loading ? null : submissions.items.length },
+    { href: "/submissions", icon: Send, label: t("nav.submissions"), count: submissions.loading || cvCount === null ? null : submissions.items.length + cvCount },
   ];
   return (
     <div className="mt-10 grid gap-3 sm:grid-cols-2">

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { getMyCv, setCvListed, type MyCv } from "@/lib/cv-actions";
+import { forgetCvListing } from "@/lib/cv-listing";
 import { parseCvMeta } from "@/lib/cv-input";
 import { fieldProps, useFormErrors } from "@/lib/use-form-errors";
 import {
@@ -58,6 +59,7 @@ export function MyCvPanel() {
     const { ok } = await setCvListed(listed).catch(() => ({ ok: false }));
     setBusy(false);
     if (!ok) return void toast.error(t("myCv.error.generic"));
+    forgetCvListing();
     await reload();
   }
 
@@ -68,6 +70,7 @@ export function MyCvPanel() {
     setBusy(false);
     if (!res?.ok) return void toast.error(t("myCv.error.generic"));
     toast.success(t("myCv.deleted"));
+    forgetCvListing();
     setEditing(false);
     await reload();
   }
@@ -146,6 +149,7 @@ export function MyCvPanel() {
           initial={cv}
           onCancel={cv ? () => setEditing(false) : undefined}
           onDone={async () => {
+            forgetCvListing();
             setEditing(false);
             await reload();
           }}

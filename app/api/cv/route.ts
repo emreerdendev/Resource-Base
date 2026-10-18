@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getSessionUser, isVerified } from "@/lib/authz";
 import { checkPdf, cvBucket } from "@/lib/cv-files";
+import { forgetCvList } from "@/lib/cv-list-cache";
 import { parseCvMeta } from "@/lib/cv-input";
 import { CV_MAX_BYTES } from "@/lib/cv-taxonomy";
 import { getDb } from "@/lib/db";
@@ -128,6 +129,8 @@ export async function POST(req: NextRequest) {
   // The row now points at the new file. Cleaning up the old one happens after
   // the response and never undoes the upload.
   if (existing) {
+    // A listed CV goes back to review: drop it from the cached list.
+    if (existing.status === "published") await forgetCvList(req.url);
     inBackground(bucket.delete(existing.fileKey));
     // A replaced CV leaves the review queue for good.
     if (existing.sanitySubmissionId && existing.status === "pending")
@@ -145,6 +148,7 @@ export async function DELETE(req: NextRequest) {
   const [cv] = await db.select().from(cvs).where(eq(cvs.userId, user.id)).limit(1);
   if (!cv) return NextResponse.json({ ok: true });
   await db.delete(cvs).where(eq(cvs.id, cv.id)); // cascades cv_likes
+  if (cv.status === "published") await forgetCvList(req.url);
   await cvBucket().delete(cv.fileKey);
   if (cv.sanitySubmissionId && cv.status === "pending")
     await writeClient.delete(cv.sanitySubmissionId).catch(() => {});

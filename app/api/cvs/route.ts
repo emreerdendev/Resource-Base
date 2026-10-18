@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { cvs, user } from "@/lib/db/schema";
+import { cvListKey } from "@/lib/cv-list-cache";
 import type { CvListing } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -15,7 +16,7 @@ const CACHE_CONTROL = "public, max-age=60, s-maxage=300";
  */
 export async function GET(req: NextRequest) {
   const cache = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
-  const key = new Request(new URL("/api/cvs", req.url));
+  const key = cvListKey(req.url);
   const hit = await cache?.match(key);
   if (hit) return hit;
 
