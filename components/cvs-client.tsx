@@ -22,6 +22,7 @@ import { loadCvListing } from "@/lib/cv-listing";
 import { createSearch } from "@/lib/search";
 import type { CvListing } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/empty-state";
 
 type Sort = "newest" | "popular";
 type FacetKey = "field" | "seniority" | "language" | "tech";
@@ -194,12 +195,35 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
     return (
       <div className="mx-auto max-w-4xl">
         {header}
-        <div className="rounded-xl border border-dashed border-border py-20 text-center">
-          <p className="text-muted-foreground">{t("cvs.liked.signInPrompt")}</p>
-          <Button className="mt-4" onClick={() => openAuth()}>
-            {t("header.signIn")}
-          </Button>
-        </div>
+        <EmptyState
+          icon={Heart}
+          title={t("cvs.liked.signInPrompt")}
+          action={<Button onClick={() => openAuth()}>{t("header.signIn")}</Button>}
+        />
+      </div>
+    );
+  }
+
+  // Liked CVs: like Favorites and My Applications — while loading a skeleton,
+  // with nothing liked a single empty box; search, filters and sort only once
+  // there is something to search.
+  if (mode === "liked" && (loading || base.length === 0)) {
+    return (
+      <div className="mx-auto max-w-4xl">
+        {header}
+        {loading ? (
+          <ResourceGridSkeleton count={6} />
+        ) : (
+          <EmptyState
+            icon={Heart}
+            title={t("cvs.liked.empty")}
+            action={
+              <Button asChild>
+                <Link href="/cvs">{t("cvs.browse")}</Link>
+              </Button>
+            }
+          />
+        )}
       </div>
     );
   }
@@ -295,23 +319,10 @@ export function CvsClient({ mode }: { mode: "all" | "liked" }) {
       ) : loading ? (
         <ResourceGridSkeleton count={9} />
       ) : base.length === 0 ? (
-        // Nothing to list yet (or nothing liked yet).
+        // Nothing shared yet (an empty Liked CVs list returned above).
         <div className="py-20 text-center text-muted-foreground">
-          {mode === "liked" ? (
-            <>
-              {t("cvs.liked.empty")}
-              <div className="mt-4">
-                <Button asChild>
-                  <Link href="/cvs">{t("cvs.browse")}</Link>
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              {t("cvs.emptyAll")}
-              <SubmitCta variant="compact" kind="cv" />
-            </>
-          )}
+          {t("cvs.emptyAll")}
+          <SubmitCta variant="compact" kind="cv" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center text-muted-foreground">

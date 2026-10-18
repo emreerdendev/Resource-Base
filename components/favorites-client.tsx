@@ -10,6 +10,7 @@ import type { Resource } from "@/lib/types";
 import { Star } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { EmptyState } from "@/components/empty-state";
 
 export function FavoritesClient({ resources }: { resources: Resource[] }) {
   const { t } = useTranslation();
@@ -22,21 +23,23 @@ export function FavoritesClient({ resources }: { resources: Resource[] }) {
       <PageHeader icon={Star} title={t("favorites.title")} description={t("favorites.subtitle")} />
 
       {!authLoading && !user ? (
-        <div className="rounded-xl border border-dashed border-border py-20 text-center">
-          <p className="text-muted-foreground">{t("favorites.signInPrompt")}</p>
-          <Button className="mt-4" onClick={() => openAuth()}>
-            {t("header.signIn")}
-          </Button>
-        </div>
+        <EmptyState
+          icon={Star}
+          title={t("favorites.signInPrompt")}
+          action={<Button onClick={() => openAuth()}>{t("header.signIn")}</Button>}
+        />
       ) : loading || authLoading ? (
         <ResourceGridSkeleton count={6} />
       ) : favorites.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border py-20 text-center">
-          <p className="text-muted-foreground">{t("favorites.empty")}</p>
-          <Button asChild className="mt-4">
-            <Link href="/resources">{t("favorites.browse")}</Link>
-          </Button>
-        </div>
+        <EmptyState
+          icon={Star}
+          title={t("favorites.empty")}
+          action={
+            <Button asChild>
+              <Link href="/resources">{t("favorites.browse")}</Link>
+            </Button>
+          }
+        />
       ) : (
         <ResourceGrid resources={favorites} />
       )}

@@ -19,6 +19,7 @@ import { toCsv } from "@/lib/csv";
 import { APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/company-taxonomy";
 import type { Company } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/empty-state";
 
 function Row({ company, tracked }: { company: Company; tracked: TrackedCompany }) {
   const { t, i18n } = useTranslation();
@@ -138,12 +139,11 @@ export function ApplicationsTracker({ companies }: { companies: Company[] }) {
 
   if (!authLoading && !user) {
     return (
-      <div className="rounded-xl border border-dashed border-border py-20 text-center">
-        <p className="text-muted-foreground">{t("tracker.signInPrompt")}</p>
-        <Button className="mt-4" onClick={() => openAuth()}>
-          {t("header.signIn")}
-        </Button>
-      </div>
+      <EmptyState
+        icon={BriefcaseBusiness}
+        title={t("tracker.signInPrompt")}
+        action={<Button onClick={() => openAuth()}>{t("header.signIn")}</Button>}
+      />
     );
   }
   if (loading || authLoading) {
@@ -151,14 +151,16 @@ export function ApplicationsTracker({ companies }: { companies: Company[] }) {
   }
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border py-16 text-center">
-        <BriefcaseBusiness className="mx-auto size-6 text-muted-foreground" />
-        <p className="mt-3 text-muted-foreground">{t("tracker.empty")}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{t("tracker.import.emptyHint")}</p>
-        <Button asChild className="mt-4">
-          <Link href="/companies">{t("tracker.browse")}</Link>
-        </Button>
-      </div>
+      <EmptyState
+        icon={BriefcaseBusiness}
+        title={t("tracker.empty")}
+        hint={t("tracker.import.emptyHint")}
+        action={
+          <Button asChild>
+            <Link href="/companies">{t("tracker.browse")}</Link>
+          </Button>
+        }
+      />
     );
   }
 
