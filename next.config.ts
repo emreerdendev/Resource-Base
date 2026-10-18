@@ -72,15 +72,21 @@ const GA_SCRIPT = "https://*.googletagmanager.com";
 const GA_CONNECT =
   "https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com";
 
+// Cloudflare Web Analytics (cookieless): Cloudflare injects its beacon script,
+// which reports to cloudflareinsights.com. Without these the CSP blocked it
+// and no visits were recorded.
+const CF_INSIGHTS_SCRIPT = "https://static.cloudflareinsights.com";
+const CF_INSIGHTS_CONNECT = "https://cloudflareinsights.com";
+
 const scriptSrc = isDev
-  ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${GA_SCRIPT} ${TURNSTILE}`
-  : `script-src 'self' 'unsafe-inline' ${GA_SCRIPT} ${TURNSTILE}`;
+  ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${GA_SCRIPT} ${TURNSTILE} ${CF_INSIGHTS_SCRIPT}`
+  : `script-src 'self' 'unsafe-inline' ${GA_SCRIPT} ${TURNSTILE} ${CF_INSIGHTS_SCRIPT}`;
 
 // In dev, Next.js needs a WebSocket (ws:) to the local server for HMR; without
 // it the browser blocks the connection and the console floods with CSP errors.
 const connectSrc = isDev
-  ? `connect-src 'self' ws: wss: ${GA_CONNECT} ${TURNSTILE}`
-  : `connect-src 'self' ${GA_CONNECT} ${TURNSTILE}`;
+  ? `connect-src 'self' ws: wss: ${GA_CONNECT} ${TURNSTILE} ${CF_INSIGHTS_CONNECT}`
+  : `connect-src 'self' ${GA_CONNECT} ${TURNSTILE} ${CF_INSIGHTS_CONNECT}`;
 
 const csp = [
   "default-src 'self'",
