@@ -6,7 +6,7 @@ import { sanityFetch } from "@/sanity/lib/fetch";
 import { homeCountsQuery } from "@/sanity/lib/queries";
 
 export const metadata: Metadata = shareMeta(
-  "Resource Base — Resources, companies & CVs",
+  "Resource Base — Resources, Companies & CVs",
   siteDescription,
   "/",
 );
