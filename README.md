@@ -119,8 +119,8 @@ Notes:
 - Apply new D1 migrations to production with `pnpm db:migrate:remote` before (or right after) deploying a schema change.
 - Add two Sanity webhooks (**sanity.io/manage → API → Webhooks**), drafts off, each with its secret:
   - **`/api/revalidate`** — trigger on create/update/delete, filter `_type in ["resource","category","tag","company"]`, projection
-    `{ _type, "slug": slug.current, "skip": delta::changedOnly((lastCheckedAt, httpStatus, linkStatus, linkFailures)) && (before().linkStatus == "broken") == (after().linkStatus == "broken") }`
-    so the link checker's daily bookkeeping doesn't re-render anything unless a link turns broken (or recovers).
+    `{ _type, "slug": slug.current, "oldSlug": before().slug.current, "skip": delta::changedOnly((lastCheckedAt, httpStatus, linkStatus, linkFailures)) && (before().linkStatus == "broken") == (after().linkStatus == "broken") }`
+    so the link checker's daily bookkeeping doesn't re-render anything unless a link turns broken (or recovers), and a renamed or deleted document's old page is refreshed too.
   - **`/api/notify`** — trigger on create/update only, filter `_type == "submission" && status in ["approved","rejected"] && delta::changedAny(status)`, projection `{ _id, status, submittedBy, name, url, rejectionReason, kind, targetResourceId }`.
 - Deploy the Studio with `pnpm studio:deploy` (and again after schema changes).
 - The Sanity dataset is public (the free plan has no private datasets), so submissions carry no personal data: no emails, and the CV review link only opens for someone signed in on the site with an address in `ADMIN_EMAILS`.

@@ -3,12 +3,9 @@ import { notFound } from "next/navigation";
 import { CompanyPageView } from "@/components/company-page";
 import { rankRelatedCompanies } from "@/lib/company-utils";
 import { siteName, siteUrl } from "@/lib/site";
-import type { CompanyWithRelated } from "@/lib/types";
-import { sanityFetch } from "@/sanity/lib/fetch";
-import { companyBySlugQuery } from "@/sanity/lib/queries";
-import { hasSlug } from "@/sanity/lib/slugs";
 import { jsonLd } from "@/lib/json-ld";
 import { OG_IMAGE } from "@/lib/og";
+import { loadCompany } from "./data";
 
 /**
  * Nothing is prerendered at build: each page renders on its first visit and
@@ -21,14 +18,7 @@ export async function generateStaticParams() {
 }
 
 async function load(slug: string) {
-  if (!(await hasSlug("company", slug))) return null;
-  const company = await sanityFetch<CompanyWithRelated | null>({
-    query: companyBySlugQuery,
-    params: { slug },
-    // Only this company's tag: other edits don't touch this page.
-    tags: [`company:${slug}`],
-    revalidate: 86400,
-  });
+  const company = await loadCompany(slug);
   return company && { ...company, related: rankRelatedCompanies(slug, company.related) };
 }
 

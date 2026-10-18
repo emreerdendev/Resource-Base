@@ -1,13 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ResourceDetail } from "@/components/resource-detail";
-import { sanityFetch } from "@/sanity/lib/fetch";
-import { resourceBySlugQuery } from "@/sanity/lib/queries";
-import { hasSlug } from "@/sanity/lib/slugs";
-import type { ResourceWithRelated } from "@/lib/types";
 import { siteUrl, siteName } from "@/lib/site";
 import { jsonLd } from "@/lib/json-ld";
 import { OG_IMAGE } from "@/lib/og";
+import { loadResource } from "./data";
 
 /**
  * Nothing is prerendered at build: each page renders on its first visit and
@@ -19,16 +16,7 @@ export async function generateStaticParams() {
   return [];
 }
 
-async function load(slug: string) {
-  if (!(await hasSlug("resource", slug))) return null;
-  return sanityFetch<ResourceWithRelated | null>({
-    query: resourceBySlugQuery,
-    params: { slug },
-    // Only this resource's tag: other edits don't touch this page.
-    tags: [`resource:${slug}`],
-    revalidate: 86400,
-  });
-}
+const load = loadResource;
 
 export async function generateMetadata({
   params,
