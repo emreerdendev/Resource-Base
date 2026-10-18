@@ -6,17 +6,30 @@ import { ResourceGrid } from "@/components/resource-grid";
 import { PageHeader } from "@/components/page-header";
 import { ResourceGridSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
-import type { Resource } from "@/lib/types";
+import { useMemo } from "react";
+import { expandResources } from "@/lib/expand-resources";
+import type { Category, CompactResource, Tag } from "@/lib/types";
 import { Star } from "lucide-react";
 import { NavLink as Link } from "@/components/nav-link";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/empty-state";
 
-export function FavoritesClient({ resources }: { resources: Resource[] }) {
+export function FavoritesClient({
+  resources,
+  categories,
+  tags,
+}: {
+  resources: CompactResource[];
+  categories: Category[];
+  tags: Tag[];
+}) {
   const { t } = useTranslation();
   const { user, loading: authLoading, openAuth } = useAuth();
   const { ids, loading } = useFavorites();
-  const favorites = resources.filter((r) => ids.includes(r._id));
+  const favorites = useMemo(
+    () => expandResources(resources.filter((r) => ids.includes(r._id)), categories, tags),
+    [resources, ids, categories, tags],
+  );
 
   return (
     <div className="mx-auto max-w-4xl">

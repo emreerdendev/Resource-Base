@@ -20,10 +20,16 @@ const RESOURCE_FIELDS = groq`
 
 const PUBLISHED = groq`_type == "resource" && submissionStatus == "published"`
 
-/** Every published resource — the dataset the client-side search indexes. */
-export const allResourcesQuery = groq`
+/**
+ * Every published resource, for the list pages. Category and tag ids only
+ * (see CompactResource); the pages already load those lists.
+ */
+export const allResourcesCompactQuery = groq`
   *[${PUBLISHED}] | order(featured desc, addedAt desc) {
-    ${RESOURCE_FIELDS}
+    _id, name, "slug": slug.current, url, description, author, language,
+    pricing, featured, addedAt, linkStatus, submittedBy,
+    "categoryIds": categories[]._ref,
+    "tagIds": tags[]._ref
   }
 `
 

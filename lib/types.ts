@@ -66,6 +66,16 @@ export interface Resource {
   tags: TagRef[]
 }
 
+/**
+ * A resource as list pages ship it: category and tag ids instead of the
+ * objects (those were repeated in every one of ~500 resources, over a third
+ * of the page). lib/expand-resources.ts turns it back into a Resource.
+ */
+export type CompactResource = Omit<Resource, 'categories' | 'tags'> & {
+  categoryIds: string[] | null
+  tagIds: string[] | null
+}
+
 export interface Category {
   _id: string
   title: string

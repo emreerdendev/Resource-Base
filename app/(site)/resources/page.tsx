@@ -5,10 +5,10 @@ import { HomeIntro } from "@/components/home-intro";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import {
   allCategoriesQuery,
-  allResourcesQuery,
+  allResourcesCompactQuery,
   allTagsQuery,
 } from "@/sanity/lib/queries";
-import type { Category, Resource, Tag } from "@/lib/types";
+import type { Category, CompactResource, Tag } from "@/lib/types";
 
 const DESCRIPTION =
   "A curated, searchable directory of the best resources for development, design and more.";
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default async function ResourcesPage() {
   const [resources, categories, tags] = await Promise.all([
-    sanityFetch<Resource[]>({ query: allResourcesQuery, tags: ["resource-list"] }),
+    sanityFetch<CompactResource[]>({ query: allResourcesCompactQuery, tags: ["resource-list"] }),
     sanityFetch<Category[]>({ query: allCategoriesQuery, tags: ["taxonomy", "resource-list"] }),
     sanityFetch<Tag[]>({ query: allTagsQuery, tags: ["taxonomy", "resource-list"] }),
   ]);

@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { SortSelect } from "@/components/ui/sort-select";
 import { UrlParams } from "@/components/url-params";
 import { createResourceSearch } from "@/lib/resource-search";
-import type { Category, Resource, Tag } from "@/lib/types";
+import type { Category, CompactResource, Tag } from "@/lib/types";
+import { expandResources } from "@/lib/expand-resources";
 import { cn } from "@/lib/utils";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,13 +25,13 @@ const PRICING_VALUES = ["free", "freemium", "paid"] as const;
 const LANG_VALUES = ["en", "tr"] as const;
 
 export function BrowseClient({
-  resources,
+  resources: compact,
   categories,
   tags,
   basePath = "/",
   intro,
 }: {
-  resources: Resource[];
+  resources: CompactResource[];
   categories: Category[];
   tags: Tag[];
   /** Path the filter state syncs to (so the homepage stays on "/"). */
@@ -39,6 +40,7 @@ export function BrowseClient({
   intro?: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  const resources = useMemo(() => expandResources(compact, categories, tags), [compact, categories, tags]);
   const { get: getClicks } = useClickCounts();
   const { get: getFavorites } = useFavoriteCounts();
 
