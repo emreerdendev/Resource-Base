@@ -42,6 +42,7 @@ export async function toggleCvLike(
 
   if (existing) {
     await db.batch([db.delete(cvLikes).where(own), recountLikes(db, cvId)]);
+    await forgetCvList();
     return { liked: false };
   }
   const [cv] = await db
@@ -54,6 +55,8 @@ export async function toggleCvLike(
     db.insert(cvLikes).values({ userId: me.id, cvId }).onConflictDoNothing(),
     recountLikes(db, cvId),
   ]);
+  // The cached list shows like counts: refresh it here so the next load is right.
+  await forgetCvList();
   return { liked: true };
 }
 

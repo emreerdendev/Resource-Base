@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/auth/auth-provider";
 import { toggleCvLike } from "@/lib/cv-actions";
 import { loadViewer } from "@/lib/viewer";
+import { forgetCvListing } from "@/lib/cv-listing";
 
 type CvLikesValue = {
   liked: (id: string) => boolean;
@@ -56,6 +57,8 @@ export function CvLikesProvider({ children }: { children: React.ReactNode }) {
         const res = await toggleCvLike(id, !was);
         const saved = res.error && res.error !== "rate_limited" ? was : res.liked;
         if (saved !== !was) apply(saved);
+        // The next list load skips the browser's copy (counts changed).
+        if (!res.error) forgetCvListing();
         if (res.error)
           toast.error(t(res.error === "unverified" ? "verifyBanner.verifyFirst" : res.error === "rate_limited" ? "card.favoriteRateLimited" : "cvs.likeError"));
       } catch {
@@ -69,7 +72,9 @@ export function CvLikesProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<CvLikesValue>(
     () => ({
       liked: (id) => ids.includes(id),
-      count: (id, listed) => Math.max(0, listed + (delta[id] ?? 0)),
+      // The listing can predate your own like (it's cached for minutes, and a
+      // reload resets this session's delta): never show 0 on a CV you liked.
+      count: (id, listed) => Math.max(ids.includes(id) ? 1 : 0, listed + (delta[id] ?? 0)),
       likedIds: ids,
       loading: Boolean(userId) && state.userId !== userId,
       toggle,
