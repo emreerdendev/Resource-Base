@@ -271,8 +271,9 @@ export function CompaniesClient({
       {/* Search bar — floating island that docks under the header */}
       <div className="sticky top-[88px] z-20 mb-6 rounded-b-xl bg-background">
         <div className="rounded-xl border border-border/70 bg-background/95 p-3 shadow-md shadow-black/5 ring-1 ring-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-background/85">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
+          {/* Phones: the search gets its own row, the controls share the next. */}
+          <div className="flex flex-wrap gap-2 sm:flex-nowrap">
+            <div className="relative w-full sm:w-auto sm:flex-1">
               <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={q}
@@ -285,11 +286,11 @@ export function CompaniesClient({
             <Button
               variant="outline"
               onClick={() => setShowFilters((s) => !s)}
-              className={cn(showFilters && "border-primary text-primary")}
+              className={cn("flex-1 sm:flex-none", showFilters && "border-primary text-primary")}
               aria-expanded={showFilters}
             >
               <SlidersHorizontal className="size-4" />
-              <span className="hidden sm:inline">{t("browse.filters")}</span>
+              {t("browse.filters")}
               {filterCount > 0 && (
                 <span className="grid size-5 place-items-center rounded-full bg-primary text-[10px] text-primary-foreground">
                   {filterCount}
