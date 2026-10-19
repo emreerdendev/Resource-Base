@@ -17,7 +17,12 @@ export const VERIFY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 /** Stem a display name/email into a username base, then add a short suffix. */
 function usernameStem(raw: string | null | undefined): string {
   const cleaned = (raw ?? "")
+    // Turkish letters become their Latin twins instead of being dropped
+    // (Ayşe → ayse, Çağrı Işık → cagriisik); other accents are stripped.
+    .replace(/[İIı]/g, (c) => (c === "ı" ? "i" : "I"))
     .toLowerCase()
+    .replace(/[çğöşü]/g, (c) => ({ ç: "c", ğ: "g", ö: "o", ş: "s", ü: "u" })[c] ?? c)
+    .normalize("NFKD")
     .replace(/[^a-z0-9]/g, "")
     .slice(0, 12);
   return cleaned || "user";
