@@ -101,7 +101,8 @@ export function CvPreview({
             className={cn("tabular-nums", liked && "text-rose-500 hover:text-rose-500")}
           >
             <Heart className={cn("size-4", liked && "fill-current")} />
-            {likes.count(cv.id, cv.likeCount)}
+            {/* No "0": the count appears with the first like. */}
+            {likes.count(cv.id, cv.likeCount) > 0 && likes.count(cv.id, cv.likeCount)}
           </Button>
           <Button asChild variant="outline" size="sm">
             <a href={file} target="_blank" rel="noopener noreferrer">

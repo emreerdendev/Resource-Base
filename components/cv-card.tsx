@@ -88,7 +88,8 @@ export function CvCard({ cv, pool }: { cv: CvListing; pool?: CvListing[] }) {
             className={cn("gap-1 tabular-nums", liked && "text-rose-500 hover:text-rose-500")}
           >
             <Heart className={cn("size-4", liked && "fill-current")} />
-            {count}
+            {/* No "0": the count appears with the first like. */}
+            {count > 0 && count}
           </Button>
           <Button variant="outline" size="sm" onClick={preview}>
             {t(user ? "cvs.preview" : "cvs.signInToOpen")}

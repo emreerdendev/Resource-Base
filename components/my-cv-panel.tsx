@@ -161,7 +161,7 @@ export function MyCvPanel() {
               {cv.rejectionReason}
             </p>
           )}
-          {(cv.status === "published" || cv.status === "hidden") && (
+          {(cv.status === "published" || cv.status === "hidden") && cv.likeCount > 0 && (
             <p className="mt-2 inline-flex items-center gap-1 text-sm text-muted-foreground">
               <Heart className="size-3.5" /> {t("cvs.likes", { count: cv.likeCount })}
             </p>
