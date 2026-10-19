@@ -417,7 +417,24 @@ export const es = {
     unlinkFailed: "No se pudo desconectar ese proveedor.",
   },
 
+  contributions: {
+    title: "Contribuciones",
+    subtitle: "Todas las personas que han ayudado a construir el directorio: añadiendo recursos y empresas, corrigiendo y mejorando fichas y compartiendo CV. ¡Gracias!",
+    error: "No se pudieron cargar los colaboradores. Inténtalo de nuevo.",
+    empty: "Aún no hay contribuciones: ¡sé el primero!",
+    resources_one: "{{count}} recurso",
+    resources_other: "{{count}} recursos",
+    companies_one: "{{count}} empresa",
+    companies_other: "{{count}} empresas",
+    edits_one: "{{count}} edición",
+    edits_other: "{{count}} ediciones",
+    cv: "CV",
+    total_one: "contribución",
+    total_other: "contribuciones",
+  },
+
   footer: {
+    contributions: "Contribuciones",
     tagline: "Un directorio gratuito de recursos, empresas y CV, mantenido por la comunidad.",
     source: "Dar estrella en GitHub",
     reportIssue: "Reportar un problema",

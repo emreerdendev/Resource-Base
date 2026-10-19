@@ -2,7 +2,7 @@
 
 import { GithubIcon } from "@/components/brand-icons";
 import { Separator } from "@/components/ui/separator";
-import { Boxes, CircleDot, Globe, Heart, Mail } from "lucide-react";
+import { Boxes, CircleDot, Globe, Heart, Mail, Users } from "lucide-react";
 import { NavLink } from "@/components/nav-link";
 import { useTranslation } from "react-i18next";
 
@@ -40,7 +40,26 @@ export function SiteFooter() {
           {t("footer.tagline")}
         </p>
 
-        {/* Row 1 — contact + personal site */}
+        {/* Everyone who contributed */}
+        <NavLink href="/contributions" className={`${linkClass} text-primary`}>
+          <Users className="size-4" aria-hidden="true" />
+          <span>{t("footer.contributions")}</span>
+        </NavLink>
+
+        {/* Legal */}
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs">
+          <NavLink href="/privacy" className={linkClass}>
+            {t("footer.privacy")}
+          </NavLink>
+          <Dot />
+          <NavLink href="/terms" className={linkClass}>
+            {t("footer.terms")}
+          </NavLink>
+        </div>
+
+        <Separator className="my-2 max-w-md" />
+
+        {/* Contact + personal site */}
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
           <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass}>
             <Mail className="size-4" aria-hidden="true" />
@@ -58,7 +77,7 @@ export function SiteFooter() {
           </a>
         </div>
 
-        {/* Row 2 — project links + sponsor */}
+        {/* Project links + sponsor */}
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
           <a
             href={REPO_URL}
@@ -89,17 +108,6 @@ export function SiteFooter() {
             <Heart className="size-4 fill-current" aria-hidden="true" />
             <span>{t("footer.sponsor")}</span>
           </a>
-        </div>
-
-        {/* Row 3 — legal */}
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs">
-          <NavLink href="/privacy" className={linkClass}>
-            {t("footer.privacy")}
-          </NavLink>
-          <Dot />
-          <NavLink href="/terms" className={linkClass}>
-            {t("footer.terms")}
-          </NavLink>
         </div>
       </div>
     </footer>

@@ -417,7 +417,24 @@ export const en = {
     unlinkFailed: "Couldn’t disconnect that provider.",
   },
 
+  contributions: {
+    title: "Contributions",
+    subtitle: "Everyone who has helped build the directory — adding Resources and Companies, fixing and improving listings, and sharing CVs. Thank you!",
+    error: "Couldn’t load the contributors. Please try again.",
+    empty: "No contributions yet — be the first!",
+    resources_one: "{{count}} resource",
+    resources_other: "{{count}} resources",
+    companies_one: "{{count}} company",
+    companies_other: "{{count}} companies",
+    edits_one: "{{count}} edit",
+    edits_other: "{{count}} edits",
+    cv: "CV",
+    total_one: "contribution",
+    total_other: "contributions",
+  },
+
   footer: {
+    contributions: "Contributions",
     tagline: "A free directory of Resources, Companies and CVs, maintained by the community.",
     source: "Star on GitHub",
     reportIssue: "Report an Issue",

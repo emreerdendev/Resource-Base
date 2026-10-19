@@ -415,7 +415,24 @@ export const tr = {
     unlinkFailed: "Bu sağlayıcının bağlantısı kesilemedi.",
   },
 
+  contributions: {
+    title: "Katkılar",
+    subtitle: "Dizinin oluşmasına katkı veren herkes: Kaynak ve Şirket ekleyenler, kayıtları düzeltip iyileştirenler ve CV paylaşanlar. Teşekkürler!",
+    error: "Katkıda bulunanlar yüklenemedi. Lütfen tekrar dene.",
+    empty: "Henüz katkı yok — ilk sen ol!",
+    resources_one: "{{count}} kaynak",
+    resources_other: "{{count}} kaynak",
+    companies_one: "{{count}} şirket",
+    companies_other: "{{count}} şirket",
+    edits_one: "{{count}} düzenleme",
+    edits_other: "{{count}} düzenleme",
+    cv: "CV",
+    total_one: "katkı",
+    total_other: "katkı",
+  },
+
   footer: {
+    contributions: "Katkılar",
     tagline: "Kaynaklar, Şirketler ve CV'ler için topluluk tarafından sürdürülen ücretsiz bir dizin.",
     source: "GitHub'da Yıldızla",
     reportIssue: "Sorun Bildir",

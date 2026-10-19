@@ -417,7 +417,24 @@ export const fr = {
     unlinkFailed: "Impossible de déconnecter ce fournisseur.",
   },
 
+  contributions: {
+    title: "Contributions",
+    subtitle: "Toutes les personnes qui ont aidé à construire l’annuaire : ajout de ressources et d’entreprises, corrections et améliorations, CV partagés. Merci !",
+    error: "Impossible de charger les contributeurs. Veuillez réessayer.",
+    empty: "Aucune contribution pour l’instant — soyez le premier !",
+    resources_one: "{{count}} ressource",
+    resources_other: "{{count}} ressources",
+    companies_one: "{{count}} entreprise",
+    companies_other: "{{count}} entreprises",
+    edits_one: "{{count}} modification",
+    edits_other: "{{count}} modifications",
+    cv: "CV",
+    total_one: "contribution",
+    total_other: "contributions",
+  },
+
   footer: {
+    contributions: "Contributions",
     tagline: "Un annuaire gratuit de ressources, d’entreprises et de CV, maintenu par la communauté.",
     source: "Star sur GitHub",
     reportIssue: "Signaler un problème",

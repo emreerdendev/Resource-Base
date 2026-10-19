@@ -417,7 +417,24 @@ export const de = {
     unlinkFailed: "Anbieter konnte nicht getrennt werden.",
   },
 
+  contributions: {
+    title: "Beiträge",
+    subtitle: "Alle, die das Verzeichnis mit aufgebaut haben – mit neuen Ressourcen und Unternehmen, Korrekturen und Verbesserungen sowie geteilten Lebensläufen. Danke!",
+    error: "Die Beitragenden konnten nicht geladen werden. Bitte versuche es erneut.",
+    empty: "Noch keine Beiträge – sei die erste Person!",
+    resources_one: "{{count}} Ressource",
+    resources_other: "{{count}} Ressourcen",
+    companies_one: "{{count}} Unternehmen",
+    companies_other: "{{count}} Unternehmen",
+    edits_one: "{{count}} Bearbeitung",
+    edits_other: "{{count}} Bearbeitungen",
+    cv: "Lebenslauf",
+    total_one: "Beitrag",
+    total_other: "Beiträge",
+  },
+
   footer: {
+    contributions: "Beiträge",
     tagline: "Ein kostenloses, von der Community gepflegtes Verzeichnis für Ressourcen, Unternehmen und Lebensläufe.",
     source: "Auf GitHub bewerten",
     reportIssue: "Problem melden",

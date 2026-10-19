@@ -29,6 +29,21 @@ export interface PublicProfileCompact {
   avatar_url: string | null
 }
 
+/** A contributor on /contributions, with what they contributed (/api/contributions). */
+export interface ContributorEntry {
+  username: string
+  full_name: string | null
+  avatar_url: string | null
+  /** New resources and companies approved. */
+  resources: number
+  companies: number
+  /** Approved fixes, category/tag suggestions and company edits. */
+  edits: number
+  /** A listed CV (0 or 1). */
+  cvs: number
+  total: number
+}
+
 /** The signed-in user's own editable profile (private columns included). */
 export interface Profile extends PublicProfile {
   email: string | null
