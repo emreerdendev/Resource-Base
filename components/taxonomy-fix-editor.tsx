@@ -70,7 +70,8 @@ export function TaxonomyFixEditor({
   const [url, setUrl] = useState(resubmit?.url ?? resource.url);
   // "Gone / should be removed" replaces every other change.
   const [removal, setRemoval] = useState(resubmit?.removal ?? false);
-  const [reason, setReason] = useState(resubmit?.removal ? (resubmit.note ?? "") : "");
+  // The note to the editor; when reporting removal it's the reason.
+  const [note, setNote] = useState(resubmit?.note ?? "");
   // A resubmission starts from the proposal; titles come from the resource's
   // own values where known (free-text entries are their own title).
   const pick = (slugs: string[], known: Picked[]) =>
@@ -102,6 +103,7 @@ export function TaxonomyFixEditor({
   const dirty =
     Boolean(resubmit) ||
     removal ||
+    note.trim().length > 0 ||
     nameChanged ||
     urlChanged ||
     !sameSet(cats, initialCats) ||
@@ -136,8 +138,9 @@ export function TaxonomyFixEditor({
           url: resource.url,
           // Send slugs for existing, raw title for free-text — the webhook
           // resolves either against slug or title on approval.
+          note: note.trim(),
           ...(removal
-            ? { proposeRemoval: true, note: reason.trim() }
+            ? { proposeRemoval: true }
             : {
                 proposedCategories: cats.map((c) => c.slug),
                 proposedTags: tagList.map((tg) => tg.slug),
@@ -178,21 +181,7 @@ export function TaxonomyFixEditor({
           <span className="mt-0.5 block text-xs text-muted-foreground">{t("taxonomy.removalHint")}</span>
         </span>
       </label>
-      {removal && (
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={`${id}-reason`} className={label}>
-            {t("taxonomy.removalReason")}
-          </label>
-          <Textarea
-            id={`${id}-reason`}
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={2}
-            maxLength={1000}
-            placeholder={t("taxonomy.removalReasonPlaceholder")}
-          />
-        </div>
-      )}
+
       {/* Every other field is locked while the resource is reported as gone. */}
       <fieldset disabled={removal} className={cn("flex flex-col gap-4", removal && "opacity-50")}>
       <FormField id={`${id}-name`} label={t("submit.name")} error={nameError}>
@@ -249,6 +238,21 @@ export function TaxonomyFixEditor({
         <p className="text-xs text-destructive">{t("taxonomy.pendingText")}</p>
       )}
       </fieldset>
+      {/* Never shown publicly: e.g. the resource's owner pointing out a mistake. */}
+      <FormField
+        id={`${id}-note`}
+        label={removal ? t("taxonomy.removalReason") : t("taxonomy.editorNote")}
+        counter={`${note.length}/1000`}
+      >
+        <Textarea
+          id={`${id}-note`}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={2}
+          maxLength={1000}
+          placeholder={removal ? t("taxonomy.removalReasonPlaceholder") : t("taxonomy.editorNotePlaceholder")}
+        />
+      </FormField>
       <div className="flex gap-2">
         <Button
           type="button"

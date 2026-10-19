@@ -84,7 +84,8 @@ export function CompanyEditEditor({
         linkedin: proposed.linkedin ?? "",
         emails: Array.from(new Set(proposed.emails as string[])),
       });
-  const dirty = removal || Object.keys(changes).length > 0;
+  // A note alone is enough: e.g. the company pointing out a mistake.
+  const dirty = removal || Object.keys(changes).length > 0 || note.trim().length > 0;
 
   /** Replace a field's value with its normalized form when it's valid. */
   const tidy = (v: string, set: (v: string) => void, fn: (v: string) => string | null) => {

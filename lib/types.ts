@@ -147,6 +147,8 @@ export interface Submission {
 /** A single resource plus its related resources (detail page query). */
 export interface ResourceWithRelated extends Resource {
   related: Resource[]
+  /** What the contributor wrote when suggesting it (detail page only). */
+  contributorNote?: string | null
 }
 
 /** A category with its resolved resource list (detail page query). */
@@ -183,6 +185,8 @@ export interface Company {
 
 export interface CompanyWithRelated extends Company {
   related: Company[]
+  /** What the contributor wrote when suggesting it (detail page only). */
+  contributorNote?: string | null
 }
 
 /** A resource as the ⌘K palette needs it — the slim shape /api/search-index serves. */

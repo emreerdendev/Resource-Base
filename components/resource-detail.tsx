@@ -34,6 +34,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { trackClick } from "@/lib/track-click";
 import { profilePath } from "@/lib/username";
+import { ContributorNote } from "@/components/contributor-note";
 
 const PILL =
   "inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-xs text-accent-foreground transition-colors hover:bg-accent/70";
@@ -266,6 +267,13 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
           <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
             {resource.description || t("modal.noDescription")}
           </p>
+
+          {/* What the contributor wrote when suggesting it. */}
+          {resource.contributorNote && (
+            <div className="mt-5">
+              <ContributorNote note={resource.contributorNote} userId={resource.submittedBy} />
+            </div>
+          )}
 
           {/* Categories */}
           {resource.categories?.length > 0 && (

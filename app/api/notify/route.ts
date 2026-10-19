@@ -65,7 +65,18 @@ type CompanySubmissionDoc = {
   companyCities?: string[];
   companyOtherLocations?: string[];
   companyWorkModels?: string[];
+  note?: string;
 };
+
+/**
+ * The contributor's note on a new resource or company, shown publicly on its
+ * page. Only what they wrote: the editor's lines (appended after "\n\n— ")
+ * stay on the submission.
+ */
+function contributorNoteOf(note: string | null | undefined): string | undefined {
+  const own = (note ?? "").split("\n\n— ")[0].trim();
+  return own && !own.startsWith("— ") ? own.slice(0, 1000) : undefined;
+}
 
 /**
  * Create the live company from an approved suggestion. Reads the submission
@@ -78,7 +89,7 @@ async function createCompanyFromSubmission(
   submittedBy: string,
 ): Promise<string | null> {
   const doc = await writeClient.fetch<CompanySubmissionDoc | null>(
-    `*[_type == "submission" && _id == $id][0]{ name, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, companyCities, companyOtherLocations, companyWorkModels }`,
+    `*[_type == "submission" && _id == $id][0]{ name, companyWebsite, companyCareerUrl, companyLinkedin, companyEmails, companyCities, companyOtherLocations, companyWorkModels, note }`,
     { id: submissionId },
   );
   const name = doc?.name?.trim();
@@ -112,6 +123,7 @@ async function createCompanyFromSubmission(
     addedAt: new Date().toISOString(),
     // Credits the suggester ("Added by @username", resolved live by id).
     submittedBy,
+    ...(contributorNoteOf(doc.note) && { contributorNote: contributorNoteOf(doc.note) }),
     internalNotes: `Suggested by the community (submission ${submissionId}).`,
   });
   return slug;
@@ -127,7 +139,7 @@ async function appendEditorNote(submissionId: string, line: string) {
   if (current?.includes(line)) return;
   await writeClient
     .patch(submissionId)
-    .set({ note: current?.trim() ? `${current.trim()}\n\n— ${line}` : line })
+    .set({ note: current?.trim() ? `${current.trim()}\n\n— ${line}` : `— ${line}` })
     .commit();
 }
 
@@ -146,8 +158,9 @@ async function createResourceFromSubmission(submissionId: string, submittedBy: s
     suggestedCategory?: string;
     pricing?: string;
     tags?: string[];
+    note?: string;
   } | null>(
-    `*[_type == "submission" && _id == $id][0]{ name, url, suggestedCategory, pricing, tags }`,
+    `*[_type == "submission" && _id == $id][0]{ name, url, suggestedCategory, pricing, tags, note }`,
     { id: submissionId },
   );
   const name = doc?.name?.trim().slice(0, 200);
@@ -189,6 +202,7 @@ async function createResourceFromSubmission(submissionId: string, submittedBy: s
     addedAt: new Date().toISOString(),
     // Credits the suggester ("Added by @username", resolved live by id).
     submittedBy,
+    ...(contributorNoteOf(doc.note) && { contributorNote: contributorNoteOf(doc.note) }),
     internalNotes: `Suggested by the community (submission ${submissionId}).`,
   });
   const unresolved = [...cats.unresolved, ...tags.unresolved];

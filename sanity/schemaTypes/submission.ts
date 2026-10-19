@@ -281,7 +281,13 @@ export const submission = defineType({
       options: { layout: 'tags' },
       hidden: ({ parent }) => !isNewResource(parent),
     }),
-    defineField({ name: 'note', type: 'text', rows: 3 }),
+    defineField({
+      name: 'note',
+      type: 'text',
+      rows: 3,
+      description:
+        'New resource / company: the contributor’s public note, shown on its page after approval (lines after “— ” are notes for the editor and stay here). Edits and fixes: the contributor’s note to the editor (never shown).',
+    }),
     defineField({
       name: 'submittedBy',
       title: 'Submitted by (user id)',

@@ -589,7 +589,10 @@ function SubmissionDialog({
                   </div>
                 )}
                 {s.note && s.kind !== "companyEdit" && (
-                  <DetailRow label={t("submit.note")} value={s.note} />
+                  <DetailRow
+                    label={s.kind === "new" || s.kind === "company" ? t("contributorNote.title") : t("taxonomy.editorNote")}
+                    value={s.note}
+                  />
                 )}
 
                 {/* Rejection reason */}

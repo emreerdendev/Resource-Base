@@ -156,6 +156,8 @@ export const de = {
     removalHint: "Meldet sie an die Redaktion, statt Änderungen vorzuschlagen.",
     removalReason: "Warum? (optional)",
     removalReasonPlaceholder: "z. B. Die Seite wurde eingestellt, das Projekt archiviert…",
+    editorNote: "Notiz an die Redaktion (optional)",
+    editorNotePlaceholder: "Was die Redaktion wissen sollte – z. B. dass du diese Ressource betreust oder was falsch ist.",
     removalProposed: "Als nicht mehr vorhanden gemeldet – wird nach Bestätigung aus dem Verzeichnis entfernt.",
     pending: "Ausstehend",
     editShort: "Vorschlagen",
@@ -293,8 +295,9 @@ export const de = {
     tags: "Tags (optional)",
     tagsPlaceholder: "Kommagetrennt, z. B. react, css",
     viewMine: "Meine Einreichungen ansehen",
-    note: "Notiz",
-    notePlaceholder: "Warum ist diese Ressource großartig?",
+    note: "Notiz zum Beitrag (optional)",
+    noteHint: "Wird öffentlich auf der Ressourcenseite angezeigt, mit deinem Benutzernamen.",
+    notePlaceholder: "Was macht sie nützlich? Tipps für den Einstieg…",
     submit: "Ressource hinzufügen",
     success: "Danke! Deine Einreichung ist in der Prüfung.",
     error: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
@@ -433,6 +436,10 @@ export const de = {
     total_other: "Beiträge",
   },
 
+  contributorNote: {
+    title: "Notiz zum Beitrag",
+  },
+
   footer: {
     contributions: "Beiträge",
     tagline: "Ein kostenloses, von der Community gepflegtes Verzeichnis für Ressourcen, Unternehmen und Lebensläufe.",
@@ -555,9 +562,9 @@ export const de = {
 
     clearHint: "Lass ein Feld leer, um seine Entfernung vorzuschlagen.",
 
-    note: "Notiz (optional)",
+    note: "Notiz an die Redaktion (optional)",
 
-    notePlaceholder: "Wo hast du das gesehen? z. B. auf der Karriereseite",
+    notePlaceholder: "Was die Redaktion wissen sollte – z. B. dass du dort arbeitest oder wo du die Änderung gesehen hast.",
 
     removalPlaceholder: "z. B. Das Unternehmen wurde geschlossen oder übernommen…",
 
@@ -657,6 +664,7 @@ export const de = {
     websitePlaceholder: "Website des Unternehmens",
     privacyHint: "Nur allgemeine Firmenadressen (hr@, careers@, info@…) — bitte keine persönlichen E-Mails von Mitarbeitenden.",
     notePlaceholder: "Alles Hilfreiche — was sie entwickeln, wie du dich beworben hast, welcher Weg funktioniert hat…",
+    noteHint: "Wird öffentlich auf der Unternehmensseite angezeigt, mit deinem Benutzernamen.",
     submit: "Vorschlag senden",
     success: "Danke! Dein Vorschlag wird geprüft.",
     exists: "Dieses Unternehmen ist bereits im Verzeichnis.",

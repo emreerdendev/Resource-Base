@@ -188,10 +188,12 @@ async function createSubmission(req: NextRequest) {
   if (proposedName !== null && proposedName.length < 2) {
     return new NextResponse("Invalid proposed name", { status: 400 });
   }
-  // An edit suggestion must propose SOMETHING.
+  // An edit suggestion must propose SOMETHING — a change, or at least a note
+  // to the editor (e.g. the resource's owner pointing out a mistake).
   if (
     kind === "taxonomy" &&
     !proposeRemoval &&
+    !str(data.note) &&
     !proposedName &&
     !proposedUrl &&
     !proposedCategories.length &&
@@ -504,16 +506,17 @@ async function submitCompanyEdit(data: Record<string, unknown>, userId: string) 
   };
 
   const removal = data.proposeRemoval === true;
+  const note = str(data.note).slice(0, 1000);
   let changes: CompanyEditFields = {};
   if (!removal) {
     const parsed = parseCompanyEdit(data);
     if (!parsed.ok) return new NextResponse(`Invalid ${parsed.error}`, { status: 400 });
     changes = changedFields(original, parsed.value);
-    if (!Object.keys(changes).length) {
+    // A change, or at least a note to the editor (e.g. from the company itself).
+    if (!Object.keys(changes).length && !note) {
       return new NextResponse("Propose at least one change", { status: 400 });
     }
   }
-  const note = str(data.note).slice(0, 1000);
 
   try {
     const dup = await writeClient.fetch<string | null>(

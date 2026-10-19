@@ -156,6 +156,8 @@ export const es = {
     removalHint: "Lo notifica a los editores en lugar de sugerir cambios.",
     removalReason: "¿Por qué? (opcional)",
     removalReasonPlaceholder: "p. ej. El sitio cerró, el proyecto está archivado…",
+    editorNote: "Nota para el editor (opcional)",
+    editorNotePlaceholder: "Lo que el editor debería saber — p. ej. mantienes este recurso o qué está mal.",
     removalProposed: "Notificado como desaparecido: se retirará del directorio si se confirma.",
     pending: "Pendiente",
     editShort: "Sugerir",
@@ -293,8 +295,9 @@ export const es = {
     tags: "Etiquetas (opcional)",
     tagsPlaceholder: "Separadas por comas, p. ej. react, css",
     viewMine: "Ver mis propuestas",
-    note: "Nota",
-    notePlaceholder: "¿Por qué es genial este recurso?",
+    note: "Nota del colaborador (opcional)",
+    noteHint: "Se muestra públicamente en la página del recurso, con tu nombre de usuario.",
+    notePlaceholder: "¿Qué lo hace útil? Consejos para empezar…",
     submit: "Añadir recurso",
     success: "¡Gracias! Tu envío está en revisión.",
     error: "Algo salió mal. Inténtalo de nuevo.",
@@ -433,6 +436,10 @@ export const es = {
     total_other: "contribuciones",
   },
 
+  contributorNote: {
+    title: "Nota del colaborador",
+  },
+
   footer: {
     contributions: "Contribuciones",
     tagline: "Un directorio gratuito de recursos, empresas y CV, mantenido por la comunidad.",
@@ -555,9 +562,9 @@ export const es = {
 
     clearHint: "Deja un campo vacío para pedir que se elimine.",
 
-    note: "Nota (opcional)",
+    note: "Nota para el editor (opcional)",
 
-    notePlaceholder: "¿Dónde lo viste? p. ej. su página de empleo",
+    notePlaceholder: "Lo que el editor debería saber — p. ej. trabajas allí o dónde viste el cambio.",
 
     removalPlaceholder: "p. ej. La empresa cerró o fue adquirida…",
 
@@ -657,6 +664,7 @@ export const es = {
     websitePlaceholder: "Sitio web de la empresa",
     privacyHint: "Solo correos genéricos de la empresa (rrhh@, careers@, info@…) — sin correos personales de empleados.",
     notePlaceholder: "Todo lo que ayude — qué desarrollan, cómo postulaste, qué canal funcionó…",
+    noteHint: "Se muestra públicamente en la página de la empresa, con tu nombre de usuario.",
     submit: "Enviar sugerencia",
     success: "¡Gracias! Tu sugerencia está en revisión.",
     exists: "Esta empresa ya está en el directorio.",

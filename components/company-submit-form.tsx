@@ -438,7 +438,12 @@ export function CompanySubmitForm({
         </div>
       </div>
 
-      <FormField id={`${id}-note`} label={t("submit.note")} counter={`${note.length}/1000`}>
+      <FormField
+        id={`${id}-note`}
+        label={t("submit.note")}
+        hint={t("suggest.noteHint")}
+        counter={`${note.length}/1000`}
+      >
         <Textarea
           id={`${id}-note`}
           rows={3}

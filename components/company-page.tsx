@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { CompanyStatusMenu } from "@/components/company-status-menu";
 import { Button } from "@/components/ui/button";
 import type { CompanyWithRelated } from "@/lib/types";
+import { ContributorNote } from "@/components/contributor-note";
 
 /**
  * Deep-linkable company page — same body as the modal, plus related companies.
@@ -68,6 +69,9 @@ export function CompanyPageView({ company }: { company: CompanyWithRelated }) {
 
       <div className="mt-8 flex max-w-2xl flex-col gap-6">
         <CompanyDetails company={company} />
+        {company.contributorNote && (
+          <ContributorNote note={company.contributorNote} userId={company.submittedBy} />
+        )}
         <CompanyEditPanel
           company={company}
           editOpen={editOpen}

@@ -157,6 +157,16 @@ export const company = defineType({
       readOnly: true,
     }),
     defineField({
+      name: 'contributorNote',
+      title: 'Contributor note (public)',
+      type: 'text',
+      rows: 3,
+      group: 'moderation',
+      description:
+        'What the contributor wrote when suggesting it, shown on its page under “Contributor Note”. Copied from the suggestion on approval; edit or clear it to change or hide it.',
+      validation: (rule) => rule.max(1000),
+    }),
+    defineField({
       name: 'internalNotes',
       type: 'text',
       rows: 2,

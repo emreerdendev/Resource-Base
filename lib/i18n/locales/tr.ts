@@ -156,6 +156,8 @@ export const tr = {
     removalHint: "Değişiklik önermek yerine editörlere bildirir.",
     removalReason: "Neden? (isteğe bağlı)",
     removalReasonPlaceholder: "örn. Site kapandı, proje arşivlendi…",
+    editorNote: "Editöre Not (İsteğe Bağlı)",
+    editorNotePlaceholder: "Editörün bilmesi gereken bir şey varsa — ör. bu kaynağın sahibisin ya da neyin yanlış olduğu.",
     removalProposed: "Artık yok olarak bildirildi — onaylanırsa dizinden kaldırılacak.",
     pending: "Beklemede",
     editShort: "Öner",
@@ -293,8 +295,9 @@ export const tr = {
     tags: "Etiketler (opsiyonel)",
     tagsPlaceholder: "Virgülle ayır, örn. react, css",
     viewMine: "Önerilerimi Gör",
-    note: "Not",
-    notePlaceholder: "Bu kaynak neden harika?",
+    note: "Katkıcı Notu (İsteğe Bağlı)",
+    noteHint: "Kaynak sayfasında kullanıcı adınla birlikte herkese açık gösterilir.",
+    notePlaceholder: "Onu faydalı yapan ne? Başlamak için ipuçları…",
     submit: "Kaynağı Ekle",
     success: "Teşekkürler! Gönderin inceleme sırasında.",
     error: "Bir şeyler ters gitti. Lütfen tekrar dene.",
@@ -431,6 +434,10 @@ export const tr = {
     total_other: "katkı",
   },
 
+  contributorNote: {
+    title: "Katkıcı Notu",
+  },
+
   footer: {
     contributions: "Katkılar",
     tagline: "Kaynaklar, Şirketler ve CV'ler için topluluk tarafından sürdürülen ücretsiz bir dizin.",
@@ -553,9 +560,9 @@ export const tr = {
 
     clearHint: "Kaldırılmasını istediğin alanı boş bırak.",
 
-    note: "Not (İsteğe Bağlı)",
+    note: "Editöre Not (İsteğe Bağlı)",
 
-    notePlaceholder: "Bunu nerede gördün? Örn. kariyer sayfaları",
+    notePlaceholder: "Editörün bilmesi gereken bir şey varsa — ör. orada çalışıyorsun ya da değişikliği nerede gördün.",
 
     removalPlaceholder: "Örn. Şirket kapandı veya satın alındı…",
 
@@ -655,6 +662,7 @@ export const tr = {
     websitePlaceholder: "Şirketin web sitesi",
     privacyHint: "Sadece şirketin genel adresleri (ik@, kariyer@, info@…) — lütfen çalışanların kişisel e-postalarını ekleme.",
     notePlaceholder: "Faydalı olabilecek her şey — ne geliştiriyorlar, nasıl başvurdun, hangi kanal işe yaradı…",
+    noteHint: "Şirket sayfasında kullanıcı adınla birlikte herkese açık gösterilir.",
     submit: "Öneriyi Gönder",
     success: "Teşekkürler! Önerin inceleme sırasında.",
     exists: "Bu şirket zaten listede.",

@@ -156,6 +156,8 @@ export const en = {
     removalHint: "Reports it to the editors instead of suggesting changes.",
     removalReason: "Why? (optional)",
     removalReasonPlaceholder: "e.g. The site shut down, the project is archived…",
+    editorNote: "Note to Editor (Optional)",
+    editorNotePlaceholder: "Anything the editor should know — e.g. you maintain this resource, or what’s wrong.",
     removalProposed: "Reported as gone — it will be removed from the directory if confirmed.",
     pending: "Pending",
     editShort: "Suggest",
@@ -293,8 +295,9 @@ export const en = {
     tags: "Tags (optional)",
     tagsPlaceholder: "Comma-separated, e.g. react, css",
     viewMine: "View My Submissions",
-    note: "Note",
-    notePlaceholder: "Why is this resource great?",
+    note: "Contributor Note (Optional)",
+    noteHint: "Shown publicly on the resource page, with your username.",
+    notePlaceholder: "What makes it useful? Tips for getting started…",
     submit: "Add Resource",
     success: "Thanks! Your submission is in the review queue.",
     error: "Something went wrong. Please try again.",
@@ -433,6 +436,10 @@ export const en = {
     total_other: "contributions",
   },
 
+  contributorNote: {
+    title: "Contributor Note",
+  },
+
   footer: {
     contributions: "Contributions",
     tagline: "A free directory of Resources, Companies and CVs, maintained by the community.",
@@ -555,9 +562,9 @@ export const en = {
 
     clearHint: "Leave a field empty to ask for it to be removed.",
 
-    note: "Note (Optional)",
+    note: "Note to Editor (Optional)",
 
-    notePlaceholder: "Where did you see this? e.g. their careers page",
+    notePlaceholder: "Anything the editor should know — e.g. you work there, or where you saw the change.",
 
     removalPlaceholder: "e.g. The company closed or was acquired…",
 
@@ -657,6 +664,7 @@ export const en = {
     websitePlaceholder: "Company website",
     privacyHint: "Only generic company inboxes (hr@, careers@, info@…) — please no personal employee emails.",
     notePlaceholder: "Anything that helps — what they build, how you applied, which channel worked…",
+    noteHint: "Shown publicly on the company page, with your username.",
     submit: "Send Suggestion",
     success: "Thanks! Your suggestion is in the review queue.",
     exists: "This company is already in the directory.",

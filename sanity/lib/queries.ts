@@ -105,6 +105,7 @@ export const resourceIdsQuery = groq`*[${PUBLISHED}]._id`
 export const resourceBySlugQuery = groq`
   *[${PUBLISHED} && slug.current == $slug][0] {
     ${RESOURCE_FIELDS},
+    contributorNote,
     "related": *[
       ${PUBLISHED} && slug.current != ^.slug.current && linkStatus != "broken" &&
       (count(tags[@._ref in ^.^.tags[]._ref]) > 0 ||
@@ -162,6 +163,7 @@ export const companyIdsQuery = groq`*[${PUBLISHED_COMPANY}]._id`
 export const companyBySlugQuery = groq`
   *[${PUBLISHED_COMPANY} && slug.current == $slug][0] {
     ${COMPANY_FIELDS},
+    contributorNote,
     "related": *[
       ${PUBLISHED_COMPANY} && slug.current != ^.slug.current &&
       (count(sectors[@ in ^.^.sectors]) > 0 ||

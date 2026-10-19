@@ -156,6 +156,8 @@ export const fr = {
     removalHint: "La signale aux éditeurs au lieu de proposer des modifications.",
     removalReason: "Pourquoi ? (facultatif)",
     removalReasonPlaceholder: "ex. Le site a fermé, le projet est archivé…",
+    editorNote: "Note pour l’éditeur (facultatif)",
+    editorNotePlaceholder: "Ce que l’éditeur doit savoir — par ex. vous maintenez cette ressource, ou ce qui ne va pas.",
     removalProposed: "Signalée comme disparue — elle sera retirée de l’annuaire si c’est confirmé.",
     pending: "En attente",
     editShort: "Suggérer",
@@ -293,8 +295,9 @@ export const fr = {
     tags: "Tags (facultatif)",
     tagsPlaceholder: "Séparés par des virgules, ex. react, css",
     viewMine: "Voir mes propositions",
-    note: "Note",
-    notePlaceholder: "Pourquoi cette ressource est-elle géniale ?",
+    note: "Note du contributeur (facultatif)",
+    noteHint: "Affichée publiquement sur la page de la ressource, avec votre nom d’utilisateur.",
+    notePlaceholder: "Qu’est-ce qui la rend utile ? Conseils pour bien démarrer…",
     submit: "Ajouter la ressource",
     success: "Merci ! Votre ajout est en cours d'examen.",
     error: "Une erreur s'est produite. Veuillez réessayer.",
@@ -433,6 +436,10 @@ export const fr = {
     total_other: "contributions",
   },
 
+  contributorNote: {
+    title: "Note du contributeur",
+  },
+
   footer: {
     contributions: "Contributions",
     tagline: "Un annuaire gratuit de ressources, d’entreprises et de CV, maintenu par la communauté.",
@@ -555,9 +562,9 @@ export const fr = {
 
     clearHint: "Laissez un champ vide pour demander sa suppression.",
 
-    note: "Note (facultatif)",
+    note: "Note pour l’éditeur (facultatif)",
 
-    notePlaceholder: "Où l’avez-vous vu ? ex. leur page carrières",
+    notePlaceholder: "Ce que l’éditeur doit savoir — par ex. vous y travaillez, ou où vous avez vu le changement.",
 
     removalPlaceholder: "ex. L’entreprise a fermé ou a été rachetée…",
 
@@ -657,6 +664,7 @@ export const fr = {
     websitePlaceholder: "Site web de l’entreprise",
     privacyHint: "Uniquement des adresses génériques (rh@, careers@, info@…) — pas d’e-mails personnels d’employés.",
     notePlaceholder: "Tout ce qui peut aider — ce qu’ils développent, comment vous avez postulé, quel canal a marché…",
+    noteHint: "Affichée publiquement sur la page de l’entreprise, avec votre nom d’utilisateur.",
     submit: "Envoyer la suggestion",
     success: "Merci ! Votre suggestion est en cours de vérification.",
     exists: "Cette entreprise est déjà dans l’annuaire.",
