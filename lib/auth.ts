@@ -15,17 +15,39 @@ import { resetPasswordEmail, verifyEmail } from "@/lib/email-templates";
 export const VERIFY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Stem a display name/email into a username base, then add a short suffix. */
+/**
+ * Letters that NFKD doesn't reduce to a-z: Turkish and other European ones,
+ * plus Cyrillic and Greek, so a name keeps its sound (Ayşe → ayse, Groß →
+ * gross, Иван → ivan). Scripts without letter-by-letter Latin (Arabic, CJK…)
+ * fall back to the email address in usernameFor.
+ */
+const LATIN: Record<string, string> = {
+  ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u",
+  ß: "ss", æ: "ae", œ: "oe", ø: "o", ł: "l", đ: "d", ð: "d", þ: "th",
+  а: "a", б: "b", в: "v", г: "g", ґ: "g", д: "d", е: "e", ё: "e", є: "ye", ж: "zh", з: "z",
+  и: "i", і: "i", ї: "yi", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
+  с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts", ч: "ch", ш: "sh", щ: "shch", ъ: "",
+  ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+  α: "a", β: "v", γ: "g", δ: "d", ε: "e", ζ: "z", η: "i", θ: "th", ι: "i", κ: "k", λ: "l",
+  μ: "m", ν: "n", ξ: "x", ο: "o", π: "p", ρ: "r", σ: "s", ς: "s", τ: "t", υ: "y", φ: "f",
+  χ: "ch", ψ: "ps", ω: "o",
+};
+
 function usernameStem(raw: string | null | undefined): string {
-  const cleaned = (raw ?? "")
-    // Turkish letters become their Latin twins instead of being dropped
-    // (Ayşe → ayse, Çağrı Işık → cagriisik); other accents are stripped.
-    .replace(/[İIı]/g, (c) => (c === "ı" ? "i" : "I"))
+  return (raw ?? "")
+    .replace(/[İI]/g, "i")
     .toLowerCase()
-    .replace(/[çğöşü]/g, (c) => ({ ç: "c", ğ: "g", ö: "o", ş: "s", ü: "u" })[c] ?? c)
+    // Accents off first (ά → α, é → e), then the letter map.
     .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/./g, (c) => LATIN[c] ?? c)
     .replace(/[^a-z0-9]/g, "")
     .slice(0, 12);
-  return cleaned || "user";
+}
+
+/** Stem from the name, else the email's local part, else "user". */
+function usernameFor(name: string | null | undefined, email: string): string {
+  return usernameStem(name) || usernameStem(email.split("@")[0]) || "user";
 }
 
 /** Bound a new user's display name and keep only an https avatar URL. */
@@ -240,7 +262,7 @@ export async function getAuth() {
                 .set({ verifyDeadline: new Date(Date.now() + VERIFY_WINDOW_MS) })
                 .where(eq(schema.user.id, createdUser.id));
             }
-            const stem = usernameStem(createdUser.name || createdUser.email);
+            const stem = usernameFor(createdUser.name, createdUser.email);
             for (let i = 0; i < 6; i++) {
               const suffix = crypto.randomUUID().replace(/-/g, "").slice(0, 5);
               try {
