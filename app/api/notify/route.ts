@@ -118,6 +118,20 @@ async function createCompanyFromSubmission(
 }
 
 /**
+ * Add a line for the editor under the submission's note. Appended, never
+ * replacing it: the note is what the contributor wrote. Idempotent, so a
+ * retried webhook doesn't add it twice.
+ */
+async function appendEditorNote(submissionId: string, line: string) {
+  const current = await writeClient.fetch<string | null>(`*[_id == $id][0].note`, { id: submissionId });
+  if (current?.includes(line)) return;
+  await writeClient
+    .patch(submissionId)
+    .set({ note: current?.trim() ? `${current.trim()}\n\n— ${line}` : line })
+    .commit();
+}
+
+/**
  * Publish the resource from an approved "new" suggestion. Reads the submission
  * itself (editors may adjust it before approving). The id is derived from the
  * submission, so a retried webhook never creates it twice; the slug gets a
@@ -179,11 +193,10 @@ async function createResourceFromSubmission(submissionId: string, submittedBy: s
   });
   const unresolved = [...cats.unresolved, ...tags.unresolved];
   if (unresolved.length) {
-    await writeClient
-      .patch(submissionId)
-      .set({ note: `Created without these unmatched values — add them by hand: ${unresolved.join(", ")}` })
-      .commit()
-      .catch(() => {});
+    await appendEditorNote(
+      submissionId,
+      `Created without these unmatched values — add them by hand: ${unresolved.join(", ")}`,
+    ).catch(() => {});
   }
   return slug;
 }
@@ -442,12 +455,7 @@ export async function POST(req: NextRequest) {
         }
         const unresolved = [...cats.unresolved, ...tags.unresolved];
         if (unresolved.length) {
-          await writeClient
-            .patch(body._id)
-            .set({
-              note: `Unresolved proposals to add manually: ${unresolved.join(", ")}`,
-            })
-            .commit();
+          await appendEditorNote(body._id, `Unresolved proposals to add manually: ${unresolved.join(", ")}`);
         }
       }
     } catch (err) {
