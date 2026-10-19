@@ -5,7 +5,7 @@ import { captcha } from "better-auth/plugins";
 import type { BetterAuthPlugin } from "better-auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
-import { eq } from "drizzle-orm";
+import { and, eq, lt } from "drizzle-orm";
 import * as schema from "@/lib/db/schema";
 import { isDisposableEmail } from "@/lib/disposable-email";
 import { sendEmail } from "@/lib/email";
@@ -222,6 +222,31 @@ export async function getAuth() {
             const username = await pickUsername(db, usernameFor(identity.name, email));
             const verifyDeadline = data.emailVerified ? null : new Date(Date.now() + VERIFY_WINDOW_MS);
             return { data: { ...data, ...identity, fullName, username, verifyDeadline } };
+          },
+        },
+      },
+      account: {
+        create: {
+          // Connecting Google/GitHub/GitLab to an existing account only
+          // succeeds when that provider vouches for the account's own email
+          // (Google always; GitHub/GitLab only if verified there — Better Auth
+          // refuses the link otherwise, and requires the same address). So a
+          // linked provider proves the email: mark it verified, which also
+          // ends the 7-day window and lifts a suspension. Accounts created by
+          // this very sign-up (under a minute old) are left alone: their
+          // status already came from the provider.
+          after: async (account) => {
+            if (account.providerId === "credential") return;
+            await db
+              .update(schema.user)
+              .set({ emailVerified: true, verifyDeadline: null, suspendedAt: null, updatedAt: new Date() })
+              .where(
+                and(
+                  eq(schema.user.id, account.userId),
+                  eq(schema.user.emailVerified, false),
+                  lt(schema.user.createdAt, new Date(Date.now() - 60_000)),
+                ),
+              );
           },
         },
       },

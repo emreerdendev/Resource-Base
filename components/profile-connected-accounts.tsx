@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { GoogleIcon, GithubIcon, GitlabIcon } from "@/components/brand-icons";
 import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/components/auth/auth-provider";
 import { loadLinkedAccounts } from "@/lib/linked-accounts";
 
 type Provider = "google" | "github" | "gitlab";
@@ -24,6 +25,7 @@ const PROVIDERS: { id: Provider; label: string; Icon: typeof GoogleIcon }[] = [
  */
 export function ProfileConnectedAccounts() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [linked, setLinked] = useState<Set<string> | null>(null);
   const [credential, setCredential] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
@@ -41,6 +43,20 @@ export function ProfileConnectedAccounts() {
     void load();
   }, [load]);
 
+  // Connecting a provider verifies the email (lib/auth.ts), but the session
+  // is cached in a cookie for minutes: re-read it once, so the "verify your
+  // email" banner and the locked actions update right away.
+  const unverified = !!user && !user.emailVerified;
+  useEffect(() => {
+    if (!unverified) return;
+    void authClient
+      .getSession({ query: { disableCookieCache: true } })
+      .then((res) => {
+        if (res.data?.user.emailVerified) authClient.$store.notify("$sessionSignal");
+      })
+      .catch(() => {});
+  }, [unverified]);
+
   if (linked === null) return null;
 
   // Total sign-in methods = linked OAuth providers + (credential ? 1 : 0).
@@ -51,7 +67,8 @@ export function ProfileConnectedAccounts() {
     setPending(provider);
     const { error } = await authClient.linkSocial({
       provider,
-      callbackURL: "/profile/edit",
+      // Back to this tab, where the session is refreshed (see below).
+      callbackURL: "/profile/edit?tab=account",
       // Plain path only — a query string here throws "Invalid errorCallbackURL".
       // If the provider's email differs from the account email, Better Auth
       // blocks the link and redirects to this path with its own appended
