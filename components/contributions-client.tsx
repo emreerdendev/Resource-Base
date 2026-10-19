@@ -85,7 +85,7 @@ export function ContributionsClient() {
                     )}
                     <span className="mt-1 block truncate text-xs text-muted-foreground">{parts.join(" · ")}</span>
                   </span>
-                  <span className="shrink-0 text-right">
+                  <span className="shrink-0 text-center">
                     <span className="block text-lg font-semibold tabular-nums">{c.total}</span>
                     <span className="block text-[11px] text-muted-foreground">
                       {t("contributions.total", { count: c.total })}

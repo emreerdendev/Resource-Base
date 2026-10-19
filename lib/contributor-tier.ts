@@ -1,6 +1,7 @@
 /**
- * Contribution tiers based on how many published resources a user has had
- * accepted. Drives the gamification badge on profiles. The `labelKey` maps to
+ * Contribution tiers based on how many contributions of any kind a user has
+ * had accepted (lib/contributions.ts). Drives the badge on profiles. Kept low:
+ * the site is small, so a handful of contributions already stands out. The `labelKey` maps to
  * an i18n key under `contributor.tier.*`.
  */
 export type ContributorTier = {
@@ -18,13 +19,13 @@ const TIERS: ContributorTier[] = [
     labelKey: "contributor.tier.legend",
     className:
       "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    min: 25,
+    min: 10,
   },
   {
     key: "star",
     labelKey: "contributor.tier.star",
     className: "border-primary/40 bg-primary/10 text-primary",
-    min: 10,
+    min: 5,
   },
   {
     key: "contributor",

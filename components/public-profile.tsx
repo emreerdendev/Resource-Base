@@ -16,11 +16,11 @@ import { socialEntries } from "@/lib/social-links";
 import { loadMyCv } from "@/lib/my-cv";
 import { useSubmissions } from "@/lib/submissions";
 import type { PublicProfile, Resource } from "@/lib/types";
+import type { ContributionCounts } from "@/lib/contributions";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
   Award,
-  Building2,
   BriefcaseBusiness,
   Eye,
   EyeOff,
@@ -59,13 +59,14 @@ function SocialLink({
 export function PublicProfileView({
   profile,
   resources,
-  companiesAdded,
+  counts,
   publicEmail,
 }: {
   profile: PublicProfile;
+  /** The resources they added, shown as cards. */
   resources: Resource[];
-  /** Approved company suggestions — contributions without a resource card. */
-  companiesAdded: number;
+  /** Every contribution, by kind (same rules as the Contributions page). */
+  counts: ContributionCounts;
   /** The owner's email, only when they made it public. */
   publicEmail: string | null;
 }) {
@@ -74,8 +75,14 @@ export function PublicProfileView({
   const isOwner = user?.id === profile.id;
   const name = profile.full_name || `@${profile.username}`;
   // Gamification: tier badge based on accepted contributions of any kind.
-  const contributions = resources.length + companiesAdded;
+  const contributions = counts.total;
   const tier = contributorTier(contributions);
+  const breakdown = [
+    counts.resources && t("contributions.resources", { count: counts.resources }),
+    counts.companies && t("contributions.companies", { count: counts.companies }),
+    counts.edits && t("contributions.edits", { count: counts.edits }),
+    counts.cvs && t("contributions.cv"),
+  ].filter(Boolean);
 
   // Email display: the owner always sees their own (from the session) with an
   // eye/eye-off marking whether it's public; other visitors see it only if the
@@ -165,11 +172,8 @@ export function PublicProfileView({
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           {t("profile.contributions", { count: contributions })}
         </h2>
-        {companiesAdded > 0 && (
-          <p className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Building2 className="size-4" />
-            {t("profile.companiesAdded", { count: companiesAdded })}
-          </p>
+        {contributions > 0 && (
+          <p className="mb-4 text-sm text-muted-foreground">{breakdown.join(" · ")}</p>
         )}
         {contributions === 0 ? (
           <p className="py-10 text-center text-muted-foreground">

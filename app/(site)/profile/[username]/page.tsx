@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { and, count, eq } from "drizzle-orm";
-import { getDb } from "@/lib/db";
-import { submissions } from "@/lib/db/schema";
+import { contributionCounts } from "@/lib/contributions";
 import { fetchPublicEmail, getPublicProfile } from "@/lib/public-profile";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { resourcesBySubmitterQuery } from "@/sanity/lib/queries";
@@ -32,24 +30,15 @@ export default async function PublicProfilePage({
   const profile = await getPublicProfile(username);
   if (!profile) notFound();
 
-  // Contributions: published resources (Sanity, tag-cached) plus approved
-  // company suggestions (counted from the D1 submissions mirror).
-  const [resources, [{ companies }], publicEmail] = await Promise.all([
+  // The resources they added (Sanity, tag-cached) to show as cards, and the
+  // count of every contribution (same rules as the Contributions page).
+  const [resources, counts, publicEmail] = await Promise.all([
     sanityFetch<Resource[]>({
       query: resourcesBySubmitterQuery,
       params: { userId: profile.id },
       tags: ["resource-list"],
     }),
-    getDb()
-      .select({ companies: count() })
-      .from(submissions)
-      .where(
-        and(
-          eq(submissions.userId, profile.id),
-          eq(submissions.kind, "company"),
-          eq(submissions.status, "approved"),
-        ),
-      ),
+    contributionCounts(profile.id),
     // Only when the owner chose to show it.
     profile.show_email ? fetchPublicEmail(profile.id) : null,
   ]);
@@ -58,7 +47,7 @@ export default async function PublicProfilePage({
     <PublicProfileView
       profile={profile}
       resources={resources}
-      companiesAdded={companies}
+      counts={counts}
       publicEmail={publicEmail}
     />
   );

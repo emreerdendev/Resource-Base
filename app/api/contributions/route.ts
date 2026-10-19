@@ -7,15 +7,18 @@ import type { ContributorEntry } from "@/lib/types";
 
 export const runtime = "nodejs";
 
-/** Shared by every visitor; a new contribution shows up within minutes. */
-const CACHE_CONTROL = "public, max-age=300, s-maxage=600";
+/**
+ * Shared by every visitor for a minute (browser and edge), so a new
+ * contribution shows up within about a minute while the query still runs at
+ * most once a minute per location, whatever the traffic.
+ */
+const CACHE_CONTROL = "public, max-age=60, s-maxage=60";
 
 /**
  * Everyone who has contributed, with what: approved submissions of every
  * kind (new resources and companies, fixes, category/tag and company edits)
  * plus a listed CV. Most contributions first. One small list for all
- * visitors, kept in the Workers Cache API (the query runs at most once per
- * location every 10 minutes; the key ignores the query string).
+ * visitors, kept in the Workers Cache API (the key ignores the query string).
  */
 export async function GET(req: NextRequest) {
   const cache = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;

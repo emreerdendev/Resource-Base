@@ -7,14 +7,15 @@ import { inBackground } from "@/lib/server-timing";
 
 export const runtime = "nodejs";
 
-/** Shared by every visitor; a new contributor shows up within minutes. */
-const CACHE_CONTROL = "public, max-age=300, s-maxage=600";
+/** Shared by every visitor for a minute, so a new contributor's "Added by"
+ * shows up within about a minute; the query runs at most once a minute per
+ * location. */
+const CACHE_CONTROL = "public, max-age=60, s-maxage=60";
 
 /**
  * Everyone credited on the site ("Added by @username"): users with at least
  * one approved submission, by id. One small list for all visitors, served from
- * the Workers Cache API — the D1 query runs at most once per location every
- * 10 minutes, whatever the traffic. The cache key ignores the query string,
+ * the Workers Cache API, whatever the traffic. The cache key ignores the query string,
  * so it can't be bypassed with "?x=random".
  */
 export async function GET(req: NextRequest) {
