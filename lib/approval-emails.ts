@@ -8,13 +8,14 @@ import { approvalEmail } from "@/lib/email-templates";
 import { siteUrl } from "@/lib/site";
 
 /**
- * Email the contributors whose new resource or company was approved and who
- * haven't had that email yet — next to the in-app notification. Each approval
- * is claimed before sending, so it's emailed once even if two runs overlap;
- * one that couldn't go out (daily cap, per-address limit) is released and
- * retried on a later run. Returns how many were sent.
+ * Email the contributors whose new resource or company was approved — next
+ * to the in-app notification. One attempt per approval: it's marked before
+ * sending, so it's never sent twice, and one that couldn't go out (daily cap,
+ * per-address limit) is simply skipped; the notification already told them.
+ * `sanityId` limits it to that approval (the webhook); without it, every
+ * approval never attempted yet (the admin trigger). Returns how many were sent.
  */
-export async function sendApprovalEmails(limit = 10): Promise<number> {
+export async function sendApprovalEmails(opts: { sanityId?: string; limit?: number } = {}): Promise<number> {
   const db = getDb();
   const pending = await db
     .select({
@@ -31,10 +32,10 @@ export async function sendApprovalEmails(limit = 10): Promise<number> {
         eq(submissions.status, "approved"),
         inArray(submissions.kind, ["new", "company"]),
         isNull(submissions.approvalEmailedAt),
-        isNotNull(submissions.sanitySubmissionId),
+        opts.sanityId ? eq(submissions.sanitySubmissionId, opts.sanityId) : isNotNull(submissions.sanitySubmissionId),
       ),
     )
-    .limit(limit);
+    .limit(opts.limit ?? 10);
 
   let sent = 0;
   for (const row of pending) {
@@ -60,11 +61,6 @@ export async function sendApprovalEmails(limit = 10): Promise<number> {
 
     const result = await sendEmail({ to: row.email, ...mail, dedupeKey: row.email }).catch(() => ({ ok: false }));
     if (result.ok) sent++;
-    else
-      await db
-        .update(submissions)
-        .set({ approvalEmailedAt: null })
-        .where(eq(submissions.id, row.id));
   }
   return sent;
 }

@@ -238,8 +238,8 @@ export const submissions = sqliteTable(
     originalDescription: text("original_description"),
     note: text("note"),
     rejectionReason: text("rejection_reason"),
-    // When the "approved" email went out (new resources and companies only);
-    // null = not sent yet, so it's sent once and retried if it couldn't go.
+    // When the "approved" email was attempted (new resources and companies
+    // only); null = never. One attempt: a capped send isn't retried.
     approvalEmailedAt: integer("approval_emailed_at", { mode: "timestamp" }),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()

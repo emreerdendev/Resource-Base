@@ -565,9 +565,9 @@ export async function POST(req: NextRequest) {
     })
     .where(eq(submissions.sanitySubmissionId, body._id));
 
-  // A new resource or company went live: email the contributor too (after
-  // the response; also sends any earlier approval email that couldn't go out).
-  if (approved && (kind === "new" || kind === "company")) inBackground(sendApprovalEmails());
+  // A new resource or company went live: email the contributor too, once,
+  // after the response (skipped if the daily or per-address limit is hit).
+  if (approved && (kind === "new" || kind === "company")) inBackground(sendApprovalEmails({ sanityId: body._id }));
 
   return NextResponse.json({ ok: true });
 }
