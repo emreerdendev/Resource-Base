@@ -55,8 +55,11 @@ export function UserMenu() {
     );
   }
 
-  // Prefer the edited DB name; fall back to the Better Auth name, then email.
-  const name = profile?.full_name || user.name || user.email || t("nav.account");
+  // Same as the public profile: the Full Name, else the @username (the
+  // account name / email only until the profile has loaded).
+  const name = profile
+    ? profile.full_name || `@${profile.username}`
+    : user.name || user.email || t("nav.account");
   const avatar = profile?.avatar_url || user.image || undefined;
   // Provider avatar URLs can expire or be blocked — fall back to the initial.
   const showAvatar = avatar && avatar !== failedAvatar;
@@ -84,7 +87,9 @@ export function UserMenu() {
                 className="size-full object-cover"
               />
             ) : (
-              <span className="font-medium text-foreground">{initial(name)}</span>
+              <span className="font-medium text-foreground">
+                {initial(profile ? profile.full_name || profile.username : name)}
+              </span>
             )}
           </span>
           {unread > 0 && (
@@ -95,7 +100,7 @@ export function UserMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="truncate">
           {name}
-          {profile?.username && (
+          {profile?.full_name && profile.username && (
             <span className="block text-xs font-normal text-muted-foreground">
               @{profile.username}
             </span>

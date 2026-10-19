@@ -99,6 +99,13 @@
       "when": 1792275541369,
       "tag": "0013_email_verification_deadline",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1792406843912,
+      "tag": "0014_seed_full_names",
+      "breakpoints": true
     }
   ]
 }

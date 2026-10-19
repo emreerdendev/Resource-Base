@@ -217,8 +217,18 @@ export async function getAuth() {
             return { data: { ...data, ...cleanIdentity(data) } };
           },
           // Auto-assign a unique username on signup (replaces handle_new_user),
-          // and start the 7-day verification window for unverified emails.
+          // copy the account name into the profile's Full Name (the provider's
+          // name for Google/GitHub/GitLab, the email's local part such as
+          // "ahmet.yilmaz" for email sign-ups), and start the 7-day
+          // verification window for unverified emails.
           after: async (createdUser) => {
+            const fullName = (createdUser.name ?? "").trim().slice(0, 60);
+            if (fullName && !fullName.includes("@")) {
+              await db
+                .update(schema.user)
+                .set({ fullName })
+                .where(eq(schema.user.id, createdUser.id));
+            }
             if (!createdUser.emailVerified) {
               await db
                 .update(schema.user)
