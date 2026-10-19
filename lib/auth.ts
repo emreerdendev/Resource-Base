@@ -10,45 +10,11 @@ import * as schema from "@/lib/db/schema";
 import { isDisposableEmail } from "@/lib/disposable-email";
 import { sendEmail } from "@/lib/email";
 import { resetPasswordEmail, verifyEmail } from "@/lib/email-templates";
+import { pickUsername, usernameFor } from "@/lib/username-gen";
 
 /** Unverified email/password accounts are suspended after this long. */
 export const VERIFY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** Stem a display name/email into a username base, then add a short suffix. */
-/**
- * Letters that NFKD doesn't reduce to a-z: Turkish and other European ones,
- * plus Cyrillic and Greek, so a name keeps its sound (Ayşe → ayse, Groß →
- * gross, Иван → ivan). Scripts without letter-by-letter Latin (Arabic, CJK…)
- * fall back to the email address in usernameFor.
- */
-const LATIN: Record<string, string> = {
-  ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u",
-  ß: "ss", æ: "ae", œ: "oe", ø: "o", ł: "l", đ: "d", ð: "d", þ: "th",
-  а: "a", б: "b", в: "v", г: "g", ґ: "g", д: "d", е: "e", ё: "e", є: "ye", ж: "zh", з: "z",
-  и: "i", і: "i", ї: "yi", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
-  с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts", ч: "ch", ш: "sh", щ: "shch", ъ: "",
-  ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
-  α: "a", β: "v", γ: "g", δ: "d", ε: "e", ζ: "z", η: "i", θ: "th", ι: "i", κ: "k", λ: "l",
-  μ: "m", ν: "n", ξ: "x", ο: "o", π: "p", ρ: "r", σ: "s", ς: "s", τ: "t", υ: "y", φ: "f",
-  χ: "ch", ψ: "ps", ω: "o",
-};
-
-function usernameStem(raw: string | null | undefined): string {
-  return (raw ?? "")
-    .replace(/[İI]/g, "i")
-    .toLowerCase()
-    // Accents off first (ά → α, é → e), then the letter map.
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/./g, (c) => LATIN[c] ?? c)
-    .replace(/[^a-z0-9]/g, "")
-    .slice(0, 12);
-}
-
-/** Stem from the name, else the email's local part, else "user". */
-function usernameFor(name: string | null | undefined, email: string): string {
-  return usernameStem(name) || usernameStem(email.split("@")[0]) || "user";
-}
 
 /** Bound a new user's display name and keep only an https avatar URL. */
 function cleanIdentity(data: { name?: unknown; image?: unknown }) {
@@ -241,41 +207,21 @@ export async function getAuth() {
               throw new APIError("FORBIDDEN", { message: "Sign-ups are paused.", code: "SIGNUPS_PAUSED" });
             if (typeof data.email === "string" && isDisposableEmail(data.email))
               throw new APIError("BAD_REQUEST", { message: "Disposable email.", code: "DISPOSABLE_EMAIL" });
-            return { data: { ...data, ...cleanIdentity(data) } };
-          },
-          // Auto-assign a unique username on signup (replaces handle_new_user),
-          // copy the account name into the profile's Full Name (the provider's
-          // name for Google/GitHub/GitLab, the email's local part such as
-          // "ahmet.yilmaz" for email sign-ups), and start the 7-day
-          // verification window for unverified emails.
-          after: async (createdUser) => {
-            const fullName = (createdUser.name ?? "").trim().slice(0, 60);
-            if (fullName && !fullName.includes("@")) {
-              await db
-                .update(schema.user)
-                .set({ fullName })
-                .where(eq(schema.user.id, createdUser.id));
-            }
-            if (!createdUser.emailVerified) {
-              await db
-                .update(schema.user)
-                .set({ verifyDeadline: new Date(Date.now() + VERIFY_WINDOW_MS) })
-                .where(eq(schema.user.id, createdUser.id));
-            }
-            const stem = usernameFor(createdUser.name, createdUser.email);
-            for (let i = 0; i < 6; i++) {
-              const suffix = crypto.randomUUID().replace(/-/g, "").slice(0, 5);
-              try {
-                await db
-                  .update(schema.user)
-                  .set({ username: `${stem}${suffix}` })
-                  .where(eq(schema.user.id, createdUser.id));
-                break;
-              } catch (e) {
-                if (String(e).includes("UNIQUE")) continue;
-                throw e;
-              }
-            }
+            const identity = cleanIdentity(data);
+            const email = typeof data.email === "string" ? data.email : "";
+            // Username, Full Name and the verification deadline are written in
+            // the same insert as the account, so an account can never exist
+            // without them (a separate update after it could fail and leave
+            // one with no username, hence no public profile).
+            //  - Full Name: the provider's name for Google/GitHub/GitLab, the
+            //    email's local part (e.g. "ahmet.yilmaz") for email sign-ups.
+            //  - Username: stemmed from that name (else the email) plus a
+            //    random suffix, checked to be free.
+            //  - Unverified emails get 7 days to verify.
+            const fullName = identity.name && !identity.name.includes("@") ? identity.name : null;
+            const username = await pickUsername(db, usernameFor(identity.name, email));
+            const verifyDeadline = data.emailVerified ? null : new Date(Date.now() + VERIFY_WINDOW_MS);
+            return { data: { ...data, ...identity, fullName, username, verifyDeadline } };
           },
         },
       },

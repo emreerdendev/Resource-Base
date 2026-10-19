@@ -9,6 +9,7 @@ import { getSessionUser, isVerified, requireFreshUser, requireUser } from "@/lib
 import { isRateLimited, overLimit } from "@/lib/rate-limit";
 import { cleanSocialLinks } from "@/lib/social-links";
 import { isReservedUsername, isValidUsername } from "@/lib/username";
+import { ensureUsername } from "@/lib/username-gen";
 
 const PW_MIN = 8;
 const PW_MAX = 64;
@@ -88,7 +89,15 @@ export async function getMyProfile() {
   if (!me) return null;
   const db = getDb();
   const [row] = await db.select().from(user).where(eq(user.id, me.id)).limit(1);
-  return row ?? null;
+  if (!row) return null;
+  // Self-repair: an account without a username (it's set when the account is
+  // created, so only a failed write could leave one) gets one on its next
+  // visit, so it always has a public profile.
+  if (!row.username?.trim()) {
+    const username = await ensureUsername(db, { id: row.id, name: row.name, email: row.email });
+    if (username) return { ...row, username };
+  }
+  return row;
 }
 
 // Server-side length caps (anti-abuse — never trust the client).
