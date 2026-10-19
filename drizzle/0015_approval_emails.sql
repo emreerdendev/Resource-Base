@@ -1,0 +1,1 @@
+ALTER TABLE `submissions` ADD `approval_emailed_at` integer;

@@ -7,6 +7,8 @@ import { writeClient } from "@/sanity/lib/writeClient";
 import { slugify } from "@/lib/slug";
 import { isPlainId } from "@/sanity/lib/slugs";
 import { isFreshWebhook } from "@/lib/webhook-age";
+import { inBackground } from "@/lib/server-timing";
+import { sendApprovalEmails } from "@/lib/approval-emails";
 
 export const runtime = "nodejs";
 
@@ -562,6 +564,10 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date(),
     })
     .where(eq(submissions.sanitySubmissionId, body._id));
+
+  // A new resource or company went live: email the contributor too (after
+  // the response; also sends any earlier approval email that couldn't go out).
+  if (approved && (kind === "new" || kind === "company")) inBackground(sendApprovalEmails());
 
   return NextResponse.json({ ok: true });
 }

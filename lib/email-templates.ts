@@ -89,3 +89,28 @@ export function verifyEmail(url: string): {
     text: `Verify your ${BRAND} email\n\nConfirm your email address to activate your account. Open this link (expires in 1 hour):\n\n${url}\n\nIf you didn't create this account, you can safely ignore this email.`,
   };
 }
+
+const escapeHtml = (s: string) =>
+  s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
+
+/** A suggested new resource or company was approved and is live. */
+export function approvalEmail(opts: { kind: "resource" | "company"; name: string; url: string }): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const what = opts.kind === "company" ? "company" : "resource";
+  const name = opts.name.trim().slice(0, 200);
+  const heading = opts.kind === "company" ? "Your company suggestion was approved" : "Your resource was approved";
+  const live = `“${name}” is now live in the ${BRAND} directory. Thanks for contributing — it counts toward your contributor badge.`;
+  return {
+    subject: `${heading} 🎉`,
+    html: shell({
+      heading: escapeHtml(heading),
+      intro: escapeHtml(live),
+      cta: { label: `View ${what}`, url: opts.url },
+      outro: `You're receiving this because you suggested it on ${BRAND}.`,
+    }),
+    text: `${heading}\n\n${live}\n\nView it: ${opts.url}\n\nYou're receiving this because you suggested it on ${BRAND}.`,
+  };
+}
