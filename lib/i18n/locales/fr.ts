@@ -393,7 +393,7 @@ export const fr = {
     passwordMismatch: "Les mots de passe ne correspondent pas",
     passwordReset: "Mot de passe mis à jour. Vous pouvez vous connecter.",
     accountNotLinked:
-      "Un compte avec cet e-mail existe déjà. Connectez-vous avec votre e-mail et mot de passe, puis connectez ce fournisseur depuis Profil → Comptes connectés.",
+      "Un compte avec cet e-mail existe déjà. Connectez-vous avec votre e-mail et mot de passe, puis connectez ce fournisseur depuis Modifier le profil → Connexion et sécurité.",
     linkEmailMismatch:
       "L'e-mail de ce fournisseur ne correspond pas à celui de votre compte, il ne peut donc pas être connecté. Connectez-vous au fournisseur avec la même adresse e-mail que votre compte, puis réessayez.",
     changePassword: "Changer le mot de passe",
@@ -412,6 +412,8 @@ export const fr = {
     linked: "Connecté",
     cannotUnlinkLast: "Vous ne pouvez pas déconnecter votre seule méthode de connexion.",
     linkFailed: "Impossible de connecter ce fournisseur.",
+    linkTaken: "Ce compte est déjà connecté à un autre compte Resource Base. Connectez-vous à ce compte et déconnectez-le d’abord.",
+    linkUnverified: "Ce fournisseur n’a pas vérifié votre adresse e-mail, il ne peut donc pas être connecté. Vérifiez votre e-mail auprès du fournisseur, puis réessayez.",
     unlinkFailed: "Impossible de déconnecter ce fournisseur.",
   },
 

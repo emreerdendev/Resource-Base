@@ -145,7 +145,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // user can only land here with an error from a failed linkSocial attempt —
     // surface it rather than swallowing it silently.
     if (user) {
-      if (error) toast.error(t("auth.linkFailed"));
+      if (error)
+        toast.error(
+          t(
+            error === "account_already_linked_to_different_user"
+              ? "auth.linkTaken"
+              : error === "unable_to_link_account"
+                ? "auth.linkUnverified"
+                : "auth.linkFailed",
+          ),
+        );
       return;
     }
     if (error === "account_not_linked") {

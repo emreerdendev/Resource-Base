@@ -393,7 +393,7 @@ export const es = {
     passwordMismatch: "Las contraseñas no coinciden",
     passwordReset: "Contraseña actualizada. Ya puedes iniciar sesión.",
     accountNotLinked:
-      "Ya existe una cuenta con este correo. Inicia sesión con tu correo y contraseña, luego conecta este proveedor desde Perfil → Cuentas conectadas.",
+      "Ya existe una cuenta con este correo. Inicia sesión con tu correo y contraseña, luego conecta este proveedor desde Editar perfil → Acceso y seguridad.",
     linkEmailMismatch:
       "El correo de ese proveedor no coincide con el de tu cuenta, por lo que no se puede conectar. Inicia sesión en el proveedor con el mismo correo que tu cuenta e inténtalo de nuevo.",
     changePassword: "Cambiar contraseña",
@@ -412,6 +412,8 @@ export const es = {
     linked: "Conectado",
     cannotUnlinkLast: "No puedes desconectar tu único método de inicio de sesión.",
     linkFailed: "No se pudo conectar ese proveedor.",
+    linkTaken: "Esa cuenta ya está conectada a otra cuenta de Resource Base. Inicia sesión en esa cuenta y desconéctala primero.",
+    linkUnverified: "Ese proveedor no ha verificado tu correo, por lo que no se puede conectar. Verifica tu correo con el proveedor e inténtalo de nuevo.",
     unlinkFailed: "No se pudo desconectar ese proveedor.",
   },
 

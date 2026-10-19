@@ -392,7 +392,7 @@ export const tr = {
     passwordMismatch: "Şifreler eşleşmiyor",
     passwordReset: "Şifre güncellendi. Artık giriş yapabilirsin.",
     accountNotLinked:
-      "Bu e-posta ile zaten bir hesap var. Önce e-posta ve şifrenle giriş yap, sonra Profil → Bağlı hesaplar'dan bu sağlayıcıyı bağla.",
+      "Bu e-posta ile zaten bir hesap var. Önce e-posta ve şifrenle giriş yap, sonra Profili Düzenle → Giriş ve Güvenlik'dan bu sağlayıcıyı bağla.",
     linkEmailMismatch:
       "Bu sağlayıcının e-postası hesabının e-postasıyla aynı değil, bu yüzden bağlanamadı. Sağlayıcıya hesabınla aynı e-postayla giriş yapıp tekrar dene.",
     changePassword: "Şifre Değiştir",
@@ -410,6 +410,8 @@ export const tr = {
     linked: "Bağlı",
     cannotUnlinkLast: "Tek giriş yöntemini bağlantıdan çıkaramazsın.",
     linkFailed: "Bu sağlayıcı bağlanamadı.",
+    linkTaken: "Bu hesap başka bir Resource Base hesabına bağlı. Önce o hesaba giriş yapıp bağlantıyı oradan kaldır.",
+    linkUnverified: "Bu sağlayıcı e-posta adresini doğrulamamış, bu yüzden bağlanamadı. E-postanı sağlayıcıda doğrulayıp tekrar dene.",
     unlinkFailed: "Bu sağlayıcının bağlantısı kesilemedi.",
   },
 

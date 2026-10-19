@@ -392,7 +392,7 @@ export const en = {
     passwordMismatch: "Passwords don’t match",
     passwordReset: "Password updated. You can sign in now.",
     accountNotLinked:
-      "An account with this email already exists. Sign in with your email and password, then connect this provider from Profile → Connected accounts.",
+      "An account with this email already exists. Sign in with your email and password, then connect this provider from Edit Profile → Sign-In & Security.",
     linkEmailMismatch:
       "That provider’s email doesn’t match your account email, so it can’t be linked. Sign in to the provider with the same email as your account, then try again.",
     // Change password (profile)
@@ -412,6 +412,8 @@ export const en = {
     linked: "Connected",
     cannotUnlinkLast: "You can’t disconnect your only sign-in method.",
     linkFailed: "Couldn’t connect that provider.",
+    linkTaken: "That account is already connected to a different Resource Base account. Sign in to that account and disconnect it there first.",
+    linkUnverified: "That provider hasn’t verified your email address, so it can’t be connected. Verify your email with the provider, then try again.",
     unlinkFailed: "Couldn’t disconnect that provider.",
   },
 

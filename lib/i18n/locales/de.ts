@@ -393,7 +393,7 @@ export const de = {
     passwordMismatch: "Passwörter stimmen nicht überein",
     passwordReset: "Passwort aktualisiert. Du kannst dich jetzt anmelden.",
     accountNotLinked:
-      "Es existiert bereits ein Konto mit dieser E-Mail. Melde dich mit E-Mail und Passwort an und verbinde diesen Anbieter dann unter Profil → Verbundene Konten.",
+      "Es existiert bereits ein Konto mit dieser E-Mail. Melde dich mit E-Mail und Passwort an und verbinde diesen Anbieter dann unter Profil bearbeiten → Anmeldung & Sicherheit.",
     linkEmailMismatch:
       "Die E-Mail dieses Anbieters stimmt nicht mit der E-Mail deines Kontos überein, daher kann er nicht verknüpft werden. Melde dich beim Anbieter mit derselben E-Mail wie dein Konto an und versuche es erneut.",
     changePassword: "Passwort ändern",
@@ -412,6 +412,8 @@ export const de = {
     linked: "Verbunden",
     cannotUnlinkLast: "Du kannst deine einzige Anmeldemethode nicht trennen.",
     linkFailed: "Anbieter konnte nicht verbunden werden.",
+    linkTaken: "Dieses Konto ist bereits mit einem anderen Resource-Base-Konto verbunden. Melde dich dort an und trenne es zuerst.",
+    linkUnverified: "Dieser Anbieter hat deine E-Mail-Adresse nicht bestätigt, daher kann er nicht verbunden werden. Bestätige deine E-Mail beim Anbieter und versuche es erneut.",
     unlinkFailed: "Anbieter konnte nicht getrennt werden.",
   },
 
