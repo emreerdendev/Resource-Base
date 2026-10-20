@@ -268,13 +268,6 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
             {resource.description || t("modal.noDescription")}
           </p>
 
-          {/* What the contributor wrote when suggesting it. */}
-          {resource.contributorNote && (
-            <div className="mt-5">
-              <ContributorNote note={resource.contributorNote} userId={resource.submittedBy} />
-            </div>
-          )}
-
           {/* Categories */}
           {resource.categories?.length > 0 && (
             <div className="mt-6 flex flex-col gap-2">
@@ -305,6 +298,13 @@ export function ResourceDetail({ resource }: { resource: ResourceWithRelated }) 
                   </Link>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* What the contributor wrote when suggesting it — last, above the meta row. */}
+          {resource.contributorNote && (
+            <div className="mt-6">
+              <ContributorNote note={resource.contributorNote} userId={resource.submittedBy} />
             </div>
           )}
         </>
