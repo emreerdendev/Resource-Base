@@ -1,6 +1,6 @@
 "use client";
 
-import { GithubIcon } from "@/components/brand-icons";
+import { DiscordIcon, GithubIcon } from "@/components/brand-icons";
 import { Separator } from "@/components/ui/separator";
 import { Boxes, CircleDot, Globe, Heart, Mail, Users } from "lucide-react";
 import { NavLink } from "@/components/nav-link";
@@ -10,15 +10,22 @@ const REPO_URL = "https://github.com/emreerdendev/Resource-Base";
 const ISSUES_URL = "https://github.com/emreerdendev/Resource-Base/issues";
 const SITE_URL = "https://emreerden.dev";
 const SPONSOR_URL = "https://github.com/sponsors/emreerdendev";
+const COFFEE_URL = "https://www.buymeacoffee.com/emreerdendev";
+// PSIBS: Product, Startup, Indie, Build, Software — the server's name.
+const DISCORD_URL = "https://discord.gg/2C8pYMVAw5";
 const CONTACT_EMAIL = "emreerden@pm.me";
 
 function Dot() {
   return (
-    <span aria-hidden="true" className="text-border">
+    // Only between items on one line: the rows stack on phones.
+    <span aria-hidden="true" className="hidden text-border sm:inline">
       •
     </span>
   );
 }
+
+// Stacked on phones (no dots), one line from sm up.
+const rowClass = "flex flex-col items-center justify-center gap-1 sm:flex-row sm:flex-wrap sm:gap-x-2";
 
 const linkClass =
   "inline-flex items-center gap-2 rounded-md px-2 py-1 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring";
@@ -47,38 +54,18 @@ export function SiteFooter() {
         </NavLink>
 
         {/* Legal */}
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs">
-          <NavLink href="/privacy" className={linkClass}>
+        <div className={rowClass}>
+          <NavLink href="/privacy" className={`${linkClass} text-xs`}>
             {t("footer.privacy")}
           </NavLink>
           <Dot />
-          <NavLink href="/terms" className={linkClass}>
+          <NavLink href="/terms" className={`${linkClass} text-xs`}>
             {t("footer.terms")}
           </NavLink>
         </div>
 
-        <Separator className="my-2 max-w-md" />
-
-        {/* Contact + personal site */}
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-          <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass}>
-            <Mail className="size-4" aria-hidden="true" />
-            <span>{CONTACT_EMAIL}</span>
-          </a>
-          <Dot />
-          <a
-            href={SITE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={linkClass}
-          >
-            <Globe className="size-4" aria-hidden="true" />
-            <span>emreerden.dev</span>
-          </a>
-        </div>
-
-        {/* Project links + sponsor */}
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+        {/* Project links */}
+        <div className={rowClass}>
           <a
             href={REPO_URL}
             target="_blank"
@@ -98,7 +85,46 @@ export function SiteFooter() {
             <CircleDot className="size-4" aria-hidden="true" />
             <span>{t("footer.reportIssue")}</span>
           </a>
+        </div>
+
+        <Separator className="my-2 max-w-md" />
+
+        {/* Personal site + contact */}
+        <div className={rowClass}>
+          <a
+            href={SITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={linkClass}
+          >
+            <Globe className="size-4" aria-hidden="true" />
+            <span>emreerden.dev</span>
+          </a>
           <Dot />
+          <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass}>
+            <Mail className="size-4" aria-hidden="true" />
+            <span>{CONTACT_EMAIL}</span>
+          </a>
+        </div>
+
+        {/* Community */}
+        <a
+          href={DISCORD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-flex items-center gap-3 rounded-xl bg-[#5865F2] px-4 py-2.5 text-left text-white shadow-sm outline-none transition-colors hover:bg-[#4752C4] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <DiscordIcon className="size-6 shrink-0" />
+          <span className="flex flex-col leading-tight">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-white/75">
+              PSIBS!
+            </span>
+            <span className="font-semibold">{t("footer.discord")}</span>
+          </span>
+        </a>
+
+        {/* Support */}
+        <div className={`${rowClass} mt-1`}>
           <a
             href={SPONSOR_URL}
             target="_blank"
@@ -107,6 +133,24 @@ export function SiteFooter() {
           >
             <Heart className="size-4 fill-current" aria-hidden="true" />
             <span>{t("footer.sponsor")}</span>
+          </a>
+          <Dot />
+          <a
+            href={COFFEE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t("footer.coffee")}
+            className="rounded-lg outline-none transition-opacity hover:opacity-85 focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- Buy Me a Coffee's own button image */}
+            <img
+              src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+              alt="Buy Me a Coffee"
+              width={130}
+              height={36}
+              loading="lazy"
+              className="h-9 w-auto"
+            />
           </a>
         </div>
       </div>
