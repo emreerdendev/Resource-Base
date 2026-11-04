@@ -5,8 +5,15 @@ const BRAND = "Resource Base";
 const ACCENT = "#694ce6";
 const SITE = "https://resource-base.com";
 
-function shell(opts: { heading: string; intro: string; cta?: { label: string; url: string }; outro?: string }): string {
-  const { heading, intro, cta, outro } = opts;
+function shell(opts: {
+  heading: string;
+  intro: string;
+  cta?: { label: string; url: string };
+  /** Trusted HTML shown under the button. */
+  extra?: string;
+  outro?: string;
+}): string {
+  const { heading, intro, cta, extra, outro } = opts;
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#0b0b12;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -35,6 +42,7 @@ function shell(opts: { heading: string; intro: string; cta?: { label: string; ur
               </td></tr>`
                 : ""
             }
+            ${extra ? `<tr><td style="padding:20px 32px 0;">${extra}</td></tr>` : ""}
             ${outro ? `<tr><td style="padding:16px 32px 0;"><p style="margin:0;font-size:12px;line-height:1.6;color:#7c7790;">${outro}</p></td></tr>` : ""}
             <tr>
               <td style="padding:24px 32px 28px;">
@@ -103,14 +111,35 @@ export function approvalEmail(opts: { kind: "resource" | "company"; name: string
   const name = opts.name.trim().slice(0, 200);
   const heading = opts.kind === "company" ? "Your company suggestion was approved" : "Your resource was approved";
   const live = `“${name}” is now live in the ${BRAND} directory. Thanks for contributing — it counts toward your contributor badge.`;
+  // What to do next: each a short line with a link.
+  const next = [
+    { title: "You're on the Contributions page", body: "See everyone who helps build the directory.", label: "View contributors", url: `${SITE}/contributions` },
+    { title: "Share your CV", body: "Upload it to your profile so others can find and learn from it.", label: "Upload your CV", url: `${SITE}/profile/edit?tab=cv` },
+    { title: "Know another gem?", body: "Every approved suggestion counts toward your next badge tier.", label: "Suggest a resource", url: `${SITE}/submit/resource` },
+  ];
+  const extra = `<p style="margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#7c7790;">What's next</p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+                  ${next
+                    .map(
+                      (n, i) => `<tr><td style="padding:14px 16px;${i ? "border-top:1px solid rgba(255,255,255,0.08);" : ""}">
+                    <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#ffffff;">${n.title}</p>
+                    <p style="margin:0 0 6px;font-size:13px;line-height:1.5;color:#b8b3c7;">${n.body}</p>
+                    <a href="${n.url}" style="font-size:13px;font-weight:600;color:#a593ff;text-decoration:none;">${n.label} →</a>
+                  </td></tr>`,
+                    )
+                    .join("")}
+                </table>`;
   return {
     subject: `${heading} 🎉`,
     html: shell({
       heading: escapeHtml(heading),
       intro: escapeHtml(live),
       cta: { label: `View ${what}`, url: opts.url },
+      extra,
       outro: `You're receiving this because you suggested it on ${BRAND}.`,
     }),
-    text: `${heading}\n\n${live}\n\nView it: ${opts.url}\n\nYou're receiving this because you suggested it on ${BRAND}.`,
+    text: `${heading}\n\n${live}\n\nView it: ${opts.url}\n\nWhat's next\n${next
+      .map((n) => `- ${n.title} — ${n.body} ${n.url}`)
+      .join("\n")}\n\nYou're receiving this because you suggested it on ${BRAND}.`,
   };
 }
