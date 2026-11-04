@@ -11,7 +11,7 @@ const ISSUES_URL = "https://github.com/emreerdendev/Resource-Base/issues";
 const SITE_URL = "https://emreerden.dev";
 const SPONSOR_URL = "https://github.com/sponsors/emreerdendev";
 const COFFEE_URL = "https://www.buymeacoffee.com/emreerdendev";
-// PSIBS: Product, Startup, Indie, Build, Software — the server's name.
+// PSIBS!: Product, Startup, Indie, Build, Software! — the server's name.
 const DISCORD_URL = "https://discord.gg/2C8pYMVAw5";
 const CONTACT_EMAIL = "emreerden@pm.me";
 
@@ -43,7 +43,7 @@ export function SiteFooter() {
           </span>
           <span className="font-semibold">Resource Base</span>
         </div>
-        <p className="max-w-md text-center text-xs text-muted-foreground/80">
+        <p className="max-w-lg text-center text-xs text-muted-foreground/80">
           {t("footer.tagline")}
         </p>
 
@@ -107,22 +107,6 @@ export function SiteFooter() {
           </a>
         </div>
 
-        {/* Community */}
-        <a
-          href={DISCORD_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-1 inline-flex items-center gap-3 rounded-xl bg-[#5865F2] px-4 py-2.5 text-left text-white shadow-sm outline-none transition-colors hover:bg-[#4752C4] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <DiscordIcon className="size-6 shrink-0" />
-          <span className="flex flex-col leading-tight">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-white/75">
-              PSIBS!
-            </span>
-            <span className="font-semibold">{t("footer.discord")}</span>
-          </span>
-        </a>
-
         {/* Support */}
         <div className={`${rowClass} mt-1`}>
           <a
@@ -153,6 +137,22 @@ export function SiteFooter() {
             />
           </a>
         </div>
+
+        {/* Community */}
+        <a
+          href={DISCORD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-flex items-center gap-3 rounded-xl bg-[#5865F2] px-4 py-2.5 text-left text-white shadow-sm outline-none transition-colors hover:bg-[#4752C4] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <DiscordIcon className="size-6 shrink-0" />
+          <span className="flex flex-col leading-tight">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-white/75">
+              PSIBS!
+            </span>
+            <span className="font-semibold">{t("footer.discord")}</span>
+          </span>
+        </a>
       </div>
     </footer>
   );
