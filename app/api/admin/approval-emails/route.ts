@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => null)) as { test?: unknown } | null;
   if (body?.test === true) {
     const mail = approvalEmail({ kind: "resource", name: "Sample Resource", url: `${siteUrl}/resources` });
-    // The per-recipient limits still apply (one every 2 minutes, 5 a day).
+    // The per-recipient limits still apply (one every 2 minutes, 7 a day).
     const result = await sendEmail({ to: me.email, ...mail, subject: `[Test] ${mail.subject}`, dedupeKey: me.email });
     return NextResponse.json({ to: me.email, ...result });
   }
