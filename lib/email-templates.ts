@@ -4,6 +4,7 @@
 const BRAND = "Resource Base";
 const ACCENT = "#694ce6";
 const SITE = "https://resource-base.com";
+const DISCORD = "https://discord.gg/2C8pYMVAw5";
 
 function shell(opts: {
   heading: string;
@@ -128,6 +129,14 @@ export function approvalEmail(opts: { kind: "resource" | "company"; name: string
                   </td></tr>`,
                     )
                     .join("")}
+                </table>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#5865F2;border-radius:12px;">
+                  <tr><td style="padding:16px;">
+                    <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.75);">PSIBS! · Discord</p>
+                    <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#ffffff;">Come hang out with us</p>
+                    <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:rgba(255,255,255,0.9);">We'd love to have you in our Discord community — a place for people building products, startups and indie projects to share, ask and help each other grow.</p>
+                    <a href="${DISCORD}" style="display:inline-block;background:#ffffff;color:#4752C4;text-decoration:none;font-size:13px;font-weight:700;padding:9px 16px;border-radius:8px;">Join the Discord</a>
+                  </td></tr>
                 </table>`;
   return {
     subject: `${heading} 🎉`,
@@ -140,6 +149,6 @@ export function approvalEmail(opts: { kind: "resource" | "company"; name: string
     }),
     text: `${heading}\n\n${live}\n\nView it: ${opts.url}\n\nWhat's next\n${next
       .map((n) => `- ${n.title} — ${n.body} ${n.url}`)
-      .join("\n")}\n\nYou're receiving this because you suggested it on ${BRAND}.`,
+      .join("\n")}\n\nCome hang out with us on Discord (PSIBS!) — a community for people building products, startups and indie projects to share, ask and help each other grow: ${DISCORD}\n\nYou're receiving this because you suggested it on ${BRAND}.`,
   };
 }
