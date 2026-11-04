@@ -79,10 +79,10 @@ export function SiteHeader() {
     /* Opaque strip masking content that scrolls beneath the floating header.
        Layers, lowest first: sticky page toolbars z-20 · cookie banner z-30 ·
        this header and its mobile menu z-40 · dialogs, dropdowns, toasts z-50+. */
-    <header className="sticky inset-x-0 top-0 z-40 bg-background px-3 py-4 sm:px-4">
+    <header className="sticky inset-x-0 top-0 z-40 bg-background px-3 py-4 max-[359px]:px-2 sm:px-4">
       <div
         ref={rowRef}
-        className="relative mx-auto flex h-14 max-w-4xl items-center rounded-xl border border-border/70 bg-background/95 px-3 shadow-lg shadow-black/5 ring-1 ring-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-background/85 sm:px-4"
+        className="relative mx-auto flex h-14 max-w-4xl items-center rounded-xl border border-border/70 bg-background/95 px-3 shadow-lg shadow-black/5 ring-1 ring-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-background/85 max-[359px]:px-2 sm:px-4"
       >
         {/* Off-screen copies of the collapsible labels, so their width is known
             even while they're hidden. Each includes the spacing it brings. */}
@@ -151,7 +151,7 @@ export function SiteHeader() {
           </NavLink>
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-1.5 pl-1 sm:gap-2 sm:pl-2">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 pl-1 max-[359px]:gap-1 sm:gap-2 sm:pl-2">
           {showSearch && (
             <button
               onClick={openSearch}
